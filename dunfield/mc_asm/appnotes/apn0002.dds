@@ -1,0 +1,59 @@
+MICRO-C: Using multiple configurations, Debug, ROM etc.
+
+Often with MICRO-C, you have two or more systems configurations that you
+wish to use on a regular basis. For example, you might want to compile
+for testing in RAM under a debug monitor, and then compile directory for
+ROM.
+
+If you are like most programmers, you will do most of your compiling for
+testing under a debug monitor, and only infrequently will you want to
+generate the final code for ROM. If this is the case, you can simply
+configure your library (See READ.ME in library subdirectory) for the
+memory addresses used in the debug version. When you wish to create a ROM
+version, compile the program with the '-x' option (to create a full
+assembly listing file), edit the .ASM file to change the addresses to the
+ROM system, and assemble the file manually:
+
+    CC11 myprog         ; Compile for debugging
+
+    CC11 myprog -x      ; Compile to assembly
+    edt myprog.asm      ; Edit to change memory addresses
+    asm11 myprog        ; Assemble to ROM image
+
+If you frequently compile for different system configurations, the above
+approach can become quite tedious. In this case, edit the library startup
+files to use EQU's for all memory addresses, and then place those EQU's in
+a separate startup file, which is defined at the TOP of the SLINK external
+index file (Note that you can have multiple startup files):
+
+    <SYSTEM.ASM         ; System memory equates and code ORG
+    <6811RLP.ASM        ; Remainder of startup file
+    ...
+
+All you have to do now, is change the file SYSTEM.ASM. This can be
+accomplished with a simple batch file to copy one of several "canned"
+system EQU files:
+
+mcconfig.bat:
+    @echo OFF                                   ; DOS 3.3 and later only!
+    copy \MC\LIB11\%1.ASM \MC\LIB11\SYSTEM.ASM  ; Copy in configuration
+
+debug.asm:
+    ?RAM    EQU     $2000       ; Data RAM start address
+    ?RAMEND EQU     $7FFF       ; Data RAM end address
+            ORG     $0100       ; Origin code in RAM
+
+rom.asm:
+    ?RAM    EQU     $0000       ; Data RAM start address
+    ?RAMEND EQU     $7FFF       ; Data RAM end address
+            ORG     $E000       ; Origin code in ROM
+
+Now, you can switch to the canned configurations with:
+
+    C:\MC> mcconfig debug       ; Select DEBUG configuration
+    C:\MC> mcconfig rom         ; Select ROM configuration
+
+Using the above technique, you can have as many setup configurations as
+you wish, each one stored in a small file. A variation of the system can
+be used to replace the entire startup files (or any other portion of the
+library) if your system configuration differences require that.

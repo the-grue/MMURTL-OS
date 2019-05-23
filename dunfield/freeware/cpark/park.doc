@@ -1,0 +1,132 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                       A
+                                  Configurable
+                              Disk Parking Utility
+                                      for
+                                 IBM PC clones
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                          Copyright 1991 Dave Dunfield
+                              All rights reserved.
+    Configurable Park Utility                                        Page: 1
+
+
+    1. INTRODUCTION
+    
+          I recently put together an XT computer out of spare  parts  I  had
+       lying around, and ended up with a rather weird disk configuration.  I
+       had this old 12 Meg MEMOREX disk drive sitting on  the  shelf  for  a
+       number of years, which had 6 heads and  240  cylinders.  The  closest
+       drive table entry on the XT controller was 6 heads and 400 cylinders.
+    
+          I was able to use the drive by doing a partial format of only  the
+       first 240 cylinders, and establishing a primary DOS partition  (using
+       FDISK) which was only 240  cylinders  in  size.  Thus,  although  the
+       system thought it was a 400 cylinder drive, it never had  any  reason
+       to attempt access to the cylinders which were not physically present.
+    
+          All of the above worked perfectly,  until  I  tried  to  park  the
+       drive.... BUZZZZ... (Insert the sound  of  a  head  actuator  banging
+       against the drive stop about 160 times).
+    
+          Since I had run into similar situations  (particularily  on  XT's)
+       where I didn't always have a park utility which put  the  heads  away
+       where I wanted, I decided to solve the problem once and for all,  and
+       sat down and wrote the PARK.COM program described  on  the  following
+       pages.
+    
+          The source code to PARK is provided in the file PARK.C, and may be
+       re-compiled using my MICRO-C compiler (See enclosed CATALOG file). It
+       MUST be complied in TINY model, which allows it to easily  write  out
+       an updated copy of itself (See '-s' option).
+    
+          The program may be freely used and distributed, provided  that  my
+       copyright notices are not removed or altered.
+    Configurable Park Utility                                        Page: 2
+
+
+    2. PARK.COM
+    
+          The PARK.COM program  supplied  in  this  archive  allows  you  to
+       specify the number of hard drives to park, and the cylinder number at
+       which to park each drive.
+    
+          In its simplest form, the PARK command  consists  of  one  decimal
+       operand for each drive in the system, which is the cylinder number at
+       which to park the drive. If  you  specify  a  cylinder  number  of  0
+       (zero), the highest cylinder number for that  drive  as  reported  by
+       BIOS is used:
+    
+                PARK 0          ; Park drive C at highest known cylinder
+                PARK 240        ; Park drive C at cylinder 240
+                PARK 240 0      ; Park drive C at 240, drive D at highest
+                PARK 240 400    ; Park drive C at 240, drive D at 400
+    
+          If the BIOS does not acknowledge the existance of a drive, it will
+       be ignored. The last two examples above would be equivalent to  "PARK
+       240" on a single drive system.
+    
+          PARK.COM supports a '-s' option, which causes it to  write  a  new
+       PARK.COM which defaults to the remaining options. Executing PARK with
+       no arguments will PARK at these default settings:
+    
+                PARK -s 240 0   ; Save the settings
+                PARK            ; Park drive C at 240, drive D at highest
+    
+          You may see the currently defined default  settings  by  executing
+       PARK with the '-s' option, and no other arguments:
+    
+                PARK -s         ; Display the default settings
+    
+          The PARK.COM program supplied in this archive is defaulted to  TWO
+       drives, both of which are  parked  at  the  highest  cylinder  number
+       indicated by BIOS. This is equivalent to:
+    
+                PARK -s 0 0     ; Default to drive C+D, highest cylinder
+    
+          PARK will display a brief help summary if you give it  an  operand
+       of '?' or '-?'.
+    
+                PARK ?          ; Display usage info
+
+
+
+                           Configurable Park Utility
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. PARK.COM                                                            2
+

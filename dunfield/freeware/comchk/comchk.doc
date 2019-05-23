@@ -1,0 +1,34 @@
+This utility patches ".COM" programs so that they will automatically
+perform a checksum of themselves when they load.
+
+Use: COMCHK <oldfile> <newfile>
+
+EG:  COMCHK TEST.COM TEST1.COM
+
+The above line will create a TEST1.COM which behaves exactly the same as
+TEST.COM, except that it checksums itself befor running the original
+program, and aborts with a 'Corrupt image' message if it thinks it has
+been altered.
+
+At present, the program only works with ".COM" files < 64K in size.
+Source is provided... Feel free to enhance it as you see fit.
+
+The program was written in and can be compiled with MICRO-C version
+2.1 (or greater). It should be fairly easy to port to other compilers
+or earlier versions of MICRO-C, by modifying the low-level I/O function
+calls: "open, close, read, write, lrewind".
+
+To compile with MICRO-C, use:
+
+            cc comchk -o -l         /* Produce CAN.OBJ */
+            masm/ml ecan;           /* Produce ECAN.OBJ */
+            lc comchk ecomchk       /* Link to produce CAN.COM */
+
+This program MUST be compiled in the TINY model (.COM file)... It
+references some of its CODE as DATA in order to copy the embedded
+function into the patched output file, and therefore must have
+overlaid code and data segments.
+
+Enjoy,
+
+Dave Dunfield

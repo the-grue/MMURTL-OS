@@ -1,0 +1,159 @@
+                          * The DDS MICRO-C Compiler *
+    
+       NOTE:  This  archive  contains   subdirectories!   MAKE   SURE   when
+    de-archiving  it  that  you  instruct   your   de-archiver   to   create
+    dubdirectories  if  necessary.  When  using  PKUNZIP,  use  "PKUNZIP  -d
+    <archive name".
+    
+       Dunfield Development Systems (DDS) MICRO-C  is  a  compact,  portable
+    compiler suitable for code development  targeting  small  8  or  16  bit
+    systems. At the time of this  writing,  versions  of  the  compiler  are
+    available which produce code  for  the  68HC08,  6809,  68HC11,  68HC16,
+    8051/52, 8080/85/Z80, 8086 and 8096 processor families.
+    
+       This archive contains a  version  of  MICRO-C,  which  runs  on,  and
+    produces code for the IBM PC family of desktop  computers.  Included  in
+    the  package  is  a  complete  implementation   of   MICRO-C,   with   a
+    comprehensive library suitable for the PC. This  implementation  of  the
+    compiler requires the  Microsoft  MASM  (or  compatible)  assembler  and
+    linker.
+    
+       Commercial versions of  the  compiler  are  designed  for  "embedded"
+    systems. This means that the code produced by the compiler  is  ROMable,
+    and does not require that it  be  run  under  any  particular  operating
+    system. These compilers are completely configurable so that you can  run
+    the  compiled  code  in   almost   any   hardware/software   environment
+    imaginable. The commercial packages also include  their  own  assembler,
+    linker and debugger. No other software is required to develop  code  for
+    the target cpu. See the included CATALOG file for ordering information.
+    
+       This MICRO-C "package" (software and documentation)  is  copyrighted,
+    and all rights to it are reserved. Permission is granted  to  distribute
+    ORIGINAL UNMODIFIED copies ONLY of this archive via BBS and disk copying
+    services. MICRO-C is provided on an "as is" basis, with no  warranty  of
+    any kind. In no event shall the author be liable for any damages arising
+    from its use or distribution.
+    
+       For more information on the compiler, see the file MC.DOC. This  file
+    is quite large, make sure you are in no hurry before printing  it  on  a
+    slow printer. The table of contents pages are printed last,  and  should
+    be inserted between the title page and page 1. The "Browse" function  of
+    the included DDSIDE editor can be used to view the documentation online.
+                              * Getting Started *
+    
+       To install MICRO-C on a hard drive, simply  create  a  directory  and
+    unpack this archive into it. Be sure to  instruct  your  de-archiver  to
+    create subdirectories if necessary (with PKUNZIP use the  '-d'  option).
+    The directory "\MC" is preferred, since some  of  the  utilities  assume
+    this is the MICRO-C home directory unless told otherwise.
+    
+       To use MICRO-C, you must have the MASM (or compatible) assembler  and
+    linker available on your system. The exact  commands  and  options  used
+    with the assembler/linker differ with different versions of these tools,
+    and may need to be modified. Please refer to the files: CC.C, LC.BAT and
+    PC86.IDE.
+    
+       For those users who do not already  have  a  suitable  assembler  and
+    linker, I have located a freeware assembler and linker  that  appear  to
+    work quite well  with  MICRO-C.  I  take  no  responsibility  for  these
+    programs, however they are available on my BBS (in the "Assemblers" file
+    area) under the filenames: ARROWASM.ZIP and VALLINK.ZIP. I have also put
+    together  an  archive  containing  pre-configured  CC.COM,  LC.BAT   and
+    PC86.IDE files which make use of these tools. It is called MCPDCMDS.ZIP.
+    These archives should be unpacked into the MICRO-C home directory  AFTER
+    the MICRO-C package has been installed.
+    
+       Refer to the following document files for more information:
+    
+            MC.DOC      - General information about the compiler
+            DDSIDE.DOC  - Information on the Integrated Development Editor
+            LIBRARY.DOC - MICRO-C/PC library function reference
+            CINTRO.DOC  - Beginners introduction to 'C'
+    
+       The MCDIR and  MCTMP  environment  variables  should  be  set  up  as
+    described in the documents before attempting to use the compiler.
+                            * MICRO-C under MS-DOS *
+                            * Implementation notes *
+    
+       This 8086 MS-DOS implementation of the compiler produces code for the
+    Microsoft MASM (or compatible) assembler in either  the  TINY  or  SMALL
+    models. The LINK utility is required to create an EXE  file.  NOTE  that
+    programs produced for the TINY  model  will  execute  as  ".EXE"  files,
+    however, due to PSP being outside of the data/code segment, command line
+    parameters are only available when the program is  converted  to  ".COM"
+    format with the supplied EXE2BIN utility.
+    
+       The memory model to use is selected by  the  runtime  library,  which
+    MUST BE FIRST in the list of object files  passed  to  the  linker.  The
+    PC86RL_T.OBJ file distributed with MICRO-C is configured  for  the  TINY
+    model, and the PC86RL_S.OBJ file is configured for the SMALL model.
+    
+       The variables ARGC and ARGV (Note  capitals)  are  available  in  the
+    runtime  library  module  for  use  as  EXTERNAL  references  from  your
+    programs. This makes it easy for  a  function  other  than  'main()'  to
+    access the programs arguments.  The  variables  PSP  and  ENV  are  also
+    available to  determine  the  PROGRAM  SEGMENT  PREFIX  and  ENVIRONMENT
+    segments.
+    
+            ie:     extern int ARGC;        /* Count of arguments */
+                    extern char *ARGV[];    /* Array of ptrs to args */
+                    extern int PSP;         /* PSP segment */
+                    extern int ENV;         /* Environment segment */
+    
+       If you are using a DOS version prior to  3.0,  the  argv[0]  (program
+    name) argument will not work correctly.
+                           * Files in this archive *
+    
+            READ.ME         - This file
+            CATALOG         - Catalog of available software
+            MC.DOC          - MICRO-C/PC Technical Documentation
+            LIBRARY.DOC     - MICRO-C/PC Library Reference
+            DDSIDE.DOC      - Integrated Editor Documentation
+            CINTRO.DOC      - Introduction to 'C'
+            CC.COM          - Command Co-ordinator
+            MCP.COM         - Preprocessor
+            MCC.COM         - PC/80x86 Compiler
+            MCO.COM         - PC/80x86 Optimizer
+            MAKE.COM        - The MAKE utility
+            TOUCH.COM       - Used with MAKE
+            EXE2BIN.COM     - Executable to Binary convertor
+            LC.BAT          - Batch file to link multiple objects
+            DDSIDE.COM      - Integrated Development Editor
+            DDSIDE.HLP      - Help file for DDSIDE
+            PC86.IDE        - Configuration file for DDSIDE
+            PC86RL_T.OBJ    - Tiny model runtime library
+            PC86RL_S.OBJ    - Small model runtime library
+            MCLIB.LIB       - MICRO-C/PC Function Library
+            *.h             - Header files as described in the documentation
+            CC.C            - Source code to CC command
+            EXAMPLES\*.*    - Source code to LOTS of example programs
+    
+       All of the source and header files were written using tab stops every
+    4 characters, which is much more convenient for 'C' development than the
+    usual MS-DOS tab stops of every 8 characters. The included DDSIDE editor
+    has default tab stops at 4 space intervals. Also, source for  a  program
+    called "type4.c" is provided in the  EXAMPLES\DOSUTIL  directory,  which
+    reads a file and displays it using spaces to  simulate  the  tabs  at  4
+    character intervals. To compile this program, use:
+    
+                                    cc type4
+    
+       The resulting "type4.com" file may be used to view/print  the  source
+    files with proper spacing.
+                        * Limited Distribution License *
+    
+       Permission is granted to copy and distribute this "demo" archive  via
+    electronic "Bulletin Board Systems" (BBS), and  disk  copying  services,
+    subject to the following restrictions:
+    
+    - The archive must be presented in its original form, without modification.
+    
+    - The archive may not be distributed as part of or in assocation with any
+      other product.
+    
+    - Only one version of this archive may be offered at any given time, IE:
+      when you post a new version of one of my archives, any older versions of
+      that archive must no longer be offered for distribution.
+    
+    - I reserve the right to request of anyone distributing this archive that
+      they upgrade to the current release (which I will provide).

@@ -1,0 +1,45 @@
+MX-11 Multitasking Executive for the MC68HC11               12/14/93
+
+Version 1.
+
+This is the first release of the MX-11 Multitasking Executive for the
+MC68HC11.  It is to be used with Dunfield Development Systems MICRO-C.
+
+It should have been unzipped with the -d option to preserve the
+directory structure.
+
+The file MX.DOC describes how to use MX-11.
+
+The file MXQUICK.DOC has a summary of the function calls provided
+in MX-11.
+
+The files in the obj directory should be copied to your MICRO-C/11
+library (usually \mc\lib11).
+
+The files in the src directory are the files that were compressed
+with sconvert to obtain those in the obj directory.
+
+Term.com is a simple communication program that I use to download S19
+files to the 68HC11.  It uses COM1 at 9600 bps.
+
+I hope this is useful to you. If you have any comments, requests or find
+any bugs please contact me.
+
+Kevin White
+337 Pennsylvania Avenue
+Los Gatos
+Ca 95030.
+
+internet   kevin@novell.com
+
+
+MICRO-C is available from:
+
+Dunfield Development Systems
+P.O. Box 31044
+Nepean, Ontario Canada
+K2B 8S8
+Tel: (613) 256-5820   (BBS: Dial '2' at voice prompt)
+Fax: (613) 256-5821
+
+(NOTE: This is NOT a Dunfield Development Systems supported product)

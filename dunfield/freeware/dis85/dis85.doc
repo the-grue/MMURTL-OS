@@ -1,0 +1,166 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                   * DIS85 *
+                                       An
+                            8085 Cross Disassembler
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1991-1993 Dave Dunfield
+                              All rights reserved.
+    8085 Disassembler                                                Page: 1
+
+
+    1. INTRODUCTION
+    
+          DIS85 is a simple cross disassembler which I  wrote  in  order  to
+       figure out the boot sequence of a small 8085 based system  which  was
+       given to me (without software or documentation of course).
+    
+          The program is fairly simple, but proved very useful to accomplish
+       the task. I am providing it free of charge for non-commercial use, in
+       case it may prove just as useful to someone else. It  is  written  in
+       'C', using my MICRO-C compiler, and produces code which is compatible
+       with the ASM85 assembler from my  XASM  cross  assemblers.  For  more
+       information on MICRO-C, XASM and my other development  products,  see
+       the enclosed CATALOG file.
+    
+    2. USING DIS85
+    
+       2.1 Command Syntax
+    
+             The basic syntax of the DIS85 command is:
+    
+               DIS85 <filename> [option switches ...] [>outfile]
+    
+             <filename> is the name of the file containing the 8085  machine
+          code to be disassembled. The file is read as pure binary data.  If
+          your file is in INTEL or MOTOROLA hex format  (such  as  might  be
+          output by a PROM reader etc),  you  can  use  the  HEXFMT  command
+          supplied with my XASM package to convert it.
+    8085 Disassembler                                                Page: 2
+
+
+       2.2 Command Option Switches
+    
+        -a        - Inhibits the display of Address, Opcode data, and ASCII
+                    text fields in the output file.  When  this  option  is
+                    enabled,  the resulting output  file  is  suitable  for
+                    input to the assembler.
+    
+        -b        - Similar to '-d' below, except  that  symbols  are  also
+                    generated for 8 bit (BYTE) constants.
+    
+        -d        - Causes DIS85 to pre-define symbols  for  any  addresses
+                    which are used within the memory range  of  the  image.
+                    Symbols are defined as  'Hxxxx'  where  'xxxx'  is  the
+                    memory address in hexidecimal. When this option is used
+                    symbols  are generated  for all  accesses.  Any symbols
+                    which do not occur at addresses in the disassembly  are
+                    output as 'EQU' statements at the end.
+    
+        -e        - When using the 'd=' option to write the symbol table to
+                    a file, this causes DIS85 to Exclude addresses which do
+                    not occur within  the range of  memory covered  by  the
+                    disassembly.
+    
+        d=file    - Causes DIS85 to write its internal symbol table to  the
+                    named file. Automatically invokes the '-d' option.
+    
+        a=value   - Specifies the address (in hex) of the first instruction
+                    which is disassembled. If not given, DIS85 assumes  the
+                    code starts at address $0000.
+    
+        b=size    - Specify offset into file to begin disassembly.  If this
+                    parameter is given, DIS85 will skip the operand  "size"
+                    bytes in the input file before beginning disassembly.
+    
+        n=size    - Specify the number of instructions to  disassemble.  If
+                    this parameter is given, DIS85  will  only  disassemble
+                    the requested "size" number of instructions.
+    
+        s=file    - Specify a symbol table file. Each line in the file must
+                    contain a symbol name, followed by a value (in hex). If
+                    the value occurs anywhere  in  the  disassembly,  DIS85
+                    will substitute the symbol name.
+    8085 Disassembler                                                Page: 3
+
+
+       2.3 Output File
+    
+             DIS85 writes its output to  the  DOS  standard  output  device,
+          which  will  normally  appear  on  the  PC  console,  but  may  be
+          redirected to a file with the '>' operator.
+    
+          The format of each line output by DIS85 is as follows:
+    
+          <address> <opcode> <ascii> <label> <instruction> <operands>
+    
+             <address> is the hexidecimal address at which  the  instruction
+          on this line occurs. This field is disabled from the listing  when
+          the '-a' option is used. Unless otherwise specified  (with  'a='),
+          DIS85 assumes that the first instruction  disassembled  occurs  at
+          address $0000.
+    
+             <opcode>  is  the  actual  data  values  which  make   up   the
+          instruction opcode. From one to three  bytes  will  be  displayed,
+          depending on the length of the instruction which is represented by
+          the first byte. This field is disabled from the listings when  the
+          '-a' option is used.
+    
+             <ascii> is  the  ASCII  TEXT  represendation  of  the  <opcode>
+          values. Any unprintable  characters  will  be  displayed  as  dots
+          ('.'). This field is useful to help identify text data areas.  The
+          text field is disabled when the '-a' option is used.
+    
+             <label> is any label which occurs at this address.  This  field
+          may appear when any of the '-b', '-d', 'd=' or  's='  options  are
+          used.
+    
+             <instruction>  is  the  assembly  language  instruction   which
+          represents the <opcode> values.
+    
+             The <operands> field contains any operands to the instruction.
+
+
+
+                               8085 Disassembler
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. USING DIS85                                                         1
+
+        2.1 Command Syntax                                                  1
+        2.2 Command Option Switches                                         2
+        2.3 Output File                                                     3

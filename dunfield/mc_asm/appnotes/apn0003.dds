@@ -1,0 +1,42 @@
+MICRO-C: Converting from #asm/#endasm to asm{ }
+
+In MICRO-C version 2.2 (and later), the #asm/#endasm pre-processor directives
+were replaced by the 'asm' statement. This provided a cleaner assembly
+language interface, and resolved some problems in jump optimization which
+were caused by the compiler proper not knowing about the assembly language
+being inserted by the pre-processor.
+
+Converting your old programs to use the new 'asm' syntax, is a simply
+matter of replacing all occurances of '#asm' with 'asm {', and replacing
+all occurances of '#endasm' with '}'. If you are using our EDT editor
+(supplied in all developers kits), the commands are:
+
+    /s'#asm'asm {
+    /s'#endasm'}
+
+You can automate the procedure by placing the commands in a file, and
+feeding them to EDT with DOS I/O redirection.
+
+    C> copy CON edt.cmd
+    /s'#asm'asm {
+    /s'#endasm'}
+    x
+    ^Z
+    C> edt myprog.c -v <edt.cmd
+
+You can convert ALL files in the current directory by employing our WDIR
+utility (From our PCUTILS package, available for download on our BBS):
+
+    C> wdir *.c "edt @ -v <edt.cmd"
+
+If you don't have WDIR, you can use a BATCH file:
+
+    dir/b *.c >DOALL.BAT
+    edt DOALL.BAT
+    /s'<return>' -v <edt.cmd<return> edt 
+
+The above EDT '/s' command will prepend all filenames with 'edt ', and
+append ' -v <edt.cmd'. You will have to manually fixup the first and
+last lines in the edited file. If you DOS 4.x or earlier, you will not
+be able use the 'dir/b' command. In this case, use 'dir *.c >DOALL.BAT',
+and manually edit the list to return the filenames to correct syntax.

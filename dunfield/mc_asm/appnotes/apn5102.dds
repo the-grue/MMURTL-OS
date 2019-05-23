@@ -1,0 +1,120 @@
+8051: Using CPU variants without LJMP/LCALL
+
+Some manufacturers of 8051 derivative processors having 2K or less of
+internal ROM have simplified their chip design by removing the LJMP and
+LCALL instructions. These instruction are unnecessary, since the AJMP
+and ACALL instruction can span the entire 2K or progam code memory.
+
+This presents a problem with MICRO-C/51 however, because the compiler
+(not knowing that it is producing code for these parts) produces LJMP's
+and LCALL's in its output code, there are also LJMP and LCALL instructions
+embedded in the library function code.
+
+If you are only occationaly produceing code for these LJMPless parts, the
+simplest approach is to compile with the '-x' option (producing a complete
+assembly language file), and manually edit that file before assembling it
+with ASM51. If you are using our EDT editor (supplied on all developers kits),
+the commands are:
+
+    C> cc51 myprog -ofx m=t         ; Compile (TINY model) to ASM file
+    C> edt myprog.asm               ; Edit the ASM file
+    /s'LJMP'AJMP                    ; Change all LJMP to AJMP
+    /s'LCALL'ACALL                  ; Change all LCALL to ACALL
+    x                               ; Exit and save file
+    C> asm51 myprog -t              ; Assemble the output file
+
+You can automate the editing procedure by placing the commands in a file,
+and feeding them to EDT with DOS I/O redirection:
+
+    C> copy CON edt.cmd
+    /s'LJMP'AJMP
+    /s'LCALL'ACALL
+    x
+    ^Z
+    C> edt myprog.asm -v <edt.cmd
+
+You could then write the following "batch" file to fully automate the compile:
+
+    C> copy CON cc2k.bat
+    cc51 %1 -x m=t %2 %3 %4
+    edt %1.asm -v <edt.cmd
+    asm51 %1 -t
+    C> cc2k myprog -of
+
+Note that the default 8051 startup code supplied with the compiler is origined
+at $0800, and contains an LJMP to the MON51 "breakpoint" vector $001B. This
+will cause an "out of range" assembly error when you compile program with the
+above sequence. Since you won't be debugging on a CPU with only 2K total
+code space, you can remove this reference. You will also have to position the
+output code at location $0000 for insertion in the CPU rom. See the READ.ME
+file from the LIB51 subdirectory for details.
+
+
+The above procedure works fine as long as the assembly language output file
+is small enough to be loaded into your editor. If you are using an editor
+which is limited in how large a file it can load (EDT tops out at about 51K),
+you may wish to use the following approach using MACRO's:
+
+First, create a pair of MACRO's, which changes LCALL's into ACALL's and LJMP's
+into AJMP's:
+
+    LCALL   MACRO
+            AJMP    \1
+            ENDMAC
+    LJMP    MACRO
+            AJMP    \1
+            ENDMAC
+            
+Then use this macro to process all .ASM files in the LIB51 subdirectory:
+
+    rename *.ASM *.OLD
+    macro lamac 8051RLPT.OLD >8051RLPT.ASM
+    macro lamac 8051RLPS.OLD >8051RLPS.ASM
+    ...
+    macro lamac TPRINTF.OLD >TPRINTF.ASM
+
+If you have our 'WDIR' utility (available in PCUTILS from our BBS), you
+could convert all the files with only two commands:
+
+    rename *.ASM *.OLD
+    wdir *.OLD "MACRO lamac $.OLD >$.ASM"
+
+Once you have done this, edit your macro file, and place a "asm { }"
+wrapper around it, so that it can be called from 'C', and place it in
+a file called LAMAC.H
+
+    asm {
+    LCALL   MACRO
+            AJMP    \1
+            ENDMAC
+    LJMP    MACRO
+            AJMP    \1
+            ENDMAC
+    }
+
+Now, when you compile your 'C' program, #include the LAMAC.H file, and
+specify the '-m' option on the CC51 command line:
+
+    #include <8051io.h>
+    #include <lamac.h>
+
+    main()
+    { ... }
+
+
+    cc51 myprog -ofpm
+
+The '-m' option causes CC51 to call MACRO between the compiler (MCC51),
+and the source linker (SLINK) stages. The LAMAC.H file will cause MACRO
+to replace LCALL/LJMP with ACALL/AJMP.
+
+
+If you don't want to replace all LJMP/LCALL's in the library, you can
+use MACRO on the entire output file, however this will be slower than
+described above because the entire program must be converted every time:
+
+    cc51 myprog -ofx
+    macro lamac myprog.asm amyprog.asm
+    asm11 amyprog -t
+
+NOTE: the 'lamac' file should NOT have the 'asm { }' wrapper in this case.

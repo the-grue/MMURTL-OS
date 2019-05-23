@@ -1,0 +1,198 @@
+This help library contains information that may be needed when
+interfacing to various devices from the PC.
+>ASCII code chart
+                       Most Significant Digit
+        HEX||  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |
+        ===++=====+=====+=====+=====+=====+=====+=====+=====+
+   L     0 || NUL | DLE |     |  0  |  @  |  P  |  `  |  p  |
+   e     1 || SOH | DC1 |  !  |  1  |  A  |  Q  |  a  |  q  |
+   a     2 || STX | DC2 |  "  |  2  |  B  |  R  |  b  |  r  |
+   s     3 || ETX | DC3 |  #  |  3  |  C  |  S  |  c  |  s  |
+   t     4 || EOT | DC4 |  $  |  4  |  D  |  T  |  d  |  t  |
+     D   5 || ENQ | NAK |  %  |  5  |  E  |  U  |  e  |  u  |
+   s i   6 || ACK | SYN |  &  |  6  |  F  |  V  |  f  |  v  |
+   i g   7 || BEL | ETB |  '  |  7  |  G  |  W  |  g  |  w  |
+   g i   8 || BS  | CAN |  (  |  8  |  H  |  X  |  h  |  x  |
+   n t   9 || HT  | EM  |  )  |  9  |  I  |  Y  |  i  |  y  |
+   i     A || LF  | SUB |  *  |  :  |  J  |  Z  |  j  |  z  |
+   f     B || VT  | ESC |  +  |  ;  |  K  |  [  |  k  |  {  |
+   i     C || FF  | FS  |  ,  |  <  |  L  |  \  |  l  |  |  |
+   c     D || CR  | GS  |  -  |  =  |  M  |  ]  |  m  |  }  |
+   a     E || SO  | RS  |  .  |  >  |  N  |  ^  |  n  |  ~  |
+   n     F || SI  | US  |  /  |  ?  |  O  |  _  |  o  | DEL |
+   t    ---++-----+-----+-----+-----+-----+-----+-----+-----+
+>Connections and Pinouts
+>>Game connector pin assignments
+8   7   6   5   4   3   2   1
+ 15  14  13  12  11  10   9
+
+1 Game1 +5V           9 Game2 +5V
+2 Game1 switch 1     10 Game2 switch 1
+3 Game1 X position   11 Game2 X position
+4 Game1 Ground       12 Game2 Ground
+5 Game1 Ground       13 Game2 Y position
+6 Game1 Y position   14 Game2 Switch2
+7 Game1 switch 2     15 No connection
+8 No connection
+
+Connector viewed from rear of PC.
+>>Keyboard connector pin assignments
+PC/AT DIN-5 connector
+      ___ ___
+     /   U   \     1 +Clock
+   /           \   2 +Data
+  |             |  3 -Reset
+  |  3       1  |  4 Ground
+   \  5     4  /   5 +5 Vdg
+     \   2   /
+       -----
+
+PS/2 minature DIN-6 connector
+       __ __
+     / 6 U 5 \     1 Data
+   /           \   2 Reserved
+  |  4       3  |  3 Ground
+   \           /   4 +5 Vdc
+     \ 2   1 /     5 Clock
+       -----       6 Reserved
+
+Connectors viewed from rear of PC
+>>Printer connector pin assignments
+13  12  11  10   9   8   7   6   5   4   3   2   1
+  25  24  23  22  21  20  19  18  17  16  15  14
+
+      1 -STROBE        * 10 -ACK
+      2 DATA 0         * 11 +BUSY
+      3 DATA 1         * 12 +PAPER OUT
+      4 DATA 2         * 13 +SELECT
+      5 DATA 3           14 -AUTO FD
+      6 DATA 4         * 15 -ERROR
+      7 DATA 5           16 -INIT
+      8 DATA 6           17 -SELECT INPUT
+      9 DATA 7        18-26 GROUND
+
+Signals marked with '*' originate from the printer.
+Connector viewed from rear of PC.
+>>Serial connector pin assignments
+                  PC (25 pin)                              AT (9 pin)
+1   2   3   4   5   6   7   8   9  10  11  12  13      1   2   3   4   5
+ 14  15  16  17  18  19  20  21  22  23  24  25          6   7   8   9
+
+    Signal name               Origin   25-Pin(PC)  9-Pin(AT)
+    --------------------------------------------------------
+    Protective Ground   (GND)   ---         1          1
+    Transmit Data       (TXD)   DTE         2          3
+    Receive Data        (RXD)   DCE         3          2
+    Request To Send     (RTS)   DTE         4          7
+    Clear To Send       (CTS)   DCE         5          8
+    Data Set Ready      (DSR)   DCE         6          6
+    Signal Ground       (GND)   ---         7          5
+    Data Carrier Detect (DCD)   DCE         8          1
+    Data Terminal Ready (DTR)   DTE        20          4
+    Ring Indicator      (RI )   DCE        22          9
+
+Connectors viewed from rear of PC.
+>>Video connector pin assignments
+EGA/CGA/MDA Connector
+                        1 Ground         6 Secondary Green/Mono intensity
+ 5   4   3   2   1      2 Secondary RED  7 Secondary Blue/Mono video
+   9   8   7   6        3 Red            8 Horizontal sync
+                        4 Green          9 Vertical sync
+                        5 Blue
+
+VGA Connector
+                        1 Blue      6 Red GND      11 Monitor sense 0
+ 5   4   3   2   1      2 Green     7 Green GND    12 Monitor sense 1
+  10   9   8   7   6    3 Red       8 Blue GND     13 Horisontal sync
+15  14  13  12  11      4 Reserved  9 Keying plug  14 Vertical sync
+                        5 Ground   10 Ground       15 Reserved
+
+Connectors viewed from rear of PC.
+>Hayes compatible modems
+This section contains information about the command set and features of
+a HAYES SMARTMODEM 2400. Most "hayes compatible" modems support at least
+this minimal command set.
+>>Commands
+All commands are preceeded by 'AT'.
+Entering 'A/' causes the last command to re-execute.
+
+A     Go off-hook/answer mode        &C0-1  DCD: 0=On, 1=Control
+B0-1  Mode: 0=V.22 1=212A            &D0-3  DTR: Ignore, Cmd, Hgup, Reset
+Dnum  Dial number                    &F     Recall factory settings
+E0-1  Echo: 0=Disable 1=Enable       &G0-2  Guard tone: No, 550, 1800
+H0-1  Hook: 0=on-hook, 1=off         &J0-1  Jack: 0=RJ11/41/45 1=RJ12/13
+I0-2  Id: 0=ID, 1=Cksum, 2=test      &Q0-4  Mode: Async, Sync1/2/3/4
+L0-3  Spk vol: Low, Med, High        &R0-1  CTS: 0=Track RTS, 1=On
+M0-3  Spk: Off, Carr, On, No dial    &S0-1  DSR: 0=On, 1=Control
+O0-1  Go online: 1=+retrain          &T0-8  Test control
+Q0-1  Results: 0=Enable, 1=Disable   &V     View config, profs & numbers
+Sr=n  Set register 'r' to 'n'        &W0-1  Save current profile
+Sr?   Display register 'r'           &X0-1  Clock: Modem, Dte, Carrier
+V0-1  Results: 0=Numeric, 1=Text     &Y0-1  Set power-up profile
+X0-4  Set result code level          &Zn=x  Store phone number (0-3)
+Y0-1  Long space disconnect: 0=Disable, 1=Enable
+Z0-1  Reset and load profile
+>>Registers
+S0       Auto answer:                           0=off, after 1-255 rings
+S1       Ring count
+S2       Escape character:                      0-127
+S3       Return character:                      0-127
+S4       Line-feed character:                   0-127
+S5       Space character:                       0-32, 127
+S6       Wait time before blind dial:           2-255 sec.
+S7       Wait time for carrier/dial tone:       1-55 sec.
+S8       Duration of comma pause:               0-244 sec.
+S9       Carrier detect response time:          1-255 x 1/10 sec.
+S10      Delay between carrier lost and hangup: 1-255 x 1/10 sec.
+S11      Duration/Spacing of DTMF tones:        50-255 msec.
+S12      Escape sequence guard time:            20-255 x 1/50 sec.
+S13-24   Reserved
+S25      DTR change detect time:                0-255 x 1/100 sec.
+S26      RTS to CTS delay time:                 0-25 x 1/100 sec.
+>>Dial modifiers
+0-9,#,*,A,B,C,D   Digits/tones for dialing
+P                 Select PULSE dialing
+T                 Select TONE dialing
+,                 Pause
+!                 Flash hookswitch
+@                 Wait for silence
+W                 Wait for dialtone
+;                 Return to command mode after dialing
+R                 Reverse mode (answer)
+S=n               Dial stored number (0-3)
+>>Result codes
+0  OK             Command completed successfully
+1  CONNECT        Connection at 0-300 BPS
+2  RING           Ringing detected
+3  NO CARRIER     Carrier not detected or lost
+4  ERROR          Invalid command or parameters
+5  CONNECT 1200   Connection at 1200 BPS
+6  NO DIALTONE    No dialtone was detected
+7  BUSY           Busy signal detected
+8  NO ANSWER      No silence when dialing a system not providing dial tone
+10 CONNECT 2400   Connection at 2400 BPS
+
+X0 enables results 0-4
+X1 enables results 0-5, 10
+X2 enables results 0-6, 10
+X3 enables results 0-5, 7, 10
+X4 enables all result codes (default)
+>VT100 / ANSI terminal control codes
+ESC[nA     - Cursor UP               ESC#3 - Double height line (TOP)
+ESC[nB     - Cursor DOWN             ESC#4 - Double height line (BOTTOM)
+ESC[nC     - Cursor RIGHT            ESC#5 - Single width line
+ESC[nD     - Cursor LEFT             ESC#6 - Double width line
+ESC[n;nf   - Position cursor1        ESC#8 - Screen aligment display
+ESC[n;nH   - Position cursor2        ESC7  - Save cursor, ESC8 - Restore cursor
+ESC[ng     - Clear tab stop (0=At cursor, 3=All)
+ESC[nJ     - Erase in display (0=Cursor to end, 1=Start to cursor, 2=All)
+ESC[nK     - Erase in line    (0=Cursor to end, 1=Start to cursor, 2=All)
+ESC[n;...m - Select graphics (0=Off, 1=Bold, 24=Underline, 5=Blink, 6=Reverse)
+ESC[nn     - Device status report
+ESC[nq     - Load leds
+ESC[n;nr   - Set scrolling region
+ESC[x      - Request terminal parameters
+ESC(x      - Character set 0 x: A=United Kingdom, B=ASCII, 0=Graphics
+ESC)x      - Character set 1    1=Alt rom standard, 2=Alt rom graphics
+ESCH - Set TAB, ESCD - Index, ESCE - Newline, ESCM - rev index, ESCZ - Indent
+ESCc - Reset  , ESC= - Application keypad, ESC> - Numeric keypad

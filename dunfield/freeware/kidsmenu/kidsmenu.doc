@@ -1,0 +1,143 @@
+KIDSMENU: A very simple menu system for children
+
+KIDSMENU is a simple (and small) menu system, which allows young children to
+run their favorite games and educational programs without (much) adult help.
+
+The program presents the child with a screen of large colorful "icons",
+representing their favorite programs. A program may be selected by
+typing the number displayed under the icon, or by clicking on it with a
+mouse. Once a program is selected, KIDSMENU changes to the directory
+where it is located, and runs the program using a preset command line.
+
+A sample data file is included with entries for a number of popular
+childrens programs.
+
+This is not a graphical program, the "icons" are created using the extended
+PC character set. It works with any display type, and will be happy to run
+on your old 8088 or 286 which may have been passed on to the kids.
+Best of all... Its FREE!
+
+
+
+KMEDIT: the Kids Menu EDITor
+
+KMEDIT is used to create and edit menu data files for use by the KIDSMENU
+program. If no filename is specified, KMEDIT uses "KIDSMENU.DAT" in the
+current directory.
+
+You will be presented with a mini editing screen for the "icon" image,
+as well as a display of directory and command to execute for the program
+associated with that icon.
+
+Operation of KMEDIT is fairly self-explainatory, however to summarize,
+the following KEYS are used:
+
+  Up/Dn/Rt/Lt   - Position the cursor in the ICON display
+  F1            - Select & insert a graphic character
+    Up/Down     - Scroll up/down one character
+    PgUp/PgDn   - Scroll up/down 20  characters
+    Home/End    - Goto char 00 / 80
+    ENTER       - Select & insert character
+    ESC         - Cancel character selection
+  F2            - Insert a copy of last selected graphic character
+  F3            - "pick up" a graphic char for insertion with F2
+  F4            - Set/edit directory and command strings
+  F5            - Select a new attribute for cursor locatin
+    Up/Dn - Change FOREGROUND attribute
+    Rt/Lt - Change BACKGROUND attribute
+    ENTER - Select & set new attribute
+    ESC   - Cancel attribute selection
+  F6            - Set attribute at cursor to last selected
+  F7            - "pick up" attribute at cursor for insertion by F6
+  F8            - Change ALL attributes to last selected
+  F9            - Select entry to edit by number
+  F10           - Copy entry (by number) to current one
+  PgUP          - Select and edit next entry
+  PgDn          - Select and edit previous entry
+  Home          - Arrange (re-order) entries in menu
+    nn SPACE    - Select first entry to exchange
+    nn ENTER    - Select second entry & exchange with first
+    ESC         - Return to main editing screen
+  ESC           - Exit KMEDIT
+
+Normal ASCII characters may be inserted into the "icon" by simply typeing
+them on the keyboard.
+
+
+
+KIDSMENU: the Kids MENU program
+
+KIDSMENU uses the data file created by KMEDIT, to present the child with a
+screen of large colorful "icons", from which he/she can select a program to
+run. Each entry has a number displayed below it. The child may select an entry
+by typing the number (and pressing ENTER), or by clicking on the "icon"
+with a mouse.
+
+If used on a computer dedicated to small children, you may wish to place
+KIDSMENU on the AUTOEXEC.BAT file, so that the menu will be presented anytime
+the child turns the computer on.
+
+You may exit KIDSMENU by pressing CTRL-END. In this case, KIDSMENU will
+terminate with a DOS errorlevel of 51.
+
+If KIDSMENU is passed invalid arguments, or the option '?', it will
+display a short usage summary, and terminate with DOS errorlevel 52.
+
+The following command line options are available to KIDSMENU:
+
+  B=batch_file
+
+    This option causes KIDSMENU to create a two line "batch" file with the
+    specfied name, whenever a menu entry is selected. This batch file
+    contains the commands to 'CD' to the selections directory, and the
+    command defined for the selection. After the batch file is written,
+    KIDSMENU terminates with a DOS errorlevel of 50.
+
+    If the 'b=' option is not specified, KIDSMENU 'CD's to the directory,
+    and runs the selected command directly, while remaining in memory.
+    If your system has limited memory, or you have programs which require
+    every scrap of available RAM, you can use the 'b=' option to run
+    them without KIDSMENU occupying memory.
+
+    To use 'b=' you must run KIDSMENU from another batch file, similar to:
+
+    :runmenu
+    cd c:\
+    kidsmenu b=go
+    if errorlevel 51 goto quit
+    call go.bat
+    goto runmenu
+    :quit
+
+  D=data_file
+
+    This option specifies the name of the data file containing KIDSMENU's menu
+    definitions (created by KMEDIT). The extension ".DAT" is assumed. If not
+    sepecified, the file "KIDSMENU.DAT" in the current directory is used.
+
+  -Lock
+
+    Locks KIDSMENU, by disabling the CTRL-END exit key.
+ 
+  -Mouse
+
+    This option disables the mouse, even if one is detected.
+
+  V=video_mode
+
+    Specifies the BIOS video mode which KIDSMENU will use to initialize its
+    screen. If not specified, mode=3 is used, which results in an 80x25
+    color display. KIDSMENU sets the video mode, because some games leave
+    the video system in unusual modes.
+
+
+
+KIDSMENU and KMEDIT are compiler with my MICRO-C compiler (see included
+CATALOG). The source code for both program is included with the compiler as
+example programs.
+
+Dave Dunfield
+Dunfield Development Systems
+P.O. Box 31044
+Nepean, Ontario Canada
+K2B 8S8

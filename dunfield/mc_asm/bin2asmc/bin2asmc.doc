@@ -1,0 +1,24 @@
+BIN2ASM is a program which reads a binary file and converts it to an XASM
+compatible source file, using either FCB (motorola) or DB (intel) statements.
+
+Use: BIN2ASM <input_file> [<output_file> l=<length> -intel]
+
+  <input_file>   = Name of binary file to read
+  <output_file>  = Name of ASM file to write. If not specified, BIN2ASM
+                   writes to standard output (the PC screen).
+  l=<length>     = Number of bytes to encode in each ASM line (deafult=16)
+  -intel         = Use intel style 'DB' (Default is motorola stype 'FCB')
+
+
+
+BIN2C is a program which reads a binary file and converts it to a MICRO-C
+compatible character array declaration.
+
+Use: BIN2C <input_file> [<output_file> l=<length> -intel]
+
+  <input_file>   = Name of binary file to read
+  <output_file>  = Name of 'C' file to write. If not specified, BIN2C
+                   writes to standard output (the PC screen).
+  l=<length>     = Number of bytes to encode in each 'C' line (deafult=16)
+  n=<name>       = Define an array with this name. If 'n=' is not specified,
+                   BIN2C outputs the initialization values only.

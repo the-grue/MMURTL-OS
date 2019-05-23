@@ -1,0 +1,30 @@
+MMURTL Operating System Source Code
+Copyright 1991,1992,1993,1994,1995  Richard A. Burgess
+ALL RIGHTS RESERVED
+Version 1.0
+
+You have my permission to use MMURTL, DASM and CM32 for:
+   1) non-commercial applications within a single company
+   or corporation, if it is not distributed outside of that
+   institution, and not sold for profit.
+
+   2) Educational institutions - classrooms, etc.
+
+   3) For your own personal use
+
+You may NOT build a "Son of MMURTL" for commercial distribution
+without my permission.  Of ocurse, MMURTL can be used as a basis
+for your own commercial operating system, so long as substantial 
+changes and additions are made.
+
+The source code must not be distributed without an original copy of 
+the book  "Developing Your Own 32 Bit Operating System."
+
+CM32 was derived from Micro-C (Copyright 1990) by Dave Dunfield.
+Any commercial use of this product requires Mr. Dunfield's 
+permission as well.
+
+Note: If you do want to use MMURTL as the basis for commercial
+operating system, send me some mail at rburgess@aol.com
+
+

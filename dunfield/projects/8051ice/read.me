@@ -1,0 +1,53 @@
+This archive/directory contains all information required to build and use
+a LOW COST 8051 in-circuit emulator:
+
+8051 In-circuit Emulator Kit - Files:
+
+   READ.ME       - This file
+   ICE.DOC       - Detailed documentation on the emulator
+   ICE.DWG       - Schematic drawing of the emulator
+   ICEHOST.DWG   - Drawing of the host interface cable
+   ICEHEAD.DWG   - Drawing of the emulation header cable
+   ICEPICT.DWG   - Suggested component and switch layout.
+
+8051 ICE parts list:
+
+   Qty Description
+   --- -----------
+    1  DS5000/2250/2250T microcontroller IC
+    1  7805 +5V regulator IC
+    1  MAX-232 5V RS-232 driver IC
+    1  11.059 Mhz crystal
+    1  B561 transistor *
+    1  40 Pin DIP header & ribbon cable assembly
+    1  RJ45 8-conductor socket & cable assembly
+    5  10uf 16v capacitor
+    1  330 ohm 1/4w resistor
+    1  1K ohm 1/4w resistor
+    2  10K ohm 1/4w resistor
+    1  100K ohm 1/4w resistor
+    1  Light Emitting Diode
+    1  STDT Center Off toggle switch
+    1  DPDT toggle switch
+    2  SPST toggle switch
+    1  N.O. Pushbutton switch
+ * B561 was chosen because it was in my junkbox, virtually any general
+   purpose small-signal PNP transistor will work.
+
+Bypass capacitors should be placed across power rails or all IC's.
+
+A complete schematic diagram for an 8031 in-circuit emulator is contained in
+the file ICE.DWG. You may view/print it with our MICROCAD drawing package:
+
+     MICROCAD ICE /D    <- View on VGA monitor
+     MCPRINT ICE LASER  <- Print on HP laserjet series (LPT1)
+     MCPRINT ICE EPSON  <- Print on EPSON dot matrix (LPT1)
+
+MICROCAD is available "free" from our BBS and on our DEMO disks, as part
+of the EMBEDRAW package. For details on editing the drawing, or printing
+it to devices attached to different ports, see the MICROCAD documentation.
+
+The user documentation for the 8051 ICE is contained in the file: ICE.DOC
+
+All programs, documentation, source code and other information on this
+disk is copyright 1992-1995 Dave Dunfield. All rights are reserved.

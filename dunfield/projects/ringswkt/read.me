@@ -1,0 +1,130 @@
+This archive/directory contains all information required to build and use a
+RINGSWITCH Telephone Ring Descriminator. RINGSWITCH provides the following
+enhancements to any telephone line:
+
+    - Automaticalls directs incomming calls to one of three separate jacks
+      (requires the "ident-a-call" feature from your telephone comany).
+    - Allows sets on any of the three jacks to connect to the phone line and
+      be used normally.
+    - Provides "lock out", insuring that when a call is in progress, the sets
+      on the other jacks cannot interfere with it.
+
+RINGSWITCH Kit - Files:
+
+   READ.ME      - This file
+   RINGSW.C     - RINGSWITCH MICRO-C source code
+   RINGSW.MOT   - RINGSWITCH firmware ROM image (Motorola fmt download records)
+   RINGSW.INT   - RINGSWITCH firmware ROM image (Intel  fmt download records)
+   RINGSW1.DWG  - RINGSWITCH schematic diagram - Page 1 (MICROCAD format)
+   RINGSW2.DWG  - RINGSWITCH schematic diagram - Page 2 (MICROCAD format)
+
+RINGSWITCH parts list:
+
+   Qty Description
+   --- -----------
+    1  8031 microcontroller IC *
+    1  2764 8K EPROM IC *
+    1  74LS373 Octal Latch IC *
+    1  MAX-232 5V RS-232 driver IC **
+    1  ULN2003 Relay driver IC
+    4  4N35 Opto-Coupler IC
+    1  11.059 Mhz crystal
+    2  10uf 16v capacitor
+    4  10uf 16v capacitor **
+    1  .47uf 500v non-polar capacitor
+    1  10K ohm 1/4w resistor
+    1  15K ohm 1/4w resistor
+    1  120 ohm 1/2w resistor
+    3  150 ohm 1/4w resistor
+    7  1N4004 diodes
+
+
+*  The RINGSWITCH can also be constructed with an 8051 microcontroller, with
+   the firmware placed in internal ROM. In this case, the 2764 and 74LS373
+   IC's are not required. The EA pin (39) of the 8051 should be tied to
+   +5V in order to execute from the internal ROM.
+
+** The MAX-232 IC, and 4 of the 10uf caps are not required unless you plan
+   plan to use the RS-232 port for troubleshooting etc.
+
+Bypass capacitors should be placed across power rails or all IC's.
+
+A complete schematic diagram for an 8031 based RINGSWITCH is contained in
+the files RINGSW1.DWG and RINGSW2.DWG. You may view/print them with our
+MICROCAD drawing package:
+
+     MICROCAD RINGSW1 /D    <- View on VGA monitor
+     MCPRINT RINGSW2 LASER  <- Print on HP laserjet series (LPT1)
+     MCPRINT RINGSW1 EPSON  <- Print on EPSON dot matrix (LPT1)
+
+MICROCAD is available "free" from our BBS and on our DEMO disks, as part
+of the EMBEDRAW package. For details on editing the drawing, or printing
+it to devices attached to different ports, see the MICROCAD documentation.
+
+RINGSWITCH Source Code:
+
+    The 8051 MICRO-C source code to RINGSWITCH is provided on this disk in
+a file called RINGSW.C. You can re-compile this using our DDS 8051 MICRO-C
+developers kit (see included CATALOG file).
+
+Connections:
+
+    Jack1       - Telephone of main number
+    Jack2       - Telephone of first "ident-a-call" number
+    Jack3       - Telephone of second "ident-a-call" number
+    Line        - Connect to telephone line
+NOTE: RINGSWITCH is polarity sensitive!!! If it cuts on and off when
+      you pick up a telephone, reverse the connections to Line.
+
+Incomming calls:
+
+    RINGSWITCH uses the distinctive ringing (ident-a-call) feature available
+    from the telephone company to direct the incoming call to one of the three
+    jacks. If you do not have the ident-a-call feature, incomming calls will
+    always appear on jack1.
+
+    The ident-a-call rings have the following cadence (at least they do here
+    in canada):
+
+        Main number     - rings normally    (1 long ring)
+        1st idc number  - two short rings
+        2nd idc number  - 1 short ring, 1 long ring, 1 short ring
+
+    The ident-a-call numbers always ring correctly, however there is no
+    special conditioning of the the main number's ringing. Because of this,
+    it sometimes begins with a "short" ring (this occurs on any telephone
+    line).
+
+    RINGSWITCH insures that switching will occur correctly even with a short
+    initial ring, by completely ignoring the duration of the ring. RINGSWITCH
+    simply counts the number of rings, and directs the call to jacks one, two
+    or three accordingly. If more than three rings are detected, RINGSWITCH
+    assumes that there was an error on the line (causing one ring to appear
+    as multiple rings), and waits until the next ringing cycle to try again.
+
+    Once the number of rings has been determined, RINGSWITCH closes the relay
+    for the indicated line (allowing further rings to pass through and ring
+    that telephone), and waits for you to answer it. If ringing stops before
+    the set goes off-hook, RINGSWITCH assumes that the call was unanswered,
+    and resets to wait for the next ringing.
+
+    If any other sets go off-hook while the call is in progress, RINGSWITCH
+    generates "busy" tone which is heard at those sets.
+
+    Once the telephone is placed on-hook again, RINGSWITCH resets and waits
+    for the next ring.
+
+Outgoing calls:
+
+    Whenever RINGSWITCH detects that a telephone has gone off-hook while it
+    is idle, it immediately closes the corresponding relay, connecting that
+    set directly to the outside line. Dialing etc. may then be done directly
+    with the telephone company office.
+
+    Once connected, RINGSWITCH waits until you hang up the telephone before
+    resetting and waiting for a ring (or set off-hook). If during this time
+    any other sets go off-hook, RINGSWITCH will generate "busy" tone which
+    is heard at those sets.
+
+All programs, documentation, source code and other information on this
+disk is copyright 1993-1995 Dave Dunfield. All rights are reserved.

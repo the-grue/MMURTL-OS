@@ -1,0 +1,22 @@
+This is the main text, which is displayed upon entry into
+this help library.
+>Section1 - A main topic
+This is the text of section 1
+>Section2 - A main topic
+This is the text of section 2
+>>Section2.1 - A sub-topic
+This is the text of section 2.1
+>>Section2.2 - A sub-topic
+This is the text of section 2.2
+>>>Section2.2.1 - A sub-sub-topic
+This is the text of section 2.2.1
+>>>Section2.2.2 - A sub-sub-topic
+This is the text of section 2.2.2
+>>Section2.3 - A sub-topic
+This is the text of section 2.3
+>Section3 - A main topic
+This is the text of section 3
+>>Section3.1 - A sub-topic
+This is the text of section 3.1
+>>Section3.2 - A sub-topic
+This is the text of section 3.2

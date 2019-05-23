@@ -1,0 +1,71 @@
+This utility parses the symbol listings output from our XASM cross
+assemblers, and builds a list of selected symbols with their addresses.
+
+This can be used to automatically generate EQUates for specific addresses
+occuring in a program image. This in turn can be used to allow a separately
+assembled program to access those absolute locations.
+
+Syntax: parsesym <symbol listing> <output file> [-c -e s=file -v -?]
+
+  <symbol listings> - This is the name of the file containing the XASM
+                      symbol table listing.
+
+  <output file>     - This is the name file to which the symbol names
+                      will be written.
+
+  -c                - Causes CASE SENSITIVE parsing. Symbols will be
+                      written in upper/lower case, and will only match
+                      symbols which are identical in case (see s=file).
+
+                      Without this option, symbols are written in UPPER
+                      CASE, and will match symbols of differing case.
+
+  -e                - Causes the parser to generate XASM EQU statements
+                      from the symbol names & addresses.
+
+  s=file            - Specifies a SELECTION FILE. This file must contain
+                      a list of symbols (1 per line). Only those symbol
+                      names found in this file will be written to the
+                      output file.
+
+                      Without this option, ALL symbols are written.
+
+  -v                - Inhibits the startup and summary messages.
+
+  -?                - Causes PARSESYM to ignore any symbols which begin
+                      with the '?' character.  This provides an easy way
+                      to filter out the "housekeeping" symbols generated
+                      by our MICRO-C compiler.
+
+Example: cc11 myprog -ofx      ; Compile 68HC11 program, optimize to ASM
+         asm11 myprog -c -s    ; Assemble, Case sensitive, output sym table
+         parsesym myprog.lst global.equ -c -e -?
+
+The above command reads the MYPROG.LST file produced by the assembler (and
+containing the symbol table dump), and produces a GLOBAL.EQU file, which
+has all the non-housekeeping symbols from the MYPROG.HEX image in the
+form of XASM compatible EQU statements.
+
+         parsesym myprog.lst link.equ -c -e s=link.sym
+
+The above command reads MYPROG.LST, and generates a file of XASM compatible
+EQU statements, containing only the symbols specified in the file LINK.SYM.
+
+LINK.SYM would has the names listed 1 per line, and could look like:
+    main
+    func1
+    func2
+    global_var
+    UCASE_GLOBAL_VAR
+
+NOTE that we use the '-s' option to ASM11 to cause the MYPROG.LST file to
+contain ONLY the SYMBOL TABLE for the assembly. The '-c' options are used
+with ASM11 and PARSESYM to preserve 'C's upper/lower case distinction.
+
+A practical application of this utility would be to provide access to
+utility functions stored in a separate ROM from the main program. In
+this case, you could generate the LINK.EQU file from the utility image
+as described above, and use it from within other ASM programs to define
+the symbol addresses. If you are using MICRO-C, you could add LINK.EQU
+to the library (using the SLIB command), to make those symbols available
+from any 'C' programs.

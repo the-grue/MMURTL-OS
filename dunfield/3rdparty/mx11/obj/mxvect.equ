@@ -1,0 +1,20 @@
+*** Vector jump table *** for MX-11
+*
+* Remove comments to MON-11 setion to enable use with MON-11.
+* Comment out BUFFALO section.  Edit appropriately if using
+* another debugger
+
+* For Buffalo debugger
+* Vectors start at $C4 and end at $FF
+* note that this is the address of the vector, NOT jump inst)
+*
+monitor  equ     $E000         Start address of monitor for fatalerr
+SCIVECT  equ     $C5           Vector to SCI interrupt
+TOC1VECT equ     $E0           Vector to OC1 interrupt
+*
+* For MON-11 debugger
+* 
+*monitor  equ     $E000         Address of monitor
+*SCIVECT  equ     $80           Vector to SCI interrupt
+*TOC1VECT equ     $92           Vector to OC1 interrupt
+

@@ -1,0 +1,54 @@
+8051: Adapting MICRO-C to handle additional SFR's.
+
+As shipped, the MICRO-C 8051 compiler can handle all of the special function
+registers found in standard 8051 and 8052 type processors, by simply including
+the file "8051reg.h". This file contains definitions for the register names,
+which are built into the assembler. Once this file has been #included, you
+can read and write the registers just as if they were global 'C' variables.
+
+   EG:     P1 = 0;
+
+All SFR's are declared in 8051reg.h as "extern register char". The "extern"
+tells the compiler that the name is defined outside of the program module,
+the "register" causes it to be accessed as a direct (8 bit internal address)
+entity, and the "char" defines it as an 8 bit quantity.
+
+The standard names are known internally to the assembler, and therefore are
+not actually defined anywhere in the library. To fool the source linker
+(SLINK) into thinking that it has resolved the external references, the SFR
+names are listed in the library index file(s) as being defined within the
+startup code (8051RLP?.ASM). Since these files are always included, the
+linker is satisified that the variables are defined.
+
+The address map for the 8051/52 Special Function Registers has many unused
+addresses. Several manufacturers have use these addresses to extend the basic
+register set to include additional registers which control hardware unique
+to that manufacturers device. An example of this is the DS5000 processor from
+Dallas Semiconductor. It defines two new SFR's, the "Memory Control" register
+(MCON) at address $C6, and the "Timer Access" register (TA) at address $C7.
+
+To access these new registers in MICRO-C, you must accomplish two things:
+  1 - Inform the assembler of the direct address for the register
+      This is done by adding a new file to the library, which contains EQU
+      statements giving the SFR names addresses.
+  2 - Inform the compiler of the name and type of the register
+      This is done by adding definitions to 8051reg.h as described above.
+
+Here is an example command sequence for defining the new DS5000 registers.
+You could use your favorite editor instead of the "copy con" commands:
+
+    C:\> cd \mc\lib51                       ; Position to 8051 library
+    C:\MC\MC51> copy con extreg.asm         ; Create a new file
+    MCON EQU   $C6                          ; Memory Control register address
+    TA   EQU   $C7                          ; Timed Access register address
+    ^Z                                      ; End of file (exit)
+    C:\MC\MC51> \mc\slib i=TINY a=extreg    ; Add to TINY library
+    C:\MC\MC51> \mc\slib i=SMALL a=extreg   ; Add to SMALL library
+    C:\MC\MC51> \ms\slib i=COMPACT a=extreg ; Add to COMPACT library
+    C:\MC\MC51> \mc\slib i=MEDIUM a=extreg  ; Add to MEDIUM library
+    C:\MC\MC51> \mc\slib i=LARGE a=extreg   ; Add to LARGE library
+    C:\MC\MC51> cd \mc                      ; Switch to home directory
+    C:\MC> type con >>8051reg.h             ; Append to 8051reg.h
+    extern register char MCON, TA;          ; 'C' definitions
+    ^Z                                      ; end of file
+    C:\MC>

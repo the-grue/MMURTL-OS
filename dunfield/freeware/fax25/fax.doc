@@ -1,0 +1,697 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                  FAXPHONE 25
+                                      and
+                                    FAX-225
+    
+    
+                                     RS-232
+                                Serial Interface
+    
+                             Technical Information
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 1
+
+
+    1. INTRODUCTION
+    
+          This  document  describes  the  serial  interface   of   a   CANON
+       FAXPHONE-25 or FAX-225 (they  are  essentially  the  same  unit)  FAX
+       machine, and my experiences with it. The majority of the  information
+       presented here is a summary from the CANON document  titled  "RS-232C
+       INTERFACE KIT FOR FAXPHONE 25/FAX-225  -  TECHNICAL  SPECIFICATIONS".
+       This document bears the following message, which should be considered
+       to apply to that information:
+    
+       ---------------------------------------------------------------------
+    
+                                     NOTICE
+    
+       This manual provides information necessary for users to  operate  the
+       Faxphone 25  or  FAX-225  as  a  remote  fax  by  using  the  RS-232C
+       interface.
+    
+       This manual relates to the use of the Canon Faxphone 25  and  FAX-225
+       only. No software programming, its design or implementation should be
+       considered part of this product. the end-user is  solely  responsible
+       for obtaining all required software programming, design,  coding  and
+       installation of which Canon shall have no responsibility whatsoever.
+    
+       Canon shall not be liable for loss of  profit  or  other  incidental,
+       consequential or special damages arising out the use or inability  to
+       use  the  forgoing  produce  with  respect  to  the  information   or
+       programming samples contained in this manual.
+    
+       (Specifications  contained  herein  are  subject  to  change  without
+       notice).
+    
+       ---------------------------------------------------------------------
+    
+          The  same  goes  for  me  also.  In  other  words,  YOU  USE  THIS
+       INFORMATION ENTIRELY AT YOUR OWN RISK!!!
+    
+          Please treat this document and acompanying software as a  kind  of
+       SHAREWARE... I ask no monetary compensation for this effort,  however
+       if you write software to control the FAX, create new fonts, or create
+       any other works from this information that do nifty things  with  the
+       FAXPHONE 25/FAX-225 RS-232 port, I'd like you to send me copy.
+    
+                        Dave Dunfield
+                        Dunfield Development Systems
+                        P.O. Box 31044
+                        Nepean, Ontario (Canada)
+                        K2B 8S8
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 2
+
+
+    2. SERIAL INTERFACE
+    
+          The FAXPHONE 25/FAX-225 features a simple three wire RS-232 serial
+       interface for remote operation.
+    
+            Mode:       Asynchronous
+            Speed:      4800 or 9600 baud
+            Start bits: 1
+            Data bits:  8
+            Parity:     None
+            Stop bits:  1
+    
+       2.1 Connector Pinout
+    
+             The  FAXPHONE  25/FAX-225  features  a  small  5-pin   circular
+          connector which is located directly behind the handset jack. On my
+          FAXPHONE 25, this connector was covered by a small  plastic  plate
+          which had to be removed.
+    
+             The easiest way to connect to this interface is with  a  serial
+          cable available from CANON. This  cable  converts  to  a  standard
+          DB-25 female connector which can  be  directly  attached  to  most
+          PC's.
+    
+             If you do not have this cable, the pinout for the FAX connector
+          is as follows:
+    
+                            ______
+                           /      \ 
+                         /  1    2  \
+                        |  3  []  4  |
+                         \      5   /
+                           \______/
+    
+    
+                Pin     DB-25       Name
+                 1        2         Transmit Data (TXD)
+                 2        3         Receive  Data (RXD)
+                 3        7         Signal Ground
+                 4        1         Frame Ground
+                 5        1         Frame Ground
+    
+             The CANON cable also ties pin 4(RTS) to  pin  5(CTS),  and  pin
+          6(DSR) to pin 20(DTR) on the DB-25 connector.
+    
+             NOTE: For FAXPHONE 25, you should check the ROM revision number
+          which is indicated on a round label affixed to the bottom  of  the
+          unit (This is a small round sticker containing a number only).  If
+          the number is 01-09, CANON requests that you contact  them  before
+          attempting to  use  the  RS-232  interface.  My  FAXPHONE  25  has
+          revision 11, and it appears to work OK.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 3
+
+
+       2.2 Activating the serial interface
+    
+             To enable the RS-232 interface, you must turn on DIP switch  #4
+          on the bottom of the FAX unit. (My FAXPHONE 25  has  the  switches
+          set to 0101 0000).
+    
+             To set the serial speed (baud rate):
+    
+            1.  Press [FUNCTION] and [4] to enter USER DATA
+    
+            2.  Press [0] until you see the message prompt
+                "RS-232C BAUD RATE?".
+    
+            3.  Press [1] to active this function. The display
+                will show the currently configured baud rate.
+    
+            4.  Press [0] to toggle to the next baud rate
+                (4800/9600). Press [1] when the speed you
+                want is displayed.
+    
+             To enter RS-232 Remote  Mode  (and  accept  commands  from  the
+          serial port):
+    
+            1.  Press [FUNCTION] and [4] to enter USER DATA
+    
+            2.  Press [0] until you see the message prompt
+                "RS-232C Remove Mode?".
+    
+            3.  Press [1] to active remote mode.
+                The IN USE indicator will light.
+    
+            4.  To cancel Remote Mode, press the red STOP button.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 4
+
+
+    3. SERIAL FAX COMMANDS
+    
+          The FAXPHONE  25/FAX-225  accepts  and  acts  upon  commands  when
+       operating in its RS-232  Remote  mode.  Most  useful  functions  will
+       require several of these commands to perform.
+    
+          The FAX has a short  timeout  for  receiving  commands  and  their
+       responses, which makes it difficult to manually enter  the  commands.
+       In most cases, you will need to use a program to send and  coordinate
+       the proper sequence of commands to accomplish a particular function.
+    
+          Although the command code appear to be simple parameter lists, the
+       CANON documents do not identify the individual  value  meanings,  but
+       define only the following command strings:
+    
+       3.1 Load Font
+    
+             Loads a text font into the  FAX  machine.  This  must  be  done
+          before any operations involving text are performed.
+    
+                Send:       CC=010704/CD=01/FN=00//
+                Receive:    ACK
+                Send:       DT=<font data>EOP
+                Receive:    ACK
+    
+             <font data> consists of 96  character  entries  each  of  which
+          consists of 48 bytes, for a total of 4608 bytes of data.
+    
+             Each character is 16 bits wide, by 24 bits high. Each  pair  of
+          bytes in an entry represent one line, beginning at the top of  the
+          character.
+    
+       3.2 Load Text
+    
+             Loads a text file into the FAX machine, for later  printing  or
+          transmission. You must load a font prior to using this command.
+    
+                Send:       CC=010704/CD=00/FN=10//
+                Receive:    ACK
+                Send:       DT=<text data>EOP
+                Receive:    ACK
+    
+             <text data> consists of ASCII text  (character  values  between
+          SPACE 0x20 and DEL 0x7F only). Each line terminates with  CARRIAGE
+          RETURN (0x0D) and LINE FEED (0x0A), each page ends with FORM  FEED
+          (0x0C).
+    
+             A maximum of 100K of text may be loaded at any one time.
+    
+             Maximum line length is 100 characters.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 5
+
+
+       3.3 Transfer Image
+    
+             Transfers a compressed image (using MH method) to or  from  the
+          FAX machine.
+    
+                Send:       CC=010704/CD=03/FN=15//
+                Receive:    ACK
+                Send:       DT=<image data>[MPS or EOP]
+                Receive:    ACK
+    
+                            -- OR --
+    
+                Send:       CC=010407/CD=03/FN=15//
+                Receive:    ACK
+                Receive:    DT=<image data>[MPS or EOP]
+                Send:       ACK
+    
+             <image data> is compressed using the MH method. MH data is sent
+          out byte-by-byte in the CCITT T4 format. MH data is compressed  in
+          Huffman's code. Thus, the last byte of  a  line  does  not  always
+          contain 8 bits. If the last byte does not contain 8  bits,  insert
+          '0' in the remaining bits of the byte.
+    
+             To indicate the beginning of a page,  sent  the  following  EOL
+          code before the data: [0x00, 0x80]
+    
+             To indicate the end of a line, add the following  EOL  code  to
+          the end of each line: [0x00, 0x80]
+    
+             To indicate the end of a page, add the following  RTC  code  to
+          the last line (9 bytes): [0x00,  0x08,  0x80,  0x00,  0x08,  0x80,
+          0x00, 0x08, 0x80]
+    
+             Use MPS to indicate more  pages  are  to  follow.  Use  EOP  to
+          terminate the last page. Up to 108K of image data may be loaded.
+    
+                [DT=<1st page>RTC][MPS][.. ..<last page>RTC][EOP]
+                 __/          \___________________
+                /                                 \
+                [EOL<1st line>EOL...<last line>EOL]
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 6
+
+
+       3.4 Load Destination
+    
+             Loads the FAX with 16 identifiers  which  indicate  speed  call
+          keys to be used as the destinations for transmitted FAX's.
+    
+                Send:       CC=010704/CD=00/FN=40//
+                Receive:    ACK
+                Send:       DT=<destination data>EOP
+                Receive:    ACK
+    
+             <destination data> consists of  16  two  bytes  pairs,  plus  a
+          trailing 0xCC byte for a total of 33 bytes.
+    
+             The first byte of each pair indicates the type  of  speed  call
+          key, the second indicates the actual key to be used:
+    
+                        Byte 1           Byte 2
+                         (X)              (Y)
+    One touch spd dial:  0x00    0-9=0x00-0x09, A-C=0x0A-0x0C, #=0x0E, *=0x0F
+    Coded speed dial:    0x01    01-66=0x00-0x66  (BCD format)
+    No destination       0xCC    0xCC
+    
+    
+            [DT=<destination data>EOP]
+             __/                  \_______________________
+            /                                             \
+            [X1][Y1][X2][Y2] ... [X15][Y15][X16][Y16][0xCC]
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 7
+
+
+       3.5 Transfer Telephone
+    
+             Transfers telephone number information to or from the FAX. This
+          command loads/queries the ONE TOUCH and CODED speed call numbers.
+    
+                Send:       CC=010704/CD=00/FN=20//
+                Receive:    ACK
+                Send:       DT=<tel data>EOP
+                Receive:    ACK
+    
+    
+                        -- OR --
+    
+                Send:       CC=010407/CD=00/FN=20//
+                Receive:    ACK
+                Receive:    DT=<tel data>EOP
+                Send:       ACK
+    
+             <tel data> consists of several groups, totaling 1371 bytes.
+    
+             The first group (192 bytes) is ONE TOUCH SPEED DIALING FOR FAX.
+          It consists of 12 entries (For keys 0-9, # and *), each  of  which
+          begins with 0x00, followed by 15 bytes containing up to 30  digits
+          (in BCD) format. Use 0x0C for  any  digits  which  are  not  used,
+          0x0E=Pause, and 0x0F= Space.
+    
+             If the A,B and C keys are configured for ONE TOUCH DIALING, the
+          second group consists of three more entries (as above) except that
+          each entry is 33 bytes long (0x00 + 32 bytes).
+    
+             If the A,B and C keys are configured  for  GROUP  DIALING,  the
+          second group consists of 3 entries, each of which contains 16  X-Y
+          pairs (See LOAD DESTINATION), and a trailing 0xCC byte  (total  99
+          bytes).
+    
+             The third group (6 bytes) contains the configuration of the  A,
+          B and C keys. The first three bytes contains the type for each key
+          (0x00=Speed dial, 0x01=Group dial). the second three bytes conains
+          the number of group  dialing  destinations  registered  under  the
+          corresponding key.
+    
+             The forth group (15 bytes) is used to identify  keys  used  for
+          RELAY or CONFIDENTIAL document  sending  for  the  one-touch  keys
+          (0-9, #, *, A-C). Bit 7 of each byte indicates RELAY sending,  and
+          bit 6 indicates CONFIDENTIAL sending for each respective key.
+    
+             The fifth group  (15  bytes)  contains  information  about  the
+          confidential mailbox numbers of the one-touch  keys  (0-9,  #,  *,
+          A-C), used for sending confidential documents. Each entry contains
+          the mailbox number for the respective key  (in  BCD  format).  Two
+          bytes of zero follow this data
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 8
+
+
+             The sixth group (240 bytes), is ONE  TOUCH  SPEED  DIALING  FOR
+          VOICE. It consists of 15 entries, each of which begins with  0x00,
+          followed by 15 bytes containing up to 30 BCD digits. The format is
+          the same as for the first group listed in this section.
+    
+             The seventh group (800 bytes) contains 50 entries for the CODED
+          SPEED DIALING keys. Each entry begins with 0x00,  followed  by  15
+          bytes containing up to 30 BCD digits. Format is the  same  as  the
+          first group listed in this section.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 9
+
+
+       3.6 Transfer Special Telephone
+    
+             Loads telephone number information into "special"  Coded  speed
+          dial numbers (51-66) which are only accessable through the  RS-232
+          port. These make good "scratchpad" locations  to  store  telephone
+          numbers that are being specified from the serial port.
+    
+                Send:       CC=010704/CD=00/FN=50//
+                Receive:    ACK
+                Send:       DT=<tel data>EOP
+                Receive:    ACK
+    
+        <tel data> consists of 16 entries, each of which is 16 bytes
+    long (total 256 bytes). Each entry begins with 0x00, followed by 15
+    bytes containing up to 30 digits (in BCD) format. Use 0x0C for any
+    digits which are not used, 0x0E=Pause, and 0x0F=Space.
+    
+        Note that the "memory protect" switch must be OFF to be able
+    to load the telephone numbers.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 10
+
+
+    3.7 Print Text
+    
+        Prints a previously loaded text file on the FAX printer.
+    
+                Send:       CC=010402/CD=00/FN=10//
+                Receive:    ACK
+    
+    
+       3.8 Print Image
+    
+             Prints a previously loaded FAX image on the FAX printer.
+    
+                Send:       CC=010402/CD=03/FN=15//
+                Receive:    ACK
+    
+    
+    
+       3.9 Send Text
+    
+             Sends  a  previously  loaded  text  file  to  the  destinations
+          indicated by LOAD DESTINATION and TRANSFER TEL commands.
+    
+    
+                Send:       CC=010405/FN=10//
+                Receive:    ACK
+    
+    
+    
+       3.10 Send Image
+    
+             Sends  a  previously  loaded  FAX  image  to  the  destinations
+          indicated by LOAD DESTINATION and TRANSFER TEL comamnds.
+    
+                Send:       CC=010405/FN=15//
+                Receive:    ACK
+    
+    
+       3.11 Scan Image
+    
+             Reads an image from the FAX scanner, and loads it into the  fax
+          machine's memory.
+    
+                Send:       CC=010104/CD=03/FN=15//
+                Receive:    ACK
+                    Fax scans document...
+                Receive:    IH=nn//
+    
+             Successful scan results in status of 'IH=00//'.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 11
+
+
+    4. COORDINATING COMMANDS
+    
+          According to the CANON document, the following are the  recomended
+       orders for executing commands to accomplish the indicated functions:
+    
+    4.1 Printing Text
+    
+                LOAD FONT
+                LOAD TEXT
+                PRINT TEXT
+    
+    
+    4.2 Printing Images
+    
+                TRANSFER IMAGE (to FAX)
+                PRINT IMAGE
+    
+    
+    4.3 Scanning Documents
+    
+                SCAN IMAGE
+                TRANSFER IMAGE (from FAX)
+    
+    4.4 Sending Text
+    
+                LOAD DESTINATION
+                TRANSFER TELEPHONE or TRANSFER SPECIAL TELEPHONE
+                LOAD FONT
+                LOAD TEXT
+                SEND TEXT
+    
+    4.5 Sending Images
+    
+                LOAD DESTINATION
+                TRANSFER TELEPHONE or TRANSFER SPECIAL TELEPHONE
+                TRANSFER IMAGE (to FAX)
+                SEND IMAGE
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 12
+
+
+    5. CONTROL CODES
+    
+       5.1 Fax Control Codes
+    
+             The following character codes are used as  control  information
+          during communication with the FAXPHONE 25/FAX-225:
+    
+        MPS     0x02            Multi-Page Signal
+                                Indicates the image data for this page
+                                ends, and the image data for the next
+                                page follows without a change in
+                                transmission mode.
+    
+        EOP     0x04            End of Procedure
+                                Used to terminate all data entries to
+                                The FAX machine.
+    
+        ACK     0x06            Acknowledge
+                                Indicates that data or commands have
+                                been received without error.
+    
+        NAK     0x15            Negative Acknowledge
+                                Indicates that data or commands have
+                                not been received properly.
+    
+       5.2 Printer Control Codes
+    
+             The  following  character  codes  are  interpreted  as  special
+          actions during the reception of ASCII text:
+    
+        HT      0x09            Horizontal Tab
+                                Advances the print position to the next
+                                TAB position, which are preset every 8
+                                character spaces.
+    
+        LF      0x0A            Line feed
+                                Advances the print position to the next
+                                line while remaining at the same column.
+    
+        FF      0x0C            Form Feed
+                                Causes the FAX to cut the recording paper
+                                and begin a new page.
+    
+        CD      0x0D            Carriage Return
+                                Moves the print position to the beginning
+                                of the current line.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 13
+
+
+    6. ERROR CODES
+    
+          When an error condition occurs, the FAXPHONE  25/FAX-225  emits  a
+       loud beeping, and displays the  following  error  codes  on  the  LCD
+       display in the form "ONLINE ERROR nn":
+    
+        00          Data error during reception
+                    Overrun or Framing error occured on the data
+                    stream from the RS-232 imput.
+    
+        04          Input/Output Data Error
+                    The FAX did not receive data within 30 seconds
+                    from a time when it was expected from the
+                    computer.
+    
+        07          Receive buffer overflow
+                    The computer has sent more than 100K bytes of
+                    data to the FAX, and has overflowed memory.
+    
+        10          Command/Parameter error
+                    There is an error in either the command code or
+                    parameter values.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 14
+
+
+    7. CHARACTER FONTS
+    
+          The  FAXPHONE  25/FAX-225  has  no  internal  knowledge  of   what
+       characters received from the RS-232 port should look like. This means
+       that before you perform any operations which use character data,  you
+       need to download a FONT, which describes the exact bitmap image to be
+       used for each printable character.
+    
+          See the "Load Font" command for information on  the  format  of  a
+       font file.
+    
+       7.1 Pre-defined Fonts
+    
+             The following fonts are included in this archive:
+    
+            HIGHRES .FNT    -   A reasonable high resolution font which I
+                                created using the FONT EDITOR.
+    
+            MATRIX  .FNT    -   This is a basic 8x8 character matrix font,
+                                which I converted to the 16x24 format used
+                                by the FAXPHONE 25/FAX-225. It is still an
+                                8x8 font, and gives a "dot-matrix" look.
+    
+            MEDRES  .FNT    -   This is a version of MATRIX which has been
+                                edited to increase its point resolution.
+    
+            THINLINE.FNT    -   My first attempt at a high resolution font.
+                                This one has very thin character lines, which
+                                has the effect of producing very light text.
+    
+       7.2 The Font Editor
+    
+             You can create new fonts and edit the existing fonts  using  my
+          FONT EDITOR, which is supplied as the program FE.COM. The  program
+          is fairly self explainitory. Just run it and specify the  name  of
+          the file containing the font as an argument.
+    FAXPHONE 25/FAX-225 Serial Interface                             Page: 15
+
+
+    8. EXAMPLE PROGRAM
+    
+          Included in this archive  is  a  simple  program  (FAX.COM)  which
+       performs the basic operations available on the FAX machine.  The  'C'
+       source code for this program is also included (FAX.C), for use as  an
+       "example" of RS-232 communication with the FAX.
+    
+          This program (FAX.C) was written using my MICRO-C compiler,  which
+       is a shareware product available from me. See  the  included  CATALOG
+       file for more information.
+    
+          The basic operations performed by FAX.COM are:
+    
+       8.1 SCAN Document
+    
+             Syntax: FAX SC <filename>
+    
+    
+             The document is scanned by the FAX machine, and loaded into the
+          specified file.
+    
+       8.2 PRINT TEXT File
+    
+             Syntax: FAX PT <filename> [font file]
+    
+             The  specified  file  is  printed  as  ASCII  text,  using  the
+          specified  FONT.  If  no  FONT  is  given,  the  default  used  is
+          MEDRES.FNT.
+    
+       8.3 PRINT IMAGE File
+    
+             Syntax: FAX PI <filename>
+    
+             The previously scanned image file is printed on the FAX.
+    
+       8.4 SEND TEXT Fax
+    
+             Syntax: FAX ST <filename> <tel #> [font file]
+    
+             The specified file  is  sent  as  an  ASCII  text  FAX  to  the
+          specified telephone number. The telephone number may  contain  the
+          digits 0-9, 'P' or ',' may be used to indicate a  PAUSE,  and  any
+          other character is treated as a space. If not FONT  is  givem  the
+          default used is MEDRES.FNT.
+    
+       8.5 SEND IMAGE Fax
+    
+             Syntax: FAX SI <filename> <tel #>
+    
+             The previously scanned image file is  send  as  a  FAX  to  the
+          specified telephone number. The telephone number may  contain  the
+          digits 0-9, 'P' or ',' may be used to indicate a  PAUSE,  and  any
+          other character is treated as a space.
+
+
+
+                      FAXPHONE 25/FAX-225 Serial Interface
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. SERIAL INTERFACE                                                    2
+
+        2.1 Connector Pinout                                                2
+        2.2 Activating the serial interface                                 3
+
+     3. SERIAL FAX COMMANDS                                                 4
+
+        3.1 Load Font                                                       4
+        3.2 Load Text                                                       4
+        3.3 Transfer Image                                                  5
+        3.4 Load Destination                                                6
+        3.5 Transfer Telephone                                              7
+        3.6 Transfer Special Telephone                                      9
+        3.7 Print Text                                                     10
+        3.8 Print Image                                                    10
+        3.9 Send Text                                                      10
+        3.10 Send Image                                                    10
+        3.11 Scan Image                                                    10
+
+     4. COORDINATING COMMANDS                                              11
+
+        4.1 Printing Text                                                  11
+        4.2 Printing Images                                                11
+        4.3 Scanning Documents                                             11
+        4.4 Sending Text                                                   11
+        4.5 Sending Images                                                 11
+
+     5. CONTROL CODES                                                      12
+
+        5.1 Fax Control Codes                                              12
+        5.2 Printer Control Codes                                          12
+
+     6. ERROR CODES                                                        13
+
+
+     7. CHARACTER FONTS                                                    14
+
+        7.1 Pre-defined Fonts                                              14
+        7.2 The Font Editor                                                14
+
+     8. EXAMPLE PROGRAM                                                    15
+
+        8.1 SCAN Document                                                  15
+        8.2 PRINT TEXT File                                                15
+
+    FAXPHONE 25/FAX-225 Serial Interface                   Table of Contents
+
+                                                                         Page
+        8.3 PRINT IMAGE File                                               15
+        8.4 SEND TEXT Fax                                                  15
+        8.5 SEND IMAGE Fax                                                 15

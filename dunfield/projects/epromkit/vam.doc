@@ -1,0 +1,120 @@
+VAM: A simple Video Answering Machine
+
+  The VAM program, inplements a simple Video Answering Machine. Its basic
+functionality, is to watch for a signal (via RS-232 DTR and/or RTS), play
+an outgoing message, and then record an incomming message. The program
+can be set up to use either 1 or two VCR's.
+
+The VAM command:
+
+  To startup VAM, simply enter the command: 'vam'. VAM will startup, verify
+that it is properly connected to a DBOX, reset and zero its attached VCR's,
+and then proceed to its main control panel menu.
+
+  In the event that VAM is mis-configured in such a way that it is unable to
+start up (ie: DBOX on wrong I/O port, or incorrent number of VCR's programmed),
+you may add the 'config' operand, to proceed directly to the configuration
+menu before starting VAM: 'vam config'.
+
+The Main Control Panel
+
+  Once VAM is started, it will present its "Main Control Panel", which offers
+the following functions:
+
+Go into AUTO-ANSWER mode
+
+  Executing this function causes VAM to:
+
+    - Wait for incoming call see "Carrier detection in "Configuration menu").
+    - Play the outgoing message
+    - Record an incomming message (until carrier goes away)
+    - Wait for next call ...
+
+  To exit AUTO-ANSWER mode, press the ESCAPE key.
+
+Playback your messages
+
+  This function presents you with a menu of messages recorded, showing the
+  starting and ending times for each one. You may play any specific message
+  by using the Up/Down arrow keys to position the "bar" cursor at that
+  message, and then hitting ENTER to play it. After playing a message, VAM
+  positions the cursor to the next message, allowing you to play all
+  messages sequentially, by repeatedly hitting the ENTER key.
+
+  When you are finished, press ESCAPE to return to the main control panel.
+
+Reset message counter
+
+  After prompting for confirmation, VAM zeros the message counter,
+  effectively erasing all recorded incomming messages.
+
+Record a new outgoing message
+
+  After prompting for confirmation, VAM records a new outgoing message at
+  the beginning of the tape. Press SPACE when you are finished recording
+  you message. VAM will record the length of the message in its internal
+  configuration file, so that it can properly play the outgoing message
+  and record incomming messages when calls comes in.
+
+  If VAM is configured for a single VCR, executing this function will also
+  erase any incomming messages recorded.
+
+  If VAM is configured for two VCR's with a recorded prompt, you will be
+  prompted to record the prompt message. Press SPACE to stop. The prompt
+  message should be long enough to last throughout the expected length
+  of incomming calls.
+
+Play outgoing message
+
+  This function plays the outgoing message.
+
+Configuration menu
+
+  This function opens the configuration sub-menu:
+
+    Number of VCR's
+      Selects between three VCR setup options:
+        ONE VCR   (Prompt is caller mirror)
+          Uses only one VCR, after playing back messages, VAM fast=forwards
+          the VCR and begins recording at the first unused position. When
+          VCR is recording, caller will see himself.
+        TWO VCR's (Prompt is record source)
+          Uses TWO VCR's, one for outgoing message, and a separate one for
+          recording incomming messages. When VCR is recording caller, he
+          will see video source connected to input of outgoing VCR.
+        TWO VCR's (Prompt is outgoing tape)
+          Uses TWO VCR's, one for outgoing message, and a separate one for
+          recording incomming messages. When VCR is recording caller, the
+          outgoing tape will continue to play.
+
+    Carrier detection
+      Controls how VAM detects an incomming call. You can select either
+      DTR, RTS, DTR or RTS, or DTR and RTS. When the speocified signals
+      are raised on the RS-232 port, VAM will assume that an incomming
+      call is present, and that it persists until the signals go away.
+
+    Screen colors
+      Presents a entry screen, which allows you to select the colors used
+      for the various VAM screens and menus.
+
+    Outgoing message length
+
+      This function allows you to manually inform VAM of the length of the
+      outgoing message. This is useful if you wish to pre-record the message
+      on another system. You do not need to use this function if you record
+      the message using the "Record a new outgoing message" function in the
+      main control panel. VAM needs to know the message length, so it will
+      be able to begin recording the caller etc. at the proper time.
+
+    Communication port
+      This selection presents you with a menu allowing you to select COM 1
+      - COM 4 to be used. NOTE that is you change this selection after VAM
+	  has started up, the change will not be effective until the next time
+	  VAM is loaded.
+
+  When you are finished configuration, press ESCAPE to return to the main
+  control panel.
+
+Exit Video Answering Machine
+
+  This option terminates VAM, and returns you to the DOS command prompt.

@@ -1,0 +1,85 @@
+MKBOOT: A Floppy Disk Bootstrap Installer
+
+MKBOOT is a utility which installs a custom boot loader onto a floppy
+disk, that loads and executes a named file. It is used to create non-dos
+disks which are bootable on a PC.
+
+Command syntax: MKBOOT <drive:> [filename [offset [segment]]]
+
+   <drive:>  - Floppy drive (A: or B:) to which boot loader is written
+   filename  - Name of file to bootstrap
+   offset    - Offset into segment where file loads (Default $0100)
+   segment   - Memory segment into which file is loaded (Default $0050)
+
+The booted file must be located in the ROOT directory of the floppy,
+and MUST be CONTIGUOUS on the disk (all sectors in sequential order).
+The best way to insure that a file is contiguous is to write it
+IMMEDIATLY after formatting the diskette. You can check a file to see
+if it is contiguous by specifying its name to the DOS CHKDSK command.
+
+    eg:  CHKDSK A:BOOT.COM
+
+Disk optimizing utilities such as "DEFRAG", "SPEED-DISK", "VOPT" or
+"ORG" can also be used to re-arrange your disk, and insure that the
+files are contiguous.
+
+The default offset of $0100 is correct for .COM files. Note that any
+file (.COM or otherwise) which is booted from a disk MUST NOT contain
+any DOS calls (INT 21 etc.) since DOS is not loaded, and any calls to
+it will crash the system. Most high-level languages call DOS at least
+once in their startup code, making them unsuitable for this type of
+work. You will have either write your program in assembler, or use
+development tools intended for stand-alone applications (Such as our
+DDS MICRO-C Developer Kits).
+
+The memory map at boot time looks like this:
+
+   0:0000-03FF  = Interrupt Vectors
+   0:0400-04FF  = BIOS Data area
+   0:0500-7BFF  = Unused - small boot programs load here (segment 50)
+   0:7C00-7DFF  = BOOT Loader code
+   0:7E00-7FFF  = BOOT Loader work buffer
+   0:8000-+     = Remainder of memory free (Segment 800 up)
+
+Booted programs requiring less than 30464 bytes of memory can be loaded
+at the default segment $0050, below the BOOT loader code. Larger programs
+should be loaded at segment $0800, above the boot loader.
+
+Since .COM files normally begin at offset $0100, MKBOOT uses this for its
+default load offset. This allows .COM program to be run from DOS as well
+as booted from disk. If you do not wish to do this, you can origin your
+program to $0000 at reclaim that 256 bytes.
+
+You could also set the boot segment to $0040, and use the $0100 offset,
+thereby using ALL lower memory, and retaining the ability to run the
+.COM program from DOS. Be aware however, that doing so will place the
+BIOS data area within the address space of your program, where it can
+be altered (on purpose or not).
+
+MKBOOT double-buffers the data as It reads, to insure that DMA will not
+occur across a 64K boundary (which doesn't work on a PC).
+
+MKBOOT does not format the disk, it simply installs the custom boot
+loader, and patches it to contain the specified filename, segment and
+offset.
+
+Examples:
+
+    FORMAT A:                  ; Format a floppy drive
+
+    COPY BOOTS.COM A:          ; Small DOS .COM file
+    MKBOOT A: BOOTS.COM        ; Loads at 0050:0100
+
+    COPY BOOTB.SYS A:          ; Big SYSTEM file
+    MKBOOT A: BOOTB.SYS 800 0  ; Loads at 0800:0000
+
+The WINDEMO.COM program included in this archive was created with the
+DDS 8086 Developers Kit, and does not call DOS except when it tries
+to terminate. You can make a "bootable" version of this program with:
+
+    FORMAT A:
+    COPY WINDEMO.COM A:
+	MKBOOT A: WINDEMO.COM
+
+This program will boot and run fine, however your computer may crash if
+you attempt to exit the program by pressing ESCAPE at the main menu.

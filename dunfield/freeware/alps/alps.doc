@@ -1,0 +1,644 @@
+
+                                 8080
+
+                 Assembly Language Programming System
+                            (A. L. P. S.)
+
+                              User Guide
+
+
+
+
+
+
+
+
+
+
+                     Copyright 1979 Dave Dunfield
+A.L.P.S. USERS GUIDE.                                            Page: 1
+
+
+ INTRODUCTION
+
+    ALPS is a system designed to aid in the creation, modification, and
+debugging of assembly language programs for the 8080  family  of  micro
+processors. there are three modules which have the following names  and
+functions:
+
+    ED80 (3K)   - Editor-Assembler,  creates,  modifies  and  assembles
+                  source files.
+
+    DIS80(2K)   - Disassembler, disassembles object code to  produce  a
+                  listing or a source file.
+
+    TEST(2.5k)  - Run time interactive program debugging.
+
+    The above modules are described in detail on the following pages.
+A.L.P.S. USERS GUIDE.                                            Page: 2
+
+
+                        EDITOR  ASSEMBLER
+
+   The editor uses no line numbers, it operates with the use of a  "CURRENT"
+line. This line is kept  track  of  by  an  internal  pointer,  and  can  be
+manipulated by editing commands. The line pointer itself can be  moved  with
+other commands.
+
+   Files used by the editor are of the following format:
+
+ Each line is stored exactly as it is  entered.  All  lines  are  stored  in
+proper sequence. Lines in the file are separated by the ASCII carrage-return
+character (0D-HEX). The end of the file is indicated  by  a  line  beginning
+with an (FF-hex) this form of file is  very  compact  requireing  less  disk
+space than other popular formats.
+
+ The assembler uses the currently loaded edit file for the source  file.  It
+produces object code directly in RAM There is provision for  generating  the
+code at a different address than that it is intended to run at. This  allows
+the programmer to assemble and save a program that is to  run  in  the  same
+location as the editor assembler or the source program.
+
+ Source to the assembler is typed in with only a single space separating the
+labels, instructions, operands and comments. The assembler will automaticaly
+format its output to produce a proper  looking  listing.  There  is  also  a
+command in the editor which will print the file in formatted form.
+   (By eliminating extra spaces, source file size is greatly reduced)
+
+NOTE: The assembler is free format, allowing any number of  blanks  to
+      separate the input, however to obtain a proper listing only  one
+      blank should be used. If an instruction has no operand, then use
+      two spaces before the   comment.  This  will  cause  the  output
+      formatter to skip the  operand  space  in  the  listing.  Blanks
+      contained within quotes are ignored by the output formatter.
+A.L.P.S. USERS GUIDE.                                            Page: 3
+
+
+USING THE EDITOR
+
+  The editor commands are given below. Any command can be entered when  the
+editor prompts with '.' (unless you are in input mode).
+  Files must be created with the dos.The editor initially expects the files
+to be type five (5) files. The file type  can  be  changed  with  the  '#T'
+command.   Filenames  may  be   followed  by  an  optional   drive  number,
+EG: 'LF FILE,2'. If the drive number is omitted, the default drive  number
+is used.
+  For all single letter commands, the editor will  ignore  any  non-numeric
+characters entered between the command and its  operand. If  a  mistake  is
+made while typing at any time, input characters can  be  deleted  with  the
+backspace or delete keys. The entire input  line  can  be  aborted  with  a
+CONTROL-C.
+  Any time the editor is printing, the output can be stopped by pressing  a
+line-feed, it can be resumed by pressing a  carrage-return. Output  can  be
+stopped altogether with a CONTROL-C.
+
+  NOTE: When output is stopped with CONTROL-C the current-line  pointer  is
+        reset to the top of the file. If you stop an assembly listing  with
+        CONTROL-C, the code will only be generated up to the higest address
+        shown in the listing.
+
+   When the editor is initially run, it clears the current file.  To  enter
+the editor without clearing the file, enter it at address=starting  address
+of ED80+5.
+
+            For North-Star system, use: 'JP 2A05'
+A.L.P.S. USERS GUIDE.                                            Page: 4
+
+
+                      EDITOR COMMANDS
+
+  The following notation will be used to indicate operands to commands.
+
+      <n>     -  Decimal number having the range 1 - 255.
+                 If ZERO (0) or ommited, defaults to 1.
+
+      <x>     -  Decimal number having the range 0 - 255.
+                 If ommited, defaults to ZERO (0).
+
+      <adr>   -  Hexidecimal value with the range 0 - FFFF.
+                 If more than four digits, last four used.
+
+
+                  LIST OF EDITOR COMMANDS
+
+B    - Begin:  Moves the current-line pointer to  the start of the file. The
+               message "TOF:" and the first line of the file are  displayed.
+               First line of the file is the current line.
+
+E    - End:    Moves the current-line pointer to the end of  the  file.  the
+               message "EOF:"  is  printed.  The  current-line  pointer  now
+               points to the END OF FILE marker following the last  line  in
+               the file.
+
+N<n> - Next:   Moves the current-line pointer down <n>  lines  and  displays
+               new current line.
+
+U<n> - Up:     Moves the current-line pointer up <n> lines and displays  new
+               current line.
+
+T<n> - Type:   Prints <n> lines, starting at current line.
+               New current line is last line printed.
+
+P<n> - Print:  Same as Type but gives formatted output.
+
+DE<n>- Delete: Deletes <n> lines, starting with current line.
+
+I<X> - Insert: Inserts line(s) directly ahead of current  line.  If  <x>  is
+               given, then <x> spaces  are  automatically  inserted  at  the
+               beginning of each line. (Control-c will cancel auto  tab  for
+               the current line) Enter blank line to exit.
+
+C<n> - Change: Displays "=" followed  by current  line. Prompts for input on
+               next line. First NON-BLANK  character  deletes  character  in
+               line above. Each occurence of  the  same  character,  deletes
+               another  character  from  the  current  line.   If  different
+               character is typed,  it  and  all  following  characters  are
+               inserted. If <n> is  given, cursor  is   automaticaly  spaced
+               over that many spaces. After edit, new line is displayed.
+A.L.P.S. USERS GUIDE.                                            Page: 5
+
+
+Q    - Quit:   Quits and returns to dos.
+
+LF <name>- LoadFile: Loads file "name" from disk. sets current line to first
+               line of new file. If file is not found prints "?FILE".
+
+SF <name>- SaveFile: Saves file as "name". If not found, prints "?FILE".  If
+               edit file is larger than file on disk, prints "?SIZE".
+                       (neither file is changed)
+
+GF <name>- GetFile: Gets the file "name" from disk, and appends  it  to  the
+               currently loaded file.
+
+       NOTE: FILENAMES for 'LF', 'SF' and 'GF' may be followed by an
+             optional disk-drive number. E.G: 'LF THISFILE,2'
+
+A <adr1> <adr2>- Assemble: Assembles source file. produces code  to  run  at
+               <ADR1> and places it at <ADR2>. If <ADR2> is not given,places
+               code at <ADR1>. Produces formatted listing.
+
+AD   - AsmDisp:  Displays the symbol table from the last assembly.
+
+AE <adr1> <adr2>- Assemble Error:  Assembles  source  file,  displays  lines
+               containing errors only.
+
+AS <addr>  -     Builds and displays the  symbol  table  for  the  currently
+                 loaded source file. No code is generated.
+
+*<n> - list:     Lists the directory on disk drive <n>, If <n>  is  ommited,
+                 uses default drive#. (chosen with the '#D' command).
+
+:S   - Saveline: Saves current-line pointer.
+A.L.P.S. USERS GUIDE.                                            Page: 6
+
+
+:R   - Restore:  Returns to previously saved current-line.
+                 NOTE: If text above saved line pointer is altered,
+                       ":R"  may  not  return  to the  correct line.
+                 (main use is to examine rest of file  and  quickly
+                  return to previous location)
+
+X <expr> -       Evaluates the expression <expr> and displays the result (in
+                 hex). <expr> can be any expression which is  acceptable  to
+                 the assembler (see assembler section) if  an  assembly  has
+                 been done, then labels from that assembly can be used.
+
+?    - Query:    Displays address (in hex) of the first byte  following  the
+                 END-OF-FILE at end of current file.  Also  prints  size  of
+                 file (also in hex.).
+
++<n> - Repeat:   Repeats the current line <n> times.
+
+/string- Locate: Moves to and displays first line following the current line
+                 containing the characters "string". if  string  not  found,
+                 moves to end of file and  prints  "EOF:".
+
+                  NOTE1:   Search starts on line following current  line.
+                           (this is so that repeated "/"   commands  will
+                            not keep finding same line.)
+                  NOTE2:   A "/" command can be repeated by typing  <DEL>
+                           or <BS> and <cr> when prompted for new command.
+
+$<cmd>- Setcmd:  Sets automatic command to "<cmd>". Pressing <ESC>  key  now
+                 has same effect as Typing "<cmd>" and carrage-return.
+
+                  NOTE:    To display current auto command, Type "$"
+                           followed by <ESC>.
+
+#    - Switch:   Sets editor defaults as followes:
+
+                 #O<x>   - Sets output device  to  <x>.
+                 #D<n>   - Sets default disk drive used by LF, SF, GF
+                           and * commands (<n> should be less then 4).
+                 #T<x>   - Sets file-type accepted by "LF"  "SF"  and
+                           "GF" commands to <x>.
+
+A.L.P.S. USERS GUIDE.                                            Page: 7
+
+
+USING THE ASSEMBLER
+
+  The  assembler  uses  Intel  standard  neumonics  for   the  instructions.
+Anything starting in column one of the source is  assumed  to  be  a  label.
+Otherwise input is free format. Labels may include any  characters  but  may
+not begin with 0-9,$,* or =. Labels may be of any  length.  Labels  are  not
+followed by colons.
+
+ Comments may follow any instruction,  and  need  not  be  preceded  by  any
+special character. Any line beginning with '*' is ignored by  the  assembler
+and printed exactly as is (unformatted) in the listing.
+
+  Hexadecimal constants are preceded with '$'.
+          E.G.:   ' LXI H,$0' - ' MVI A,$40'
+
+  Decimal constants are also allowed.
+          E.G.: ' MVI A,10' , ' LXI B,0'
+
+  The resister specifications  'SP' and 'PSW' can be abbreviated  to 'S' and
+'P' respectively.
+
+  All values are calculated by the assembler as sixteen bit quantities, When
+such a value is used in an instruction requiring only eight  bits  of  data,
+the LOWER eight bits are used. If the value is preceded by an  equals  sign,
+then the high and low bytes are  swapped, thereby  allowing  access  to  the
+upper eight bits of the result.
+
+     EG: 1000           LABEL  EQU  $0123
+         1000 FE 23            CPI  LABEL
+         1002 FE 01            CPI  =LABEL
+         1004 23 01            DW   LABEL
+         1006 01 23            DW   =LABEL
+
+  The symbol '*' is always  equal  to  the  total  value  calculated  in  an
+operand expression. (expressions are  always  evaluated from left to right).
+                 EG:  A   EQU  B+C+*
+    is the same as :  A   EQU  B+C+B+C
+
+  If a '*' is used as the first element in an expression, its value is equal
+to the address of the instruction on that line. (or next line in the case of
+an 'EQU' stmt.)
+      EG:   1000 C3 03 10     JMP *+3
+            1003 00           NOP      JUMPS TO HERE.
+
+  Elements in an expression can  be  added(+),  subtracted(-),  anded(&)  or
+ored(!) together. All expression processing is done from left to right, with
+NO operator precedence.
+      EG:   1000           LABEL EQU *+$101
+            1000 C3 12 10        JMP LABLE&$FFFE+$12
+A.L.P.S. USERS GUIDE.                                            Page: 8
+
+
+ASSEMBLER DIRECTIVES
+
+  EQU  -  SYNTAX: <LABEL> EQU <EXPRESSION>
+          Causes the label <LABEL> to be assigned the value of  <EXPRESSION>.
+          Other labels may appear in the  expression,  BUT  they  must  occur
+          BEFORE this 'EQU' statement.
+
+     NOTE: - Any error messages  occuring on an 'EQU' statement will also be
+             printed at the top of the listing.
+    CAUTION: If a forward reference occurs in an  'EQU'  statement  it  will
+             cause a 'symbol not found' error-message  at  the  top  of  the
+             listing ONLY the statement in the listing will not be flagged.
+
+  DB   -  SYNTAX:  DB <EXPRESSION>
+          Causes a single byte to be defined with the value of expression.
+            EG:    DB   65
+                   DB   $41
+                   DB   'A'
+                   DB   LABEL
+                   DB   =LABEL
+
+  DW   -  SYNTAX:  DW <EXPRESSION>
+          Causes a two byte constant to be generated in the object code.
+        NOTE: The generated code is of the form  (low-order-byte)  first
+              followed by the (high-order-byte). ('='  can  be  used  to
+              swap the bytes to the form (high) followed by (low).
+
+  STR  -  SYNTAX:  STR 'string'
+          Generates the ASCII code for string.
+
+         NOTE: any character may be used as the delimiters, but the quote
+               (') is best because the output processor won't  format  on
+               blanks contained within quotes. But, if the string  is  to
+               contain quotes then you can use another delimiter.
+
+  END   -   SYNTAX:   END
+            Indicates end of assembly. (not required with this assembler)
+A.L.P.S. USERS GUIDE.                                            Page: 9
+
+
+ASSEMBLER ERROR MESSAGES
+
+   The error messages are printed on the line preceding the line in which the
+error occured. Errors occuring in an 'EQU' statment are also displayed at the
+beginning of the source listing. (this is so that  the  case  of  an  invalid
+forward reference in an 'EQU' can be detected).
+
+    ERROR MESSAGE    -----     DESCRIPTION
+
+    ?DUP: <name>            You have attempted to define Sumbol '<name>'
+                            more than once.
+
+    ?FUL                    Symbol table has overflowed.
+
+    ?INS                    Instruction is not a valid  8080  instrucion
+                            or assembler directive.
+
+    ?REG                    A Register used on this line is not a  valid
+                            8080 register.
+
+    ?VAL                    Decimal or Hex. value on this line is not of
+                            valid syntax.
+
+    ?STR                    String value on this line is  not  delimited
+                            properly.
+
+    ?SYM                    Symbol referenced on this line is not defined.
+A.L.P.S. USERS GUIDE.                                            Page: 10
+
+
+DISASSEMBLER
+
+   The disassembler will disassemble code located anywhere in RAM and produce
+a listing or a text file.  In  the  case  of  a  file   being  produced,  the
+disassembler will generate labels as operands on all instructions which  take
+two byte operands (EG: 'JMP','CALL','LXI'). If any of these labels  point  to
+addresses within  the  disassembly, the  disassembler  will generate the same
+label  at  that  address  (provided  that  it  is  at  the  beginning  of  an
+instruction). EQU statments will be generated for any labels  which  are  not
+resolved during the disassembly. All generated  labels  are  five  characters
+long consisting of the character 'H' followed by the actual address (in hex.)
+EG: 'H012F'.
+
+    Once the file is generated,  type  'Q'  to  exit  the  disassembler  then
+'LF ED80 2A00' to load the editor without running it. To enter the editor and
+preserve the generated file, type 'JP 2A05'
+
+  NOTE: Due to the way the disassembler keeps track of its labels,  an  'EQU'
+statement will not be generated for the label  'H0000'. If this label  occurs
+in any disassembly which is not  at  address  0,  the  user  should  add  the
+following line to the generated file:
+
+                   ==> H0000 EQU 0 <==
+
+   In the listing mode, the disassembler produces a listing of the  following
+format:
+
+      ADDR B1 B2 B3    ASC     INS  OPERAND
+
+ where: ADDR     is the address of the instruction in hex.
+
+        B1,B2,B3 are the instruction and operand bytes.
+
+        ASC      is a three character field containing the ASCII
+                 representation of B1, B2 and B3.
+
+        INS      is the instruction.
+
+        OPERAND  is any operands to the instruction.
+
+ NOTE: the listing may be controlled with the LINE-FEED, CARRAGE-RETURN
+       and CONTROL-C keys as with the editor.
+A.L.P.S. USERS GUIDE.                                            Page: 11
+
+
+DISASSEMBLER COMMANDS.
+
+  M <addr>        - Displays memory in hex and ASCII starting from  address
+                    <addr>. Output can can be stopped or aborted with LF,CR
+                    and CTRL-C.
+
+  D <addr> <dev>  - Displays memory as a listing. If <dev> is  given,prints
+                    on output device <dev>. (<dev> must be given in hex.)
+
+  F <addr1> <addr2> <addr3> -
+                    Disassembles code between <addr1> and <addr2>.  Creates
+                    a RAM file which can be  edited  with  the  editor  and
+                    reassembled. If <addr3> is given  , assumes  that  code
+                    starting at <addr1>  should  actually  be  starting  at
+                    <addr3>. (generates an offset for calculating labels)
+
+  Q               - Quits and returns to DOS.
+A.L.P.S. USERS GUIDE.                                            Page: 12
+
+
+INTERACTIVE DEBUGGER (TEST)
+
+  TEST is an interactive debugger,  which allows you to see and control the
+execution of your program. Registers and memory may be examined/changed  as
+well. TEST allowes you to set breakpoints in your program,  such  that  you
+will be given control, whenever the program reaches a  breakpoint, and  can
+examine or change things before proceding. TEST also allows  you  to  TRACE
+a program, so that you can see each instruction and register contents as it
+executes. TEST is totally transparent to the program being  tested,  unless
+timeing loops are interrupted with BREAKPOINTS or TRACE. When a  breakpoint
+is encountered, or an instruction is traced, TEST uses one stack  entry  on
+the user program stack. Since this consists of a PUSH and a POP, it  should
+not affect any information stacked by the user program. However, you should
+be aware of this, in case you are examining the stack, or your program trys
+to reclaim data already popped from the stack. (It is very poor practice,to
+write programs which depend on the stack contents below the stack pointer).
+  When a breakpoint is encountered, the message '**BREAKPOINT n' is printed
+where n is the number of the breakpoint (0-7). If TRACE is OFF, The command
+mode is entered (If 'A' is ON then registers are displayed also). If  TRACE
+is ON, then no other action is taken (You can still enter command mode with
+CONTROL-C). If for any reason a 'RST 1' ($CF) instruction is encountered in
+the user program, command mode will be entered with no 'BREAKPOINT' message.
+A.L.P.S. USERS GUIDE.                                            Page: 13
+
+
+COMMANDS:
+
+  Operands to commands are as followes:
+  <addr>         Hexidecimal address, range 0-FFFF.
+  <val>          Hexidecimal value, range 0-FFFF.
+  <rp>           Register pair, BC, DE, HL, SP, PC, PSW.
+  b#             A breakpoint number, range 0-7.
+  [  ]           Delimits optional operands.
+
+  The following commands are recognized by TEST, and may be  entered  when-
+ever TEST is in COMMAND MODE. Test indicates that it is in command mode  by
+prompting with 'C> '.
+
+ A  ON/OFF       This switch turns on or off the automatic register display
+                 which occures whenever a breakpoint is encountered  or  an
+                 instruction is stepped  in  trace  mode  (see below).  The
+                 default  value for 'A' is ON.
+
+ B  [b#] [addr]  Sets breakpoint [b#] at address [addr].  There  are  eight
+                 breakpoints(0-7). Once set, a breakpoint remains in effect
+                 until it is removed. A breakpoint  is removed  by  setting
+                 it to ZERO (0). Breakpoints are completely invisible,  and
+                 may be changed without adverse affects. If the 'B' command
+                 is issued with no operands, the current  breakpoints,  and
+                 the current TRACE setting (see below) will be displayed. A
+                 displayed address of '****' indicates that a breakpoint is
+                 not set.
+
+ C <rp> <val>    Changes the contents of  stored register pair <rp> to  the
+                 value <val>. Valid pairs are BC, DE, HL, SP, PC, and PSW.
+
+ D <addr>        Displays memory in assembly listing  format,  starting  at
+                 <addr>, continuing until  a CONTROL-C is entered.   Output
+                 can be temporarily stopped with  the  LINE-FEED  key,  and
+                 restarted with the RETURN key. The output is displayed  in
+                 the following form:  '<addr> <opcodes>   <asc>   <instr>'
+                 where, <addr> is the current memory location, <opcodes> is
+                 the instruction opcodes (1,2 or 3 bytes), <asc>  is  ASCII
+                 representation of <opcodes> (all non-displayable chars are
+                 displayed  as  blanks),   and  <instr>  is  the  assembler
+                 instruction and operands which <opcodes> represents.
+
+ E <addr>        Edits memory, starting at <addr>. The  address ,  and  its 
+                 contents are displayed, followed by a '-' prompt. Entering
+                 a hex. value, will cause the contents to  be  replaced  by
+                 the new value, and skips to the next sequential address. A
+                 carriage-return, will cause a skip  to  the  next address,
+                 without changeing the current contents. A '-' will back up 
+                 one address, and a 'Q' or CONTROL-C will exit.
+
+ G [addr]        Loads the stored registers, and begins  execution  at  the
+                 address in the stored PC. If [addr]  is  given,  execution 
+                 will begin there instead. A simple 'G' with no operands,is
+                 all that is needed to resume execution after a  breakpoint
+                 interrupt.
+A.L.P.S. USERS GUIDE.                                            Page: 14
+
+
+ M <addr>        Displays memory  in  HEX/ASCII  dump  format  starting  at
+                 <addr>. CONTROL-C, LINE-FEED, and CARRIAGE-RETURN  can  be
+                 used to control the listing, same is in the 'D' command.
+
+ Q               Quits the debugger and returns to the operating system.
+
+ R               Displays the contents of the stored  registers.  Registers
+                 are stored whenever a breakpoint is encountered,  and  are
+                 reloaded when the 'G' command is issued.
+
+ S ON/OFF        Controls the execution of subroutine calls when  in  trace
+                 mode (see below). When 'S' is set ON, subroutines will  be
+                 be traced. When set OFF, subroutine calls are skipped, and
+                 trace will resume at the next  instruction  following  the
+                 CALL (After the subroutine executes). WARNING, DO NOT  SET
+                 BREAKPOINTS IN THE SUBROUTINES WHEN 'S' IS SET  OFF.  When
+                 'S' is set off, TEST considers the subroutine (and all  of
+                 it's embeded instructions) to be  one  instruction.  If  a
+                 breakpoint is encountered in the  subroutine,  TRACE  will
+                 lose the address to begin at following the subroutine call.
+                 This will cause unpredictable action when  the  subroutine
+                 returns. 'S' may be turned on and off at any time with  no
+                 adverse effects.  The default value for 'S' is ON.
+
+ T ON/OFF        Turns TRACE mode on and off. When in trace mode, when  the
+                 GO command is issued, instead of beginning execution, TEST
+                 will first prompt with 'T>'. Entering a space  (' ')  will
+                 execute one instruction, and return to  the  'T>'  prompt. 
+                 An 'R' will display the processor registers. (If  the  'A'
+                 switch is set ON, they will be displayed  following  every
+                 instruction that is traced). A CONTROL-C  will  return  to
+                 TEST command mode (Trace remains on, and will resume  with
+                 the next 'G' command). Trace may be turned on and  off  at
+                 any time in a program, with no adverse  effects.  (If  you
+                 turn TRACE off, you will have to hit a breakpoint  to  get
+                 you back to command mode before you can  turn  TRACE  on).
+                 When a breakpointed  instruction  is  encountered  by  the
+                 tracer, The message '**BREAKPOINT n' will be issued at the
+                 end of the last executed instruction, indicating that  the
+                 breakpointed instruction occurs NEXT. Pressing  the  SPACE
+                 BAR would then execute the breakpointed  instruction.  The
+                 default value for 'T' is OFF.
+A.L.P.S. USERS GUIDE.                                            Page: 15
+
+
+EDITOR COMMAND SUMMARY
+
+  A <adr1> <adr2>  - Assemble source code.
+
+  AD               - Display symbol table from last Assembly.
+
+  AE <adr1> <adr2> - Assemble displaying Errors only.
+
+  AS <addr>        - Build and display symbol table.
+
+  B                - go to Beginning of file.
+
+  C<n>             - Change current line
+
+  DE<n>            - Delete <n> lines.
+
+  E                - go to End of file.
+
+  GF <file>        - Get and append file <file>.
+
+  I<n>             - Insert lines.
+
+  LF <file>        - Load file <file>.
+
+  N<n>             - go to <n>th Next line.
+
+  P<n>             - Print <n> lines formatted.
+
+  Q                - Quit.
+
+  SF <file>        - Save file as <file>.
+
+  T<n>             - Type <n> lines.
+
+  U<n>             - move Up <n> lines.
+
+  X <expr>         - Evaluate expression.
+
+  /<string>        - locates <string>.
+
+  +<n>             - repeats current line.
+
+  *                - display disk directory.
+
+  ?                - display file size.
+
+  :S + :R          - Save and Restore line pointer.
+
+  #                - Set editor switches
+
+  $<cmd>           - set automatic command string.
+
+  <ESC>            - insert and execute automatic cmd.
+A.L.P.S. USERS GUIDE.                                            Page: 16
+
+
+DISASSEMBLER COMMAND SUMMARY
+
+  D <addr> <dev>   - Display memory as listing.
+
+  F <a1> <a2> <a3> - generates a File as output.
+
+  M <addr>         - displays Memory in dump format.
+
+  Q                - Quit.
+
+
+TEST COMMAND SUMMARY
+
+  A ON/OFF         - Enables/Disables automatic register display.
+
+  B <b#> <addr>    - Sets/Removes/Displays breakpoints.
+
+  C <rp> <value>   - Changes the value of a saved register pair.
+
+  D <addr>         - Displays memory in disassembly format.
+
+  E <addr>         - Edits memory, subcommands= <byte>,-,Q or CTRL-C
+
+  G <addr>         - Startes execution at <addr> or resumes following
+                     a breakpoint.
+
+  M <addr>         - Displays memory in dump format.
+
+  Q                - Quits, returns to DOS.
+
+  R                - Displays saved registers.
+
+  S ON/OFF         - Enables/Disables subroutine traceing.
+
+  T ON/OFF         - Enables/Disables TRACE mode.

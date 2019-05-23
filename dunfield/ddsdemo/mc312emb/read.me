@@ -1,0 +1,155 @@
+NOTE: This archive contains a subdirectory (LIBCF). If you can see any *.LIB
+or *.ASM files in the main directory, the archive was not unpacked correctly,
+and you should delete everything and unpack it again in a mode which creates
+subdirectories (With PKUNZIP, use the '-d' option). Alternatively, copy the
+*.LIB and *.ASM into a subdirectory called 'LIBCF', and remove them from the
+main directory.
+
+               *** MICRO-C Embedded Controller Test-drive ***
+
+This archive contains a demonstration "MICRO-C "Developers Kit", which
+contains everything you need to write and debug 'C' and Assembly language
+code for an imaginary microprocessor that I've dubbed the C-FLEA. This
+processor is designed with a minimal instruction set which provides basic
+functions necessary for code generation by the compiler.
+
+This archive should enable you to get a good understanding of how MICRO-C
+and its companion programs are used in embedded development. You can write,
+compile, execute and debug programs, just as if you were developing for a
+real embedded control system.
+
+Before you begin, you must set the environment variable 'MCDIR' to point to
+the directory where the software is installed. Consult the file MICROC.DOC
+for details on setting up and using the compiler. After you have compiled your
+program (See CCF command), you can run it using the included C-FLEA simulator
+(see EMCF.DOC).
+
+Here are the steps required to compile and run the WALK.C demo program
+included in the archive:
+
+    SET MCDIR=C:\MC     (Use directory where you installed software)
+    CCF WALK
+    EMCF WALK.HEX
+    (Once simulator comes up, type 'G' to start execution)
+
+The C-FLEA virtual machine is somewhat unusual to program at the assembly
+language level, however if you are interested in trying out the ASMCF cross
+assembler (Or INLINE assembly code in your 'C' programs), see the ASMCF.DOC
+file for details on using the assembler. A brief description of the C-FLEA
+instruction set can be found in the file CFLEA.DOC. You can also look at the
+*.ASM files in the LIBCF subdirectory for examples of assembly programming.
+
+NOTE: The ".C" example source files use TAB stops at 4 character intervals.
+If you type them out, or load them under an editor other than DDSIDE
+(supplied), these files may appear incorrectly formatted. The ".ASM" files
+use TAB stops at 8 character intervals. To view these files with DDSIDE, use
+the command '8h' from within the editor.
+
+If you cannot configure your editor to properly display the files, execute
+the command "REMTAB".  This will remove all TAB characters from the ".C",
+".H" and ".ASM" files, and replace them with the correct number of spaces
+to retain formatting.
+
+*** The following files should be present in this archive:
+
+    READ.ME     - This file
+    CATALOG     - DDS Product Catalog
+    MICROC.DOC  - MICRO-C Compiler Documentation
+    DDSIDE.DOC  - Integrated Editor Documentation
+    CINTRO.DOC  - Introduction to 'C' document
+    ASMCF.DOC   - Cross assembler documentation
+    EMCF.DOC    - Simulator documentation
+    CFLEA.DOC   - C-FLEA virtual processor documentation
+    CCF.COM     - Compile Command
+    MCP.COM     - MICRO-C pre-processor
+    MCCCF.COM   - MICRO-C compiler for C-FLEA
+    MCOCF.COM   - MICRO-C optimizer for C-FLEA
+    SLINK.COM   - Source Linker
+    ASMCF.COM   - C-FLEA cross assembler
+    EMCF.COM    - C-FLEA simulator
+    DDSIDE.COM  - Integrated Development Editor
+    DDSIDE.HLP  - Help file for DDSIDE
+    CFLEA.IDE   - Configuration file for DDSIDE
+    REMTAB.COM  - Removes TABS from example source files
+    LIBCF\*.*   - C-FLEA startup code and run time library
+    CFLEA.H     - General I/O definition file
+    *.C         - Example programs
+
+*** Caveats, notes and limitations of the demo system:
+
+The demonstration tools have the following artificially imposed limits
+(to discourage misuse):
+
+    C Compiler:  250 source lines, 50 concurrent symbol definitions.
+    Assembler : 3000 source lines, 5000 bytes of symbol table space.
+    Simulator : No hardware interface, Port option, or serial redirection,
+                "simple" breakpoints only.
+    DDSIDE    : No target connect function.
+
+The C-FLEA virtual processor has no simple method of dealing with signed
+8 bit quantities. Therefore, 'char' variables and expressions are always
+calculated as positive quantities. The "unsigned" modifier only controls
+how the compiler views that positive value (ie: 'char' = signed value in
+the range of 0-255,  'unsigned char' = unsigned value in the range of 0-
+255).   This affects how the compiler promotes other objects involved in
+an expression. For example:
+
+    int a = -1;   char b = 255;   unsigned char c = 255;
+
+    (a < b) == TRUE     (signed comparison:     -1 < 255    )
+    (a < c) == FALSE    (unsigned comparison:   65535 > 255 )
+
+Since the C-FLEA does not have a "carry flag", more work has to be done
+to perform the multi-precision shift/add/subtract  operations which are
+used heavily by the LONGMATH function.   This causes these functions to
+be somewhat slower than on most "real" microprocessors.
+
+The following Developers Kit utilities and documentation have not been
+included in the DEMO archive:
+
+    INTxx.H     - Macro(s) for defining interrupt handlers *
+    REGxx.H     - Internal "function" register definitions *
+    MONxx       - Resident Monitor/Debugger **
+    LAPTALK     - Communication software (For communication with MONxx)
+ * The C-FLEA has no interrupt capability or special function registers.
+** MONxx functionality is provided by the included C-FLEA simulator.
+   Standard developers kits do NOT include a simulator.
+
+The following utilities have not been included in the DEMO archive, but
+are described in the documentation:
+
+    SLIB        - Source librarian
+    SINDEX      - Source library indexer
+    SCONVERT    - Source library convertor
+    SRENUM      - Source library renumberer
+    MAKE        - Automated build utility
+    TOUCH       - Utility used with MAKE
+    MACRO       - Assembly macro processor
+    HEXFMT      - Hex file manipulation utility
+
+*** Use and Distribution License conditions:
+
+All material in this archive is the Copyrighted property of Dave Dunfield,
+and All rights to it are reserved.
+
+Permission is granted to use this software and documentation for educational
+and evaluation purposes only.  You may use the compiler and/or assembler ONLY
+to generate code to be executed by the included EMCF simulator, any other use
+of the software is prohibited.
+
+Permission is granted to copy and distribute this archive via electronic
+"Bulletin Board Systems" (BBS), and disk copying services, subject to the
+following restrictions:
+
+- The archive must be presented in its original form, without modification.
+
+- The archive may not be distributed as part of or in assocation with any
+  other product.
+
+- Only one version of this archive may be offered at any given time, IE: if
+  you post a new version of one of my shareware products, any older versions
+  of that product, which were previously available must be removed and no
+  longer offered for distribution.
+
+- I reserve the right to request of anyone distributing this archive that
+  they upgrade to the current release (which I will provide).

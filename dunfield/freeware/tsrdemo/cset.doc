@@ -1,0 +1,16 @@
+IBM PC Character set display....
+
+Use 'cset' with no operands for NON-TSR operation.
+
+If HOTKEYS are specified on the command line, CSET will install
+itself as a TSR (Ram-Resident) program, which can be invoked at
+any time by pressing the HOTKEYS. Available HOTKEYS are:
+        L - Left SHIFT
+        R - Right SHIFT
+        A - ALT
+        C - CONTROL
+        S - SysRq (Caution: some systems may not like this one)
+
+    eg: CSET LR (Install with LEFT+RIGHT SHIFT for hotkeys)
+
+Press <escape> to exit

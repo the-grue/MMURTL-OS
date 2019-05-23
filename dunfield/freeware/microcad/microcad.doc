@@ -1,0 +1,405 @@
+MICROCAD is a very small drawing program (less than 12k!)
+
+It has commands for drawing/erasing/moving/copying such things as lines,
+boxes, circles, arcs, graphical text and other drawings as "group" objects.
+It also features a "display" mode, where it can be used as a simple viewer,
+and includes an MCPRINT utility to print your drawings.
+
+This is not a serious drafting package, however the complete MICRO-C source
+code to MICROCAD is available free of charge from our BBS, and should prove
+quite useful to anyone wishing to experiment with a drawing editor.
+
+In its current form, MICROCAD requires a mouse, a VGA display (it works
+at 640x480), and either an HP LASERJET or EPSON DOT-MATRIX printer. It
+should be fairly easy to modify it for compatibility with other devices.
+
+
+The MICROCAD command:
+--------------------
+
+The MICROCAD command has the following syntax:
+
+   MICROCAD [drawing file] [F=font file] [/Display]
+
+   [drawing file] is the name of a file containing a drawing that you
+wish to edit. The extension '.DWG' is assumed. If you do not specify a
+file name, MICROCAD assumes its default name MICROCAD.DWG. This default
+drawing file normally contains a blank drawing, and is used only to
+establish the default settings for the "S)etup" values.
+
+   [font file] is the name of a file containing a character set font that
+will be used to display any text in the drawing file. If you do not specify
+a font file, The default MICROCAD.FNT is assumed.
+
+   [/Display] causes MICROCAD to act as a viewer. The mouse is not
+activated, the grid is disabled (even if it is turned on in the drawing),
+and the drawing is displayed. Pressing any key will terminate the MICROCAD
+at this point.
+
+Mouse:
+-----
+
+MICROCAD uses only the LEFT and RIGHT mouse buttons, allowing it to be
+used with either a two or three button pointing device.
+
+When sitting at the top command level (no command text visible at the
+top of the screen), the mouse buttons function as follows:
+
+   LEFT   - Brings up the command menu at the top of the screen. Pressing
+            the key corrsponding to a command will active that command.
+
+   RIGHT  - Activates the last command that you executed. This is a useful
+            way to perform multiple operations, such as drawing multiple
+            box's etc.
+
+Unless noted otherwise, the mouse buttons behave as follows once a command
+has been activated:
+
+   LEFT   - Performs an operation for which you are being prompted at the
+            top of the screen. Some commands may have several locations that
+            have to be selected. For each location, you will receive a
+            prompt at the top of the screen. Simply move the mouse pointer
+            to the desired location, and press the LEFT button.
+
+   RIGHT  - Cancels the operation. In most cases this will return you directly
+            to the top command level (no command active). In some cases, this
+            will cancel a sub-function, and permit you to continue with the
+            command.
+
+Main COMMANDS:
+-------------
+
+The following commands are available from within MICROCAD at the top
+command level.
+
+A)rc
+
+Prompts you for a "center" point, a starting point, and an ending point.
+Draws an arc clockwise from the starting point to the ending point, which
+would be a portion of a circle centered about the center point.
+
+B)ox
+
+This command prompts you to select two corners, and after the second
+one is selected, MICROCAD will draw a BOX with diagonal corners on those
+points.
+
+C)ircle
+
+Prompts you to select a center point, and then a second point. MICROCAD
+will draw a circle about the center point, which includes the second point
+in its circumference.
+
+D)up
+
+Prompts you to select an object, and then for a new insertion point. The
+object is copied to the new point. Most useful for duplicating a "group"
+that you have included from another file, or insuring that you get a circle
+of exactly the same size etc. Duplicating an object takes only 7 bytes in
+the drawing file, no matter how large or complicated the object is.
+
+See the E)rase command below for details on selecting an object.
+
+E)rase
+
+Prompts you to select an object. To select an object, you must position
+the cursor over the BASE POINT of that object. In general, the base point
+will be the first point that you selected when defining the object.
+
+To make it easier for you, MICROCAD constantly watches the cursor
+position when this command is executed, and selects any object who's
+base point comes in contact with the cursor. Once an object is selected,
+MICROCAD indicates so, by temporarily removing it from the screen. Press
+the LEFT button to accept this, and permanently erase the object.
+
+If you accidently select an object that you don't want to erase, just
+move the cursor away from it, and press the RIGHT button. MICROCAD will
+restore it to the screen, and continue to search for other objects.
+
+If more than one object has its base point at the same location, MICROCAD
+will select the one which was defined first. You may accept this with the
+LEFT button, or press the RIGHT button to switch to the next oldest one.
+If you wish to cancel the selection in this case, you must keep pressing the
+RIGHT button until all objects at that location have been skipped.
+
+You may use the S)etup / B)ase-markers command to cause the base points
+of all objects in the drawing to be made visible.
+
+F)unc
+
+This command brings up menu of misc. functions:
+
+   F)ont
+
+   Prompts you for a new character font file, and if given, loads it, and
+   re-draws the drawing, using the new font.
+
+   I)nsert
+
+   Prompts you for a drawing filename, and then an insertion point. Inserts
+   the contents of that drawing into the current drawing as a single object.
+   The base point of the new object is the upper left corner of an invisible
+   box, just large enough to include all object base points in the included
+   drawing. This point will be shown by the cursor while selecting the new
+   object location.
+
+   If you wish to insert the same drawing several times, it takes much less
+   space in the drawing file if you insert it once, and then use the duplicate
+   function to create the other instances.
+
+   L)oad
+
+   Prompts for a filename, and loads a drawing from that file. Any unsaved
+   changes to the current drawing are lost.
+
+   Q)uit
+
+   Terminates MICROCAD.
+
+   S)ave
+
+   Prompts for a filename, and saves the current drawing to that file.
+
+L)ine
+
+Prompts for a starting point, and then a series of end points. Each
+time you select a new point, a line is drawn to it from the previous point.
+Press the RIGHT button to stop drawing lines.
+
+M)ove
+
+Prompts you to select an object, and then for its new base point.
+The object is then repositioned in the drawing.
+
+See the 'E)rase' command for details on selecting an object.
+
+R)edraw
+
+Redisplays the drawing. This is useful to see any objects which are
+overwritten by the text line at the top of the screen, and to "fix"
+any breaks in lines, or missing grid markers causes by erasing of
+overlaid objects.
+
+S)etup
+
+Brings up a menu of setup subcommands:
+
+   B)ase-markers
+
+   This command toggles ON/OFF the display of base points. See E)rase command
+   for a description of base points. When ON, the base point for each object
+   in the drawing will appear surrounded by a tiny box.
+
+   C)urser-base
+
+   Prompts you to select a base point for the cursor. After you select one,
+   the cursor position shown in the upper right corner of the screen, will
+   be relative to this position.
+
+   G)rid
+
+   Prompts for the spacing (in pixels) of the grid markers. Entering a
+   blank line, or a value of zero turns off grid markers. Grid markers
+   are simply "dots" placed at regular intervals, which you can use
+   as a reference for aligning objects etc.
+
+   S)nap
+
+   Prompt for the spacing of "snap stops". When snap is enabled, the
+   cursor is forced to "snap" into a grid of evenly placed stops. This
+   makes it MUCH easier to align objects that you create. The "snap" grid
+   should normally be set to some even fraction of the "G)rid" markers,
+   although this is not enforced. Entering a blank line, or a value of
+   zero turns off "snap", allowing the cursor to roam free.
+
+   T)ext-scale
+
+   This defines the size of text characters. Only affects text created
+   after this command is used, allowing you to have several different
+   sizes of text in the same drawing.
+
+   The character set fonts used by MICROCAD are built on a matrix which
+   is 16 pixels wide, by 24 pixels high. A scale value of 100 indicates
+   that this original size will be used. A value of 50 would result in
+   characters half as high and wide, while 200 would double the height
+   and width.
+
+NOTE: All of the above settings are saved in the drawing file, and will
+therefore be restored when you subsequently edit the drawing.
+
+T)ext
+
+Inserts a text string into the drawing. You will be prompted for the
+string to be inserted, and then for the position in the drawing.
+
+U)ndo
+
+Erases the last object which was created. Undo may be repeated, and each
+time the youngest living object is removed. NOTE that U)ndo cannot reverse
+operations like M)ove or E)rase.
+
+MCPRINT Utility:
+---------------
+
+MICROCAD now includes MCPRINT.COM, which will print your drawing on an
+HP LaserJet series or EPSON dot-matrix printer. MCPRINT works by building
+a raster bitmap from your drawing, and then sending it to the printer. It
+should be fairly easy to modify MCPRINT to work with other printers.
+
+The syntax of the MCPRINT command is:
+
+   MCPRINT <drawing file> <printer type> [F=font file] [D=device]
+
+   <drawing file> is the name of a file containing the drawing that you
+wish to print. The extension '.DWG' is assumed.
+
+   <printer type> indicates which kind of printer you have. It should be
+either LASERJET or EPSON.
+
+   [font file] is the name of a file containing a character set font that
+will be used to display any text in the drawing file. If you do not specify
+a font file, The default MICROCAD.FNT is assumed.
+
+   [device] is the DOS device to which the printer output will be written.
+If you do not specify one, "LPT1" is assumed. You may also use this option
+to direct the output to a file.
+
+Misc. Notes:
+-----------
+
+MICROCAD does all of its internal calculations using 16 bit arithmetic.
+Bacause of this, circles or arcs having a very large radius may not display
+correctly. This is because these objects require manipulation of squares of
+values, which may overflow 16 bits.
+
+The GRID markers are not recorded as part of the object, and will "disappear"
+if you M)ove, E)rase or U)ndo something that was on top of them. They will be
+restored any time the screen is redrawn.
+
+Character Fonts:
+---------------
+
+The following characters font files are included with MICROCAD:
+
+   MICROCAD.FNT - This is the default MICROCAD font. It is a reasonable
+                  quality font, which scales fairly well.
+   HIGHRES.FNT  - This is a higher quality font, however it does not
+                  scale to small sizes quite as well as MICROCAD.FNT.
+   MATRIX.FNT   - A low (8x8) resolution font which looks like the
+                  output from a dot matrix printer.
+   THINLINE.FNT - A thin spidery font.
+
+MICROCAD also includes a "font editor" (FE.COM) which allows you to create
+and edit your own font files. The program is fairly self explainatory, just
+run it and specify the name of the font file as an argument.
+
+Drawing File Format:
+-------------------
+
+All entries in the drawing files produced by MICROCAD consist of 8 bit bytes
+and 16 bit words. Word values are stored with the most significant byte first.
+
+The first few bytes of the drawing file contain the "S)etup" values:
+
+   Word = Grid spacing (0 = disable)
+   Word = Snap spacing (0 = disable)
+   Word = Text scale (100 = 1:1)
+   Word = Cursor base X position
+   Word = Cursor base Y position
+   Byte = Basepoint display: 0 = ON, 1=OFF
+
+Following the settings, the file will contain zero or more "objects",
+representing lines, circles etc. The form of each type of object is:
+
+END:    Byte = 0x00
+        This is not required by MICROCAD, and is not normally produced by
+        the program, however, an object consisting of a single 0x00 byte
+        causes MICROCAD to stop drawing. This has two effects:
+         1- If you are going to transmit the file using a protocol such as
+            XMODEM which adds garbage to the end of the file, you could first
+            append an END object to avoid "Corrupt drawing file".
+         2- Once the END object is encountered, further additions to the
+            drawing although recorded, are not displayed when the file is
+            redrawn or reloaded.
+
+LINE:   Byte = 0x01
+        Word = Absolute X position of first point
+        Word = Absolute Y position of first point
+        Word = Relative X position of second point
+        Word = Relative Y position of second point
+
+BOX:    Byte = 0x02
+        Word = Absolute X position of first point
+        Word = Absolute Y position of first point
+        Word = Relative X position of second point
+        Word = Relative Y position of second point
+
+CIRCLE: Byte = 0x03
+        Word = Absolute X position of center point
+        Word = Absolute Y position of center point
+        Word = Radius of circle
+
+TEXT:   Byte = 0x04
+        Word = Absolute X position of text
+        Word = Absolute Y position of text
+        Word = Scale of text (100 = 1:1 = 16x24)
+        Bytes= Text string
+        Byte = 0 (zero termination)
+
+ARC:    Byte = 0x05
+        Word = Absolute X position of center point
+        Word = Absolute Y position of center point
+        Word = Radius of arc
+        Word = Angle (0-255) to starting point.
+        Word = Angle (0-255) to ending point.
+        Angle:  0 
+                |
+          192 --+-- 64
+                |
+               128
+
+GROUP:  Byte = 0x06
+        Word = Abolute X position of group
+        Word = Abolute Y position of group
+        Word = Size of following objects (in bytes)
+        ...    Zero of more objects follow...
+               X/Y positions are relative to group start.
+
+ACOPY:  Byte = 0x07
+        Word = Absolute X position of copy
+        Word = Absolute Y position of copy
+        Word = Byte offset of copied object from first object in file
+
+RCOPY:  Byte = 0x08
+        Word = Absolute X position of copy
+        Word = Absolute Y position of copy
+        Word = Byte offset of copied object from beginning of this object
+
+The absolute copy is used whenever an object is duplicated via the D)up
+function in MICROCAD. This form is more easy to manipulate when dealing
+with discrete objects.
+
+When objects are "grouped" (a drawing is inserted), any ACOPY objects are
+changed to the relative RCOPY, so that we do not have to worry about them
+shifting due to E)rase etc. This makes it much easier to treat the entire
+group as a single object. This is safe to do, since the ACOPY must reference
+an object in the same group, and the contents of a group are never altered.
+        
+
+Finally:
+-------
+
+If anyone significantly enhances MICROCAD, or does something else truly
+useful with it, I'd like to see the results.
+
+      Dave Dunfield
+      Dunfield Development Systems
+      P.O. Box 31044
+      Nepean, Ontario Canada
+      K2B 8S8
+      TEL: (613) 256-5820     FAX: (613) 256-5821
+
+
+MICROCAD, MCPRINT, MCDRAW and FE are compiled using the PC version of my
+MICRO-C compiler. For more information on MICRO-C and my other products,
+see the CATALOG file in this archive.

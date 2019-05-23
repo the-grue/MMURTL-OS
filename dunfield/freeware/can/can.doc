@@ -1,0 +1,39 @@
+This utility patches ".COM" programs to give them permanent (CANned)
+command line arguments:
+
+Use: CAN <oldfile> <newfile> <permanent args>
+
+EG:  CAN TEST.COM TEST1.COM /A /B /C
+
+The above line will create a TEST1.COM which behaves exactly the same as
+TEST.COM, except that it has the /A, /B and /C options permanently enabled.
+These options are appended AFTER any arguments which occur on the TEST1
+command line.
+
+At present, the program only works with ".COM" files < 64K in size.
+Source is provided... Feel free to enhance it as you see fit.
+
+The program was written in and can be compiled with MICRO-C version
+2.1 (or greater). It should be fairly easy to port to other compilers
+or earlier versions of MICRO-C, by modifying the low-level I/O function
+calls: "open, close, read, write, lrewind".
+
+To compile with MICRO-C, use:
+
+            cc can -o -l            /* Produce CAN.OBJ */
+            masm/ml ecan;           /* Produce ECAN.OBJ */
+            lc can ecan             /* Link to produce CAN.COM */
+
+This program MUST be compiled in the TINY model (.COM file)... It
+references some of its CODE as DATA in order to copy the embedded
+function into the patched output file, and therefore must have
+overlaid code and data segments.
+
+Enjoy,
+
+Dave Dunfield
+
+Acknowledgments:
+
+  Thanks to Roedy Green (of Canadian Mind Products) for suggesting
+  the idea in a BIX conference.

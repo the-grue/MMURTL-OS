@@ -1,0 +1,96 @@
+MICRO-C: Accessing fixed memory locations.
+
+Often in embedded applications, it is desirable to access certain blocks
+of memory (or "memory mapped" hardware devices) at fixed addresses. An
+example of this would be a CPU in which additional on-chip hardware
+(such as an analog to digital convertor) is available. Such a device might
+be accessed as a register at a fixed memory address. Another example would
+be a single-board computer with additional hardware (an LCD display perhaps)
+which is accessable through memory reads/writes.
+
+The obvious way to access a fixed memory location in 'C' is through a
+pointer. For example, suppose we had a UART device memory mapped on a
+single board computer. Its CONTROL port might be 0x8000, and its DATA
+port might be 0x8001. We could access it like this:
+
+    char *UART_CTRL = 0x8000, *UART_DATA = 0x8001;
+
+    write_to_uart(c)
+        char c;
+    {
+        while(!(*UART_CTRL & TXRDY);    /* Wait for TX ready */
+        *UART_DATA = c;
+    }
+
+The above approach works well, but has a couple of disadvantages:
+
+    - Two bytes of memory are used for each address we wish to access.
+    - Indirection involves extra processor overhead (thr CPU must first
+      read the pointer variable to get the actual address)
+
+Using the typecasting facility of 'C', we can eliminate the memory usage
+and the extra memory read by CASTing constant values to the desired pointer
+type:
+
+    #define UART_CTRL   0x8000
+    #define UART_DATA   0x8001
+    /* ... */
+        while(!(*(char*)0x8000 & TXRDY)
+        *(char*)-0x8001 = c;
+
+With further use of the pre-processor, we can simplyfy accessing these
+variables:
+
+    #define UART_CTRL   *(char*)0x8000
+    #define UART_DATA   *(char*)0x8001
+    /* ... */
+        while(!(UART_CTRL & TXRDY);
+        UART_DATA = c;
+
+An alternative approach to providing direct accessed to frequently used
+fixed memory locations, is to add definitions to the library for them.
+This is the method we use to provide access to on-chip registers etc.
+
+First, make up an assembly language file with EQU's for each address,
+and place it in the library for the processor:
+
+    
+    C:\> cd \mc\libxx                       ; Move to library directory
+    C:\MC\LIBxx> copy con equates.asm       ; Create file
+    Uart_ctrl   EQU     $8000               ; Control register equate
+    Uart_data   EQU     $8001               ; Data register equate
+    ^Z                                      ; End of file
+    C:\MC\LIBxx>
+
+Then, add it to the library. If the CPU you are using has multiple
+memory models, you will have to add the file to each model.
+
+    C:\MC\LIBxx> slib a=equates             ; For one model processors
+    C:\MC\LIBxx> slib a=equates i=SMALL     ; For multi-model cpus
+    C:\MC\LIBxx> cd \mc
+
+Before you can access these locations from 'C', you will have to provide
+and 'extern' declaration for them, which tells the 'C' compiler how to
+treat those symbols. In this example, they are still 'char' variables.
+
+It is usually convient to place these declarations in a header file:
+
+    C:\MC> copy con fixedvar.h              ; Create header file
+    extern char Uart_ctrl, Uart_data;       ; extern declaration
+    ^Z
+    C:\MC>
+
+Now, you can simply #include the file, and access the fixed variables.
+
+    #include "fixedmem.h"
+
+    write_to_uart(c)
+        char c;
+    {
+        while(!(Uart_ctrl & TXRDY);         /* Wait for TX ready */
+        *Uart_data = c;
+    }
+
+This technique is not limited to simple variables. You can declare (and
+use) them as arrays, or even as functions (and call them). Using this
+method, you can define any 'C' symbol to be accessed at a fixed address.

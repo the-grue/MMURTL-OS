@@ -1,0 +1,138 @@
+C-FLEA VIRTUAL MACHINE OVERVIEW:
+
+  4 Registers:
+    ACC     - 16 bit accumulator 8 bit accesses are auto zero-filled
+    INDEX   - 16 bit addressing register, cannot be manipulated as 8 bits
+    SP      - 16 bit stack pointer
+    PC      - 16 bit program counter
+
+  ACC always contains 16 valid bits. All operations are performed in 16
+  bit precision. 8 bit operands are zero-filled when they are fetched.
+
+  SP decrements when data is pushed, and always points to the last
+  entry which was pushed (ie: 0,S gives data on "top" of stack).
+
+  Data is stored in LITTLE ENDIAN format. Ie: LOW BYTE is FIRST. This
+  allows us to use the same address to refer to an 8 bit or a 16 bit
+  quantity.
+
+  There are no user accessable flags. In the case of CMP, internal flags
+  are maintained only long enough to accomodate the LT-UGE instructions.
+
+  This instruction set and associated mnemonics are:
+  Copyright 1994-1995 Dave Dunfield
+  All rights reserved.
+
+GENERAL ADDRESSING MODES
+ Syntax   Description
+ ---------------------------------------------------
+  #n      Immediate (8 or 16 bit operand)
+  aaaa    Direct memory address
+  I       Indirect (through INDEX register) no offset
+  n,I     Indirect (through INDEX register) with 8 bit offset
+  n,S     Indirect (through SP) with 8 bit offset
+  S+      On Top of Stack (remove)
+  [S+]    Indirect through TOS (remove)
+  [S]     Indirect through TOS (leave on stack)
+ NOTES:
+  Mode S+ always pops 16 bits from stack. Only 16 bit values can be pushed.
+  Modes [S+] and [S] will always use a 16 bit address on the top of the
+  stack, but the final target can be 8 or 16 bits. (Depending on inst.)
+
+MEMORY ADDRESSING INSTRUCTIONS: (Use addressing modes above)
+ Name     Description                          (Unused address modes)
+ --------------------------------------------------------------------
+  LD      Load ACC 16 bits
+  LDB     Load ACC 8 bits
+  ADD     Add 16 bits
+  ADDB    Add 8 bits
+  SUB     Subtract 16 bits
+  SUBB    Subtract 8 bits
+  MUL     Multiply 16 bits
+  MULB    Multiply 8 bits
+  DIV     Divide 16 bits
+  DIVB    Divide 8 bits
+  AND     And 16 bits
+  ANDB    And 8 bits
+  OR      Or 16 bits
+  ORB     Or 8 bits
+  XOR     Xor 16 bits
+  XORB    Xor 8 bits
+  CMP     Compare 16 bits (ACC=1 if equal)
+  CMPB    Compare 8 bits
+  LDI     Load INDEX (16 bits only)
+  LEAI    Load INDEX with address              (00, 05)
+  ST      Store ACC 16 bits                    (00, 05)
+  STB     Store ACC 8 bits                     (00, 05)
+  STI     Store INDEX (16 bits only)           (00, 05)
+  SHR     Shift right (8 bit count only)
+  SHL     Shift left  (8 bit count only)
+
+COMPARE MODIFIER INSTRUCTIONS:
+ Name     Description
+ ----------------------------------------------------------------------
+  LT      ACC = 1 if less than             (signed)
+  LE      ACC = 1 if less than or equal    (signed)
+  GT      ACC = 1 if greater than          (signed)
+  GE      ACC = 1 if greater than of equal (signed)
+  ULT     ACC = 1 if lower than            (unsigned)
+  ULE     ACC = 1 if lower than or same    (unsigned)
+  UGT     ACC = 1 if higher than           (unsigned)
+  UGE     ACC = 1 if higher than or same   (unsigned)
+ NOTES:
+  NOT instruction is used to implement explicit NE.
+  These instructions must IMMEDIATELY follow a CMP instruction! One of
+  PUSHA/TAI/JMP/SJMP/JZ/SJZ/JNZ/SJNZ may occur between the CMP and the
+  above instructions, but any other instruction may cause the result of
+  the CMP to be lost!
+
+JUMP INSTRUCTIONS:
+ Name     Description
+ ----------------------------------------------------------------------
+  JMP     Long jump (16 bit absolute)
+  JZ      Long jump if ACC=0 (16 bit absolute)
+  JNZ     Long jump if ACC!=0 (16 bit absolute)
+  SJMP    Short jump (8 bit PC offset)
+  SJZ     Short jump if ACC=0 (8 bit PC offset)
+  SJNZ    Short jump if ACC!=0 (8 bit PC offset)
+  IJMP    Indirect jump (Address in ACC)
+  SWITCH  Jump through switch table (ACC=value, INDEX=table)
+ NOTES:
+  Switch table format: addr1, value1, addr2, value2, ... 0, defaultaddr
+
+STACK MANIPULATION INSTRUCTIONS:
+ Name     Description
+ ----------------------------------------------------------------------
+  CALL    Call subroutine (16 bit absolute address)
+  RET     Return from subroutine
+  ALLOC   Allocate space on stack (8 bit value)
+  FREE    Release space on stack (8 bit value)
+  PUSHA   Push ACC on stack
+  PUSHI   Push INDEX on stack
+  TAS     Copy ACC to SP
+  TSA     Copy SP to ACC
+ NOTES:
+  Explicit PULL instructions are not required since various addressing
+  modes use (and remove) the top item on the stack (PULLA = LD S+).
+
+MISC INSTRUCTIONS:
+ Name    Description
+ ----------------------------------------------------------------------
+  CLR    Zero ACC
+  COM    Complement ACC (ACC = ACC XOR FFFF)
+  NEG    Negate ACC (ACC = 0 - ACC)
+  NOT    ACC = 1 if ACC was 0, else ACC = 0
+  INC    Increment ACC
+  DEC    Decrement ACC
+  TAI    Copy ACC to INDEX
+  TIA    Copy INDEX to ACC
+  ADAI   Add ACC to INDEX
+  ALT    Get alternate result from MUL/DIV
+  OUT    Output byte in ACC to PORT
+  IN     Read byte from PORT
+ NOTES:
+  ALT obtains the remainder after DIV, and in some implementations,
+  also obtains the high word after a multiply. This instruction must
+  be executed IMMEDIATELY after the MUL or DIV. A PUSHA or TAI inst.
+  is allowed between the MUL/DIV (In case you want to save both results),
+  but any other instruction may cause the alternate result to be lost!

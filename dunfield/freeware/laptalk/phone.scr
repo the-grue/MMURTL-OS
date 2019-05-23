@@ -1,0 +1,18 @@
+rem Example of a simple phone menu implementation
+
+rem This script gives an example of a "computed goto", based on the
+rem selection from a "menu" statement.
+
+rem Note that "System4" performs several commands, switching to a different
+rem configuration, invoking terminal mode, and then switching back.
+
+menu A System1 System2 System3 System4
+goto +\A
+:-1 error No system dialed!
+:0 chain dial 555-1234
+:1 chain dial 555-1235
+:2 chain dial 555-1236
+:3 config host
+call dial 555-1237
+terminal
+config laptalk

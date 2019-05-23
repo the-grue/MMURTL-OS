@@ -1,0 +1,109 @@
+VED: A simple Video EDitor
+
+  The VED program implements a simple Video EDitor, for performing assemble
+editing between two VCR's.
+
+The VED command:
+
+  To startup VED, simply enter the command: 'ved'. VED will startup, verify
+that it is properly connected to a DBOX, reset and zero its attached VCR's,
+and then proceed to its main editor panel menu.
+
+  In the event that VED is mis-configured in such a way that it is unable to
+start up (ie: DBOX on wrong I/O port, or incorrent number of VCR's programmed),
+you may add the 'config' operand, to proceed directly to the configuration
+menu before starting VED: 'ved config'.
+
+The Main Editor Pane
+
+  Once VED is started, it will present its "Main Editor Panel", which offers
+the following functions:
+
+A)ssemble
+
+  After prompting for verification, this function performs the assemble edit
+  of all defined video clips on the playback VCR, and records them on the
+  recording VCR. The recording VCR is placed in REC PAUSE mode, while each
+  clip is located and played. As the clip is played, the recording VCR is
+  released from PAUSE, recording the clip.
+
+C)onfigure
+
+  This function opens the configuration sub-menu:
+
+    VCR assignments
+      Presents a panel allowing you to set the DBOX vcr numbers of the
+      playback and recording VCR's (1-8). Setting a VCR to zero disables
+      that VCR. If the recording VCR is disabled, this will let you edit
+      and play clips using a single VCR (but not assemble them). If both
+      VCR's are 0, the DBOX is not accessed, and you can enter clip data
+      on a system with no DBOX or VCR's attached.
+
+    DBOX com port
+      This selection presents you with a menu allowing you to select COM 1
+      - COM 4 to be used. NOTE that is you change this selection after VED
+	  has started up, the change will not be effective until the next time
+	  VED is loaded.
+     
+    Screen colors
+      Presents a entry screen, which allows you to select the colors used
+      for the various VED screens and menus.
+
+    Save configuration
+      Writes the configuration to disk in the file CONFIG.VED, which is
+      automatically loaded when VED starts up.
+
+  When you are finished configuration, press ESCAPE to return to the main
+  control panel.
+
+D)elete
+
+   After prompting for confirmation, the video clip selected by the "bar"
+   cursor is deleted. Use the Up/Down arrows to position the bar cursor.
+
+E)dit
+
+   Edits the clip definition under the cursor. Use this function to change
+   the name, or the starting and ending points of the clip. For details on
+   positioning the VCR, see the G)oto command.
+
+F)ile
+
+   Presents a menu, allowing you to "Load" or "Save" the current clip
+   information to disk, in a named file. If "wildcard" characters ('*'
+   or '?') occur in the filename, VED will present you with a menu of
+   all files matching that patterm.
+
+G)oto
+
+   This function allows you to position the tape of the playback or
+   recording VCR's. You may use the VCR controls to position the tape,
+   or the following keys:
+     Up/ENTER   = PLAY       Right  = FAST-FORWARD/Cue
+     Down/Space = STOP       Left   = REWIND/Review
+     '.'        = Manual     ESCAPE = Terminate
+
+I)nsert
+
+  Inserts a new clip definition, immediately before the one selected by the
+  "bar" cursor. You will be prompted with a sub-menu of insert options:
+    Insert new clip
+      Creates a blank clip, and then prompts you for the name and tape
+      starting and ending positions.
+    Paste last delete
+      Inserts a copy of the last clip D)eleted.
+
+P)lay
+
+   This function allows you to play the clip selected by the "bar" cursor,
+   or "all clips", in sequential order.
+
+Z)ero
+
+   Prompts you to select the "Playback" or "Recording" vcr, and then rewinds
+   ands zeros the counter on that VCR. Since the counters may drift slightly
+   as you move back and forth creating video clips, you should execute this
+   function from time to time, especially on the playback vcr, to keep it
+   from drifting too far out of sync with its timer.
+
+Press ESCAPE to exit the Video EDitor.

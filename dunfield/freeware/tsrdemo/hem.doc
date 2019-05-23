@@ -1,0 +1,22 @@
+This program displays any occurances of the first eight hardware
+interrupts on the IBM PC, which signal various processor exceptions.
+
+When HEM detects a hardware exception, It will open a small window
+in the center of the screen, displaying what type of exception
+has occured, and waits for you to press a key. After you press a key,
+HEM will close the text window, and attempt to terminate the
+application "gracefully" by exiting to DOS.
+
+To install HEM, you must execute the program, and specify HOT-KEYS
+on the command line as follows:
+        L - Left SHIFT
+        R - Right SHIFT
+        A - ALT
+        C - CONTROL
+        S - SysRq (Caution: some systems may not like this one)
+
+        eg: HEM LR  (Install with LEFT+RIGHT SHIFT for hotkeys)
+
+Any time you 'POP-INTO' HEM with the HOT-KEYS, it will reclaim the
+hardware interrupts. This allows you to bypass application programs
+which take them over.

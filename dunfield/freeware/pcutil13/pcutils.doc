@@ -1,0 +1,1375 @@
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+                                     P C
+                                  Utilities
+   
+                               A set of useful
+                               Utility Programs
+                                   For the
+                            IBM Personal Computer
+   
+   
+   
+   
+   
+                                 Release 1.3
+   
+                              Revised: 08-Nov-94
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+                      Copyright 1983-1994 Dave Dunfield
+                             All rights Reserved
+   PC Utilities                                                     Page: 1
+
+
+   1. INTRODUCTION
+   
+         PC Utilities is a collection of small but useful utility  programs
+      for the IBM PC under MS-DOS.
+   
+         Included in the package are:
+   
+           CHATTR  - Change file attributes.
+           DIFF    - Compare two text files and report differences.
+           DR      - Scan a directory tree for OLDest and NEWest file
+           DUMP    - HEX or OCTAL dump of file(s) contents.
+           DUS     - Disk Usage Summary
+           EDT     - A screen oriented text editor.
+           EXTRACT - Extact a section from a larger file.
+           FDIR    - A screen oriented directory shell.
+           FSCAN   - Scan for altered files.
+           HEXED   - A screen oriented binary editor.
+           LOCATE  - Search for text strings.
+           OFF     - CRT screen saver.
+           RETAB   - Retabulate files to different tab stops.
+           SIZE    - Display size of file(s) in lines/characters.
+           TIMEIT  - Times the execution of another command.
+           WDIR    - Walk a directory & execute commands.
+   
+         The following pages contain detailed descriptions of each  utility
+      program, and its operating syntax.
+   
+         The PCUTILS "package" (software and documentation) is copyrighted,
+      and may not be re-distributed for profit or other commercial purposes
+      without our written permission.
+   
+                          Dunfield Development Systems
+                          P.O. Box 31044
+                          Nepean, Ontario (Canada)
+                          K2B 8S8
+   
+         PCUTILS is provided on an "as is" basis, with no warranty  of  any
+      kind. In no event shall the author be liable for any damages  arising
+      from its use or distribution.
+   PC Utilities - CHATTR                                            Page: 2
+
+
+   2. CHATTR - Change file attributes
+   
+         CHATTR is a simple utility program which allows you to easily  set
+      the attribytes of DOS files.
+   
+         The form of the CHATTR command is:
+   
+                     CHATTR <filespec> <+|-attribute ...>
+   
+         The available attributes are:
+   
+   
+           +/-A    - Add/Remove ARCHIVE bit
+           +/-H    - Add/Remove HIDDEN bit
+           +/-R    - Add/Remove READ-ONLY bit
+           +/-S    - Add/Remove SYSTEM bit
+   
+         Examples:
+   
+           chattr *.* -a
+           chattr \dos\*.* +r
+           chattr C:\command.com +h +r
+   PC Utilities - DIFF                                              Page: 3
+
+
+   3. DIFF - A file compare program
+   
+         DIFF is a program which  taks  two  text  files,  and  performs  a
+      line-by-line comparison of them. If more than one differing  line  is
+      found, DIFF considers and reports this is a  single  difference.  The
+      'r=' parameter controls how many identical lines DIFF  must  find  in
+      the file before it considers a difference to be ended.
+   
+         Any time a difference is found between the  files,  DIFF  displays
+      the line numbers indicating where the difference occurs, followed  by
+      the differing lines from the first file (Preceeded by '<'),  and  the
+      differing lines from the second file (Precceded by '>').
+   
+         The form of the DIFF command is:
+   
+                      DIFF <file1> <file2> [options ...]
+   
+         The available options are:
+   
+           -d      - Inhibit display of differing lines
+           -l      - Inhibit display of line numbers
+           r=num   - Specify minimum # of lines to re-synchronize
+   
+         Examples:
+   
+           diff program.asm program.bak
+   PC Utilities - DR                                                Page: 4
+
+
+   4. DR - Date Ranger
+   
+         DR is a utility which will quickly scan a disk or  directory,  and
+      report on the oldest and newest files it finds. It  is  quite  useful
+      for determing the last date/time a change was made etc.
+   
+         The form of the DR command is:
+   
+                       DR <directory ...> [options ...]
+   
+         The available options are:
+   
+           -? or ? - Display help info.
+           -h      - Exclude HIDDEN files
+           -n      - Inhibit display of NEWest file
+           -o      - Inhibit display of OLDest file
+           -r      - Inhibit recursion into sub-directories
+           -s      - Exclude SYSTEM files
+           -v      - Inhibit startup message (header)
+   
+         Examples:
+   
+           dr c:\myprogs
+   PC Utilities - DUMP                                              Page: 5
+
+
+   5. DUMP - File dump
+   
+         DUMP is a utility which displays the contents of one or more files
+      in either HEX/ASCII or OCTAL/ASCII "dump" format. Wildcards (*,?) are
+      allowed in filenames.
+   
+         The form of the DUMP command is:
+   
+                      DUMP <filename ...> [options ...]
+   
+         The available options are:
+   
+           -f      - Pause between each file
+           -o      - Use OCTAL dump (default is HEX)
+           -p      - Pause between each block
+   
+         Examples:
+   
+           dump myprog.obj -p
+           dump *.COM -f -o
+   PC Utilities - DUS                                               Page: 6
+
+
+   6. DUS - Disk Use Summary
+   
+         The DUS utility scans a disk or directory tree, and reports on the
+      disk space used  within  each  subdirectory.  A  "Cumulative"  option
+      allows DUS to report the total  space  under  each  directory,  which
+      includes the contents of any subdirectories.
+   
+         The form of the DUS command is:
+   
+                      DUS <directory ...> [options ...]
+   
+         The available options are:
+   
+           -? or ? - Display help info.
+           -c      - Produce CUMULATIVE display
+           -d      - Inhibit individual display (total only)
+           -h      - Exclude HIDDEN files
+           -p      - Pause between each output page
+           -r      - Inhibit recursion into sub-directories
+           -s      - Exclude SYSTEM files
+           -v      - Inhibit startup message (header)
+   
+         Examples:
+   
+           dus c:\
+           dus c:\ d:\ -c
+           dus d:\archive -c
+   PC Utilities - EDT                                               Page: 7
+
+
+   7. EDT - Text editor
+   
+      7.1 Introduction
+   
+            EDT is a fully featured, in-memory, text editor. It operates in
+         either a line-by-line, or a visual screen format.
+   
+            In line-by-line mode, EDT performs no direct  screen  accesses,
+         and may be operated over a serial port using CTTY.
+   
+            EDT is invoked with the command 'EDT <filename>'. If the  named
+         file already exists, EDT will load and edit it, otherwise a  blank
+         file is presented. If the optional '-v'  qualifier  is  specified,
+         EDT will start-up in line-by-line mode, otherwise it starts up  in
+         visual mode.
+   
+               eg:     edt thefile.dat         <- Visual mode
+                       edt myfile.dat -v       <- Line by Line
+   PC Utilities - EDT                                               Page: 8
+
+
+      7.2 Line mode operation
+   
+         7.2.1 Line ranges
+   
+               Most commands accept a "line-range"  which  is  an  optional
+            specification controlling the range  of  lines  for  which  the
+            command  has  effect.  Unless  otherwise  stated,  the  default
+            line-range assumed for each command is the "current" line (*).
+   
+               The "current" line is the line at which EDT is positioned in
+            line by line mode, and is also the line on which the cursor  is
+            positioned in visual mode.
+   
+               The following are the valid line range formats:
+   
+                  *        - The "current" line
+                  /        - The entire file
+                  =        - The tagged lines
+                  0        - The end of the file
+                  <n>      - Line number <n>, (<n> >= 1)
+                  <r>,<r>  - Range between beginning of two other ranges.
+   
+               The '+' and '-' characters may be used to add or subtract  a
+            constant value from a line range.
+   
+                   eg: '0-12' <- 12 lines from end of file
+   
+               If '+' or '-' is used but no range is specified,  an  offset
+            from the current line is assumed.
+   
+                 eg: '+12' <- 12 lines from the current line.
+   
+               The  line  range  specification   is   entered   immediately
+            preceeding the command name.
+   
+                        ie: '<r><command> <operands>'
+   
+         7.2.2 Line mode commands
+            C - Copy text
+   
+                  The 'C'opy command performs a copy of the active range of
+               lines, placeing the copy directly ahead of the current line.
+   
+               Examples:
+   
+                   C               - Duplicate current line
+                   1,10C           - Copy lines 1 to 10 inclusive
+                   =C              - Copy tagged lines
+                   /C              - Duplicate entire file (must be at end)
+   PC Utilities - EDT                                               Page: 9
+
+
+            D - Delete text
+   
+                  The 'D'elete command deletes the active range of lines.
+   
+               Examples:
+   
+                   D               - Delete current line
+                   -5,+5D          - Delete 11 lines -5 to +5 from current
+                   /D              - Delete entire file
+   
+            F - File information
+   
+                  This command displays information about  the  file  being
+               edited, includes the filename, the size of the file in lines
+               and characters, and the size and position of  the  specified
+               line range.
+   
+               Examples:
+   
+                   F               - Display file & current line information
+                   =F              - Display file & tagged lines information
+   
+            <n>H - Set horisontal tab spacing
+   
+                  This command sets the display spacing of horizontal  tabs
+               to the value specified (by the preceeding number).
+   
+            I - Insert new text
+   
+                  The 'I'nsert command prompts for  'Input:',  and  inserts
+               all lines typed directly ahead of the active range. Enter  a
+               null line to exit.
+   
+               Examples:
+   
+                   I               - Insert ahead of current line
+                   /I              - Insert at start of file
+                   0I              - Insert at end of file
+   
+            L - List text in simple form
+   
+                  The 'L'ist command displays the active  range  of  lines.
+               The  display  does  not  include  line  numbers  or  special
+               indications.  'L'ist  is  faster  and  more  efficent   that
+               'P'rint.
+   
+               Examples:
+   
+                   L               - List current line
+                   /L              - List entire file
+                   -10,+10L        - List 21 lines, centered on current
+   PC Utilities - EDT                                               Page: 10
+
+
+            M - Move text
+   
+                  The 'M'ove command moves the active range of lines to the
+               location directly ahead of the current line.
+   
+               Examples:
+   
+                   =M              - Move tagged lines
+                   +1M             - Interchange active & next line
+   
+            P - Print text (Enhanced 'L'ist)
+   
+                  The 'P'rint command displays the active range  of  lines.
+               This display includes the line number which may be  preceded
+               by a special indication flag ('*' for current line, '='  for
+               tagged lines).
+   
+               Examples:
+   
+                   P               - Display current line
+                   /P              - Display entire file
+   
+            Q - Quit (exit) editor
+   
+                  The 'Q'uit command exits the editor.  This  command  will
+               not allow an exit if unsaved  changes  are  present  in  the
+               file.
+   
+               Examples:
+   
+                   Q               - Quit editor
+   
+            QQ - Unconditional 'Q'uit
+   
+                  The 'QQ'uit command exits the editor unconditionaly.
+   
+               Examples:
+   
+                   QQ              - Quit unconditionaly.
+   
+            R <filename> - Read file
+   
+                  The 'R'ead command  reads  the  entire  contents  of  the
+               specified file, and inserts it directly ahead of the  active
+               range.
+   
+               Examples:
+   
+                   Rabc            - Insert file 'abc' at current
+                   /Rabc           - Insert file 'abc' at start
+                   0Rabc           - Append file 'abc' at end
+   PC Utilities - EDT                                               Page: 11
+
+
+            S<dc><search><dc><replace> - Substitute
+   
+                  The 'S'ubstitute command searches  the  active  range  of
+               lines, and replaces all occurrances of the  string  <search>
+               with the string <replace>. The <dc> delimiter character  may
+               be any character not contained within the <search> string.
+   
+               Examples:
+   
+                   S'abc'def       - Change 'abc' to 'def' in current
+                   /S'abc'def      - Change 'abc' to 'def' in entire file
+                   =S'abc'def      - Change 'abc' to 'def' in tagged lines
+   
+            T - Tag lines
+   
+                  The  'T'ag  command  tags  the  active  range  of  lines,
+               allowing them to be referred  to  by  '='  in  a  subsequent
+               command range.
+   
+               Examples:
+   
+                   T               - Tag current line
+                   1,10T           - Tag lines 1 to 10
+                   *,+5T           - Tag six lines starting at current
+   
+            V - Switch Visual Mode
+   
+                  The 'V' command causes EDT to switch visual  modes.  This
+               enters visual mode if EDT was previously  in  line  by  line
+               mode, and enters line by line mode if previously  in  visual
+               mode.
+   
+               Examples:
+   
+                   V               - Switch visual modes
+   
+            W [filename] - Write to file
+   
+                  The 'W' command writes the active range of lines  to  the
+               named file, or to the original file edited  if  no  name  is
+               specified. Use of this command also resets the FILE  CHANGED
+               flag, allowing exit via 'q'.
+   
+                  The default line range assumed for 'W'rite is the  entire
+               file.
+   
+               Examples:
+   
+                   W               - Write entire file
+                   *W              - Write current line
+                   Wabc            - Write entire file to 'abc'
+                   =Wabc           - Write tagged lines to 'abc'
+   PC Utilities - EDT                                               Page: 12
+
+
+            X [filename] - Write file and eXit
+   
+                  This command behaves  exactly  as  the  'W'rite  command,
+               followed immediatly by  a  'Q'uit  command.  It  provides  a
+               shorthand way of saving your file and leaving the editor.
+   
+               Examples:
+   
+                   X               - Write file & exit
+                   Xabc            - Write to 'abc' and exit
+   
+            ?<text> - Search for text
+   
+                  The '?' command  moves  the  active  line  to  the  first
+               occurance of the specified string within the active range.
+   
+                  The default range assumed for '?' is one  character  past
+               the current cursor position (in visual mode)  or  the  first
+               character of the active line (In line by line mode), through
+               to the end of the file.
+   
+               Examples:
+   
+                   ?string         - Find next occurance of "string"
+                   /?string        - Find first occurance of "string"
+   
+            $<command> - Execute DOS command
+   
+                  The '$' command executes the specified DOS command.
+   
+               Examples:
+   
+                   $dir            - Execute 'dir' command
+   
+            <no command> - Goto line
+   
+                  If a line range is given  without  a  command,  EDT  will
+               reposition the "current"  line  to  the  beginning  of  that
+               range.
+   
+               Examples:
+   
+                   100             - Move to line 100
+                   /               - Move to start of file
+                   0               - Move to end of file
+                   =               - Move to tagged line(s)
+   PC Utilities - EDT                                               Page: 13
+
+
+      7.3 Visual mode operation
+   
+            When in VISUAL mode, EDT presents  a  window  on  the  terminal
+         screen which displays the contents  of  a  section  of  the  file.
+         Editing of the file may be performed directly on  the  screen  via
+         special function keys, and the screen is updated so that  you  see
+         your changes as they are being performed.
+   
+            Any  control  characters  which  exist  in  the  file  will  be
+         displayed as the  corresponding  printable  character  in  reverse
+         video.
+   
+            If the end of the file is within the area shown on the  screen,
+         the message '*EOF*' is displayed in reverse video.
+   
+         7.3.1 Entering text
+   
+               Text may be entered into the file being  edited,  simply  by
+            typeing it at the terminal keyboard. EDT  automatically  places
+            the text in the file, and updates the screen to reflect the new
+            contents. The position of the  terminal  cursor  indicates  the
+            position at which the text will be entered.
+   
+         7.3.2 Positioning the cursor
+   
+               The arrow keys on the terminal  may  be  used  to  move  the
+            cursor around the displayed image. Moving beyond the bottom  of
+            the screen causes EDT to scroll forward one line, and shift the
+            screen up. Moving beyond the top of the screen  causes  EDT  to
+            scroll backward one half screen, and redisplay the text.
+   
+               EDT will perform sideways scrolling of the display to  allow
+            the cursor to access the entire width of lines which are larger
+            than 80 columns.
+   PC Utilities - EDT                                               Page: 14
+
+
+         7.3.3 Visual mode function keys
+   
+               The following keys on  the  IBM  PC  keyboard  have  special
+            meaning to EDT:
+   
+            Right arrow
+   
+                  Moves the cursor forward one  character  positon  in  the
+               file, if at the end of a line, the cursor  will  advance  to
+               the first position of the next line.
+   
+            Left arrow
+   
+                  Moves the cursor backward one character  positon  in  the
+               file, if at the beginning of a line, the cursor will  backup
+               to the last position of the previous line.
+   
+            Up arrow
+   
+                  Moves the cursor up one  line.  If  at  the  top  of  the
+               screen, the display will scroll  backwards  by  one  half  a
+               screen page.
+   
+            Down arrow
+   
+                  Moves the cursor down one line. If at the bottom  of  the
+               screen, the display will scroll forward by one line.
+   
+                  The cursor may appear to jump back and  forth  as  it  is
+               moved up and down, if it ancounters lines which are  shorter
+               than the current character  position  within  the  line,  or
+               lines which contain tabs. This is because whenever possible,
+               the cursor is  returned  to  the  same  number  of  physical
+               characters from the start of the line as is was on the first
+               line from which the UP or DOWN arrow was pressed.
+   
+            Page up
+   
+                  This key pages backward one  screen.  (Top  line  becomes
+               bottom)
+   
+            Page down
+   
+                  This key pages forward one screen. (Bottom  line  becomes
+               top)
+   
+            Home
+   
+                  Moves the cursor to the beginning of the line. If  it  is
+               already at the beginning of a  line,  it  is  moved  to  the
+               beginning of the previous line.
+   
+            End
+   
+                  Moves the cursor to the end of the line.  If  already  at
+               the end of a line, it is moved to the end of the next line.
+   PC Utilities - EDT                                               Page: 15
+
+
+            CTRL-PgUp
+   
+                  This key moves the cursor to the beginning of  the  first
+               line in the file.
+   
+            CTRL-PgDn
+   
+                  This key moves the cursor to the end of the file.
+   
+            CTRL-Right Arrow
+   
+                  Moves the cursor to the beginning of the next word.
+   
+            CTRL-Left Arrow
+   
+                  Moves the cursor to the beginning of the previous word.
+   
+            Ins
+   
+                  Toggles between character INSERT and OVERWRITE  mode.  In
+               INSERT mode,  all  characters  typed  at  the  terminal  are
+               inserted into the text. In OVERWRITE mode, only the  NEWLINE
+               character and data entered at the end of a line is inserted,
+               all other characters will overwrite the existing text.
+   
+            Delete
+   
+                  Deletes the character under the  cursor,  without  moving
+               the cursor.
+   
+            Backspace
+   
+                  Moves the cursor backward to the previous character, then
+               deletes that character.
+   
+            CTRL-Home
+   
+                  Redraws the screen image of the file.  This  is  normally
+               used in the case of  the  screen  being  corrupted  by  data
+               transmission  errors,  or  asynchronus  messages  from   the
+               operating system or its users.
+   
+            F1
+   
+                  Toggles ON/OFF the display of NEWLINE characters  at  the
+               end of each line of text.
+   
+            F2
+   
+                  Displays  the  current  cursor  position,  including  the
+               actual and character offsets from the start of line.
+   
+            F3
+   
+                  Brings the line the cursor  is  on  to  the  top  of  the
+               screen.
+   PC Utilities - EDT                                               Page: 16
+
+
+            F4
+   
+                  Tags one or more lines for a later operation. The  tagged
+               lines  are  displayed  in  special  video  if  the  terminal
+               supports it. Once one line is tagged, pressing this  key  on
+               another line causes all lines between  them  to  be  tagged.
+               Pressing it again on the first  line  of  the  tagged  range
+               removes the tags.
+   
+            F5
+   
+                  Deletes from the cursor position to the end of  the  line
+               (inclusive).
+   
+            F6
+   
+                  Deletes from the cursor position to the end of  the  line
+               (exclusive).
+   
+            F7
+   
+                  Inserts the deleted line text (From  Function  key  8  or
+               Function key 9) at the current cursor position.
+   
+            F10 or Keypad '+'
+   
+                  Prompts for a line mode command, and executes it. See the
+               section on line mode operation.
+   
+            F9 or Keypad '-'
+   
+                  Re-executes the last line mode command entered.
+   PC Utilities - EXTRACT                                           Page: 17
+
+
+   8. EXTRACT - Extract section of file
+   
+         The EXTRACT utility reads a file, and writes a specified range  of
+      lines to standard output, which can be re-directed  to  another  file
+      with the '>' operator. If the specified ending line number is  higher
+      than the number of lines in the file, all  lines  from  the  starting
+      line number to the end of the file will be written.
+   
+         The form of the EXTRACT command is:
+   
+                  EXTRACT <filename> <start line> <end line>
+   
+         Examples:
+   
+           extract bigfile.dat 1 1000 >small1.dat
+           extract bigfile.dat 1001 2000 >small2.dat
+           extract bigfile.dat 2001 9999 >small3.dat
+   PC Utilities - FDIR                                              Page: 18
+
+
+   9. FDIR - Full screen directory
+   
+      9.1 Introduction
+   
+            FDIR is a screen oriented directory utility, which  allows  the
+         entry and editing of commands into a console display of  directory
+         files. The directory  display  includes  the  filename,  the  file
+         owner, size (in Kbytes) and attributes.
+   
+      9.2 Command format
+   
+            The following characters have special significance when used as
+         part of the commands entered into the directory display:
+   
+           @   - Substitutes the entire filename and extension
+                 (without directory) into the command.
+   
+           $   - Substitutes the filename only (without directory
+                 or extension) into the command.
+   
+           ^   - Substitutes the directory path (no filename or
+                 extension into the command.
+   
+           !   - Protect the next character in the command from
+                 the above translations.
+   
+            If none of the above characters are found in a command, and the
+         F1 (filename) option flag is turned  on  (see  below),  FDIR  will
+         append the entire directory path, filename and  extension  to  the
+         command.
+   
+            For example, if you issued the command:
+   
+                               FDIR \cmds\*.EXE
+   
+            The following lines  would  result  in  the  indicated  command
+         executed if entered beside the name 'FDIR.EXE':
+   
+           echo            ===>    echo \cmds\FDIR.EXE
+           echo @          ===>    echo FDIR.EXE
+           echo $          ===>    echo FDIR
+           echo ^          ===>    echo \cmds\
+           echo !@         ===>    echo \cmds\FDIR.EXE
+           echo !^@        ===>    echo ^FDIR.EXE
+           echo !^         ===>    echo ^ FDIR.EXE
+           copy !@ @       ===>    copy \cmds\FDIR.EXE FDIR.EXE
+   PC Utilities - FDIR                                              Page: 19
+
+
+      9.3 Function keys
+   
+            FDIR recognizes and acts upon the following special keys:
+   
+         Right Arrow
+   
+               Moves the cursor one character  to  the  right,  within  the
+            field of the command being edited.
+   
+         Left Arrow
+   
+               Move the cursor one character to the left, within the  field
+            of the command being edited.
+   
+         Up Arrow
+   
+               Move the cursor up one line, to the previous command  field.
+            The screen will be paged backward through the directory display
+            if necessary.
+   
+         Down Arrow
+   
+               Move the cursor down one line, to the  next  command  field.
+            The screen will  be  scrolled  forward  through  the  directory
+            display if necessary.
+   
+         Page up
+   
+               This key pages backward one screen in the directory display.
+            (Top line becomes bottom)
+   
+         Page down
+   
+               This key pages forward one screen in the directory  display.
+            (Bottom line becomes top)
+   
+         Home
+   
+               Moves the cursor to the beginning of the command entry field
+            on this line.
+   
+         End
+   
+               Moves the cursor to the end of the command  entry  field  on
+            this line.
+   PC Utilities - FDIR                                              Page: 20
+
+
+         CTRL-PgUp
+   
+               This key positions  the  cursor  to  the  beginning  of  the
+            command entry field in the first file entry  in  the  directory
+            display.
+   
+         CTRL-PgDn
+   
+               This key positions  the  cursor  to  the  beginning  of  the
+            command entry field in the last file  entry  in  the  directory
+            display.
+   
+         CTRL-Home
+   
+               Redraws the screen image of the file. This is normally  used
+            in the case of the screen being corrupted by data  transmission
+            errors, or asynchronus messages from the  operating  system  or
+            its users.
+   
+         Ins
+   
+               Toggles between character  INSERT  and  OVERWRITE  mode.  In
+            INSERT mode, all characters typed at the terminal are  inserted
+            into the command. In OVERWRITE mode, characters typed overwrite
+            any data already present in the command field.
+   
+         Delete
+   
+               Deletes the character under the cursor, without  moving  the
+            cursor.
+   
+         Backspace
+   
+               Moves the cursor backward to the  previous  character,  then
+            deletes that character.
+   
+         F1
+   
+               Toggles ON/OFF the automatic insertion of filenames  at  the
+            end of commands.
+   
+         F2
+   
+               Toggles ON/OFF the display of the actual  commands  as  they
+            are executed.
+   
+         F3
+   
+               Toggles ON/OFF the  pause  prompt  after  all  commands  are
+            executed. If this option is not enabled,  the  screen  will  be
+            cleared, and the FDIR directory will be re-displayed immediatly
+            after the commands execute.
+   PC Utilities - FDIR                                              Page: 21
+
+
+         F10 or Keypad '+'
+   
+               This key causes FDIR to clear the screen, and execute all of
+            the  commands  which  have  been  entered  into  the  directory
+            display. If no commands are found, FDIR terminates.
+   
+         F11 or Keypad '-'
+   
+               This key causes FDIR to terminate immediatly.
+   PC Utilities - FSCAN                                             Page: 22
+
+
+   10. FSCAN - File Consistancy Scanner
+   
+      10.1 Introduction
+   
+            FSCAN is a utility for checking the consistancy of the files on
+         you disk, and warning you if any changes have occured. An  "INDEX"
+         file is maintained, in which the size and  CRC  of  all  files  is
+         recorded, allowing FSCAN to verify them at a later date.
+   
+      10.2 Command format
+   
+            The following options/commands may be given to FSCAN:
+   
+           +b      - Instructs FSCAN to keep a backup (.BAK) of
+                     the index file whenever it is updated.
+   
+           +d      - Instructs FSCAN to delete specified file
+                     records from the index file.
+   
+           i=name  - Specify an alternate index file.
+                     (Default is "\FSCAN.IDX")
+   
+           +l      - List the files records in the index file.
+   
+           +m      - Mark (update) the file records in the
+                     index file.
+   
+           -v      - Inhibit informational messages.
+   
+            Examples:
+   
+           fscan                   <== Check all files in index
+           fscan \dos              <== Check only \dos\*.*
+           fscan +m \dos           <== Record all files in \dos
+           fscan +d *.TMP          <== Remove temporary files
+           fscan +l                <== List files in index
+           fscan +l \cmds\*.exe    <== List only .EXE file in \cmds
+           fscan +m +b             <== Record and keep backup of index
+   PC Utilities - HEXED                                             Page: 23
+
+
+   11. HEXED - Binary editor
+   
+      11.1 Introduction
+   
+            HEXED is a screen oriented (window) editor, which allows you to
+         patch binary files in a HEX/ASCII DUMP display format.
+   
+            HEXED is invoked with the  command  "HEXED  <filename>",  where
+         <filename> is the name of an existing file.
+   
+            To patch the file, simply position the  cursor  over  the  byte
+         which you wish to change (using the special keys described below),
+         in either the HEXIDECIMAL or ASCII display windows, and enter  the
+         new value. Values in the HEXIDECIMAL window must be entered as two
+         (2) HEX/ASCII characters (0-9, A-F). Value in  the  ASCII  display
+         window may be entered by simply typing  ASCII  characters  on  the
+         keyboard.
+   
+      11.2 Function Keys
+   
+            HEXED recognizes the following special function keys:
+   
+         Right Arrow
+   
+               Advance the cursor position by one byte.
+   
+         Left arrow
+   
+               Backups the cursor position by one byte.
+   
+         Up Arrow
+   
+               Moves the cursor up one line (Back 16 bytes).
+   
+         Down Arrow
+   
+               Moves the cursor down one line (Forward 16 bytes).
+   
+         PgUp
+   
+               Displays the preceeding screen of data (backup 256 bytes).
+   
+         PgDn
+   
+               Displays the following screen of data (advance 256 bytes).
+   
+         Home
+   
+               Moves the cursor to the start of the line.
+   
+         End
+   
+               Moves the cursor to the end of the line.
+   PC Utilities - HEXED                                             Page: 24
+
+
+         CTRL-PgUp
+   
+               Displays the first page of data in the file,  and  positions
+            the cursor on the first byte.
+   
+         CTRL-PgDn
+   
+               Displays the last page of data in the  file,  and  positions
+            the cursor on the last byte.
+   
+         CTRL-Home
+   
+               Re-draw the screen.
+   
+         Ins
+   
+               Insert a byte in the file. The value  under  the  cursor  is
+            duplicated. All subsequent data is shifted down by one byte  to
+            make room.
+   
+         Del
+   
+               Delete a byte from the file. The value under the  cursor  is
+            removed. All subsequent data is shifted up by one byte to  fill
+            in.
+   
+         F1
+   
+               Toggles the cursor between the HEXIDECIMAL and ASCII display
+            windows, allowing data entry in either form.
+   
+         F10 or Keypad '+'
+   
+               Prompts for a command, and executes it.
+   
+         F9 or Keypad '-'
+   
+               Re-executes the last line mode command entered.
+   PC Utilities - HEXED                                             Page: 25
+
+
+      11.3 Commands
+   
+            HEXED recognizes the following commands:
+   
+         G <xxxx> - Goto position
+   
+               Positions the display to begin at specified address (xxxx).
+   
+            Examples:
+   
+                   g100            - Position to 0100
+                   g1000           - Position to 1000
+   
+         Q - Quit (exit) editor
+   
+               The 'Q'uit command exits the editor. This command  will  not
+            allow an exit if unsaved changes are present in the file.
+   
+            Examples:
+   
+                   Q               - Quit editor
+   
+         QQ - Unconditional 'Q'uit
+   
+               The 'QQ'uit command exits the editor unconditionaly.
+   
+            Examples:
+   
+                   QQ              - Quit unconditionaly.
+   
+         W [filename] - Write to file
+   
+               The 'W' command writes the contents of the  edit  buffer  to
+            the named file, or to the original file edited if  no  name  is
+            specified. Use of this command also  resets  the  FILE  CHANGED
+            flag, allowing exit via 'q'.
+   
+            Examples:
+   
+                   W               - Write file
+                   Wabc            - Write file to 'abc'
+   
+         X [filename] - Write file and eXit
+   
+               This  command  behaves  exactly  as  the  'W'rite   command,
+            followed  immediatly  by  a  'Q'uit  command.  It  provides   a
+            shorthand way of saving your file and leaving the editor.
+   
+            Examples:
+   
+                   X               - Write file & exit
+                   Xabc            - Write to 'abc' and exit
+   PC Utilities - HEXED                                             Page: 26
+
+
+         ?<xx> <xx> ... - HEX search
+   
+               This  command  searches  for  the  specified   sequence   of
+            hexidecimal values, beginning at the byte following the  cursor
+            position.
+   
+            Examples:
+   
+                   ?01 02 03       - Search for bytes
+   
+         /<text> - ASCII search
+   
+               This command searches for the specified text string of ASCII
+            values, beginning at the byte following the cursor position.
+   
+            Examples
+   
+                   /dave           - Search for text
+   PC Utilities - LOCATE                                            Page: 27
+
+
+   12. LOCATE - Text file search
+   
+         LOCATE is a fast utility for finding  specified  strings  in  text
+      files. Unlike most other such utilities, LOCATE allows you to  search
+      for several strings at the same time.
+   
+         The format of the LOCATE command is:
+   
+                  LOCATE <filespec> "text"... [options ...]
+   
+         The available options are:
+   
+           +c      - Use CASE-SENSITIVE search
+           +r      - Recurse into SUB-DIRECTORIES
+           +t      - Display lines where text is found
+           -v      - Inhibit line number display
+   
+         Examples:
+   
+           locate *.c "printf" "svanf"
+           locate C:\*.c "strcpy" +r
+   PC Utilities - OFF                                               Page: 28
+
+
+   13. OFF - CRT screen Saver
+   
+         OFF is a manually operated CRT screen saved.  When  executed,  OFF
+      saves the current contents of the CRT screen,  clears  it,  and  then
+      displays a "happy face" character which moves around at random.  This
+      saves the  phosphors  of  the  CRT  from  becoming  "burned"  due  to
+      characters being displayed in one position for too long. Pressing any
+      key will restore the saved CRT screen, and terminate OFF.
+   
+         The form of the OFF command is:
+   
+                                     OFF
+   
+         This command should be executed whenever you are going to be  away
+      from your computer for any length of time.
+   PC Utilities - RETAB                                             Page: 29
+
+
+   14. RETAB - File Re-Tabulator
+   
+      14.1 Introduction
+   
+            RETAB is a very useful utility  which  re-tabulates  files,  so
+         that they will be correctly formatted when viewed on systems using
+         different tab stops. RETAB writes its output to the console, which
+         may be re-directed to a file using the DOS '>' operation.
+   
+            This is very useful  when  moving  files  from  one  system  to
+         another (For example: QNX uses tabs every four spaces, and  MS-DOS
+         uses tabs every 8 spaces).
+   
+      14.2 Command format
+   
+            The format of the RETAB command is:
+   
+          RETAB [options] <filename> [options <filename>]... >output
+   
+            The available options are:
+   
+           -f      - Inhibit filling with spaces. If this option is
+                     specified, RETAB will only format the file as
+                     close to the original format as it can using the
+                     output tab stops only. If not specified, RETAB
+                     will format the file to exactly the same visual
+                     format, using spaces to fill in any partial tabs.
+   
+           -s      - Causes RETAB to convert any strings of spaces in
+                     the input file to tabs where possible.
+   
+           i=n,... - Specifies the input file tab stops.
+   
+           o=n,... - Specifies the output file tab stops.
+   
+       NOTE: RETAB processes multiple files, and allows the tab settings
+   to be defined for each file. The '-f -s i= and o=' parameters must be
+   specified BEFORE the file name where they are to have effect.
+   
+       If more tabs are present in the input or output file than were specified
+   (using I= and O=), RETAB assumes that the tabs continue at the spacing of
+   the last two stops. Therefore, if the tabs are at regular intervals, only
+   the first tab stop need be given.
+   
+       Both input and output tabs default to 8 space intervals.
+   
+       If 'O=0' is specified, RETAB will convert all tabs in the input file to
+   the appriopriate number of spaces in the output file.
+   
+       Examples:
+   
+           retab i=4 tab4.fil >tab8.fil
+           retab o=4 tab8.fil >tab4.fil
+           retab i=4 o=2 tab4.file i=8 tab8.fil >tab2.fil
+           retab o=0 tab8.file >space.fil
+   PC Utilities - SIZE                                              Page: 30
+
+
+   15. SIZE - Report file sizes
+   
+         The SIZE utility reads one or more files, and counts the number of
+      lines and characters in each one.
+   
+         If no files are specified, SIZE reads from  the  "standard  input"
+      device, allowing it to be used in a "pipe" to process the output from
+      another command.
+   
+         If more than one filename is specified, SIZE will  also  report  a
+      "grand  total"  of  the  total  numbers  of  lines   and   characters
+      encountered.
+   
+         The form of the SIZE command is:
+   
+                             SIZE [filename ...]
+   
+         Examples:
+   
+           size textfile.dat
+           size file1.txt file2.txt
+           dir | size
+   PC Utilities - TIMEIT                                            Page: 31
+
+
+   16. TIMEIT - Time Command Execution
+   
+         TIMEIT executes another DOS command, and  reports  the  amount  of
+      time taken to execute it. The elapsed  time  is  reported  in  hours,
+      minites, seconds and hundredths of a second.
+   
+         The form of the TIMEIT command is:
+   
+                               TIMEIT <command>
+   
+         Examples:
+   
+           timeit cc myprog
+           timeit dus d:\
+   PC Utilities - WDIR                                              Page: 32
+
+
+   17. WDIR - Walk Directory
+   
+      17.1 Introduction
+   
+            This utility walks through a directory, executing one  or  more
+         commands on files matching a specified pattern. Its main use is to
+         provide "wildcard" capability to commands which  do  not  directly
+         support wildcards, although  it  can  be  quite  useful  in  other
+         situations as well.
+   
+      17.2 Command format
+   
+            The format of the WDIR command is:
+   
+                    WDIR <filespec> "command..." [options]
+   
+            The following options are available:
+   
+           +r      - Recurse into sub-directories. When this option
+                     is specified, WDIR will search sub-directories
+                     for matching files.
+   
+           -v      - Inhibit display of commands executed.
+   
+           +m      - Use multiple (wildcard) forms of commands.
+                     This options is used with '+r' to cause a
+                     single command to be executed once in all
+                     sub-directories that have matching files.
+   
+            The following characters have special significance when used as
+         part of the commands given to WDIR.
+   
+           @   - Substitutes the entire filename and extension
+                 (without directory) into the command.
+   
+           $   - Substitutes the filename only (without directory
+                 or extension) into the command.
+   
+           ^   - Substitutes the directory path (no filename or
+                 extension into the command.
+   
+           !   - Protect the next character in the command from
+                 the above translations.
+   
+            If none of the above characters are found in  a  command,  WDIR
+         will append the entire directory path, filename and  extension  to
+         the command.
+   
+            NOTE: WDIR accepts and executes multiple commands.
+   
+            Examples:
+   
+           WDIR *.c "del" +r           <=== One "DEL" for each FILE
+           WDIR *.c "del" +r +m        <=== One "DEL" for each DIRECTORY
+           WDIR \cmds\*.BAT "copy" "delete"
+           (Copy all ".BAT" files from \cmds and then delete them)
+
+
+
+                                 PC Utilities
+
+                              TABLE OF CONTENTS
+
+
+                                                                        Page
+
+    1. INTRODUCTION                                                        1
+
+
+    2. CHATTR - Change file attributes                                     2
+
+
+    3. DIFF - A file compare program                                       3
+
+
+    4. DR - Date Ranger                                                    4
+
+
+    5. DUMP - File dump                                                    5
+
+
+    6. DUS - Disk Use Summary                                              6
+
+
+    7. EDT - Text editor                                                   7
+
+       7.1 Introduction                                                    7
+       7.2 Line mode operation                                             8
+       7.3 Visual mode operation                                          13
+
+    8. EXTRACT - Extract section of file                                  17
+
+
+    9. FDIR - Full screen directory                                       18
+
+       9.1 Introduction                                                   18
+       9.2 Command format                                                 18
+       9.3 Function keys                                                  19
+
+    10. FSCAN - File Consistancy Scanner                                  22
+
+       10.1 Introduction                                                  22
+       10.2 Command format                                                22
+
+    11. HEXED - Binary editor                                             23
+
+       11.1 Introduction                                                  23
+       11.2 Function Keys                                                 23
+       11.3 Commands                                                      25
+
+    12. LOCATE - Text file search                                         27
+
+
+
+   PC Utilities                                           Table of Contents
+
+                                                                        Page
+    13. OFF - CRT screen Saver                                            28
+
+
+    14. RETAB - File Re-Tabulator                                         29
+
+       14.1 Introduction                                                  29
+       14.2 Command format                                                29
+
+    15. SIZE - Report file sizes                                          30
+
+
+    16. TIMEIT - Time Command Execution                                   31
+
+
+    17. WDIR - Walk Directory                                             32
+
+       17.1 Introduction                                                  32
+       17.2 Command format                                                32

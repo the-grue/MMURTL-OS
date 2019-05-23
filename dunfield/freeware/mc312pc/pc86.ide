@@ -1,0 +1,36 @@
+rem Before using the IDE, you will have to configure it for your assembler
+rem and linker. It is currently configured for MASM and LINK, and will look
+rem for them in a directory called C:\CMDS. You must modify the 'step' items
+rem near the end of this file to reflect the correct command/options, as
+rem well as the directory where the assembler and linker are located.
+rem
+rem Details of the assemblers/linkers that are reported to work OK with
+rem MICRO-C and required command line options can be found in the comments
+rem near the beginning of the CC.C source file.
+rem
+file *.C
+temp 0 0
+tab 4
+rem Remove the following line if you have a MONOCHROME video system
+color WH|BL WH|MG BL|GR WH|RD BK|WH RD|CY BK|WH BL|WH
+rem Provide "hotkey" access to main menu items from editor
+key !C|$~F8C !T|$~F8T !O|$~F8O !F|$~F8F !K|$~F8K !A|$~F8A !B|$~F8B !L|$~F8L
+target 1 9600 0 1
+debug debug
+option
+	pick	0	Memory model     |Tiny$'PC86RL_T'A$Y5|Small$'PC86RL_S'A$N5
+	switch	0	Commented listing|-c
+	switch	1	Fold literals    |-f
+	switch	0	Optimizer debug  |-d
+	switch	0	ASM Listing file |,$f
+	switch	0	Linker MAP file  |$f|NUL
+	end
+setup $0
+step Preprocess|C|	$H\MCP.COM $I $O l=$H -q$' -l'1
+step Compile|ASM|	$H\MCC.COM $I $O -q $1 $2 $'-l'0
+step -Optimize|ASM|	$H\MCO.COM $I $O -q $3
+rem ** Modify these steps to be compatible with your assembler and linker
+step Assemble|OBJ|	C:\CMDS\MASM.EXE /t/ml $I $O$4;
+step Link|EXE|		C:\CMDS\LINK.EXE /noi $H\$A.OBJ $I,$O,$5,$H\MCLIB
+rem **
+step !Convert|COM|	$H\EXE2BIN.COM $I $O

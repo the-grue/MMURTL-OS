@@ -1,0 +1,22 @@
+LaserJet Commander: Performs common operations on a LaserJet printer.
+
+Use 'LZC' with no operands for NON-TSR operation.
+
+If HOTKEYS are specified on the command line, LZC will install
+itself as a TSR (Ram-Resident) program, which can be invoked at
+any time by pressing the HOTKEYS. Available HOTKEYS are:
+        L - Left SHIFT
+        R - Right SHIFT
+        A - ALT
+        C - CONTROL
+        S - SysRq (Caution: some systems may not like this one)
+
+    eg: LZC LR (Install with LEFT+RIGHT SHIFT for hotkeys)
+
+Once you have activated the program, you may use the up and down arrow
+keys to select an operation, and press <enter> to perform that function.
+
+<Home> and <End> will take you to the beginning and end of the list
+(respectivly), Press <escape> to exit the menu.
+
+All operations are performed on "LPT1".

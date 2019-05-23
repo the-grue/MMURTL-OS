@@ -1,0 +1,180 @@
+BOOTMENU is yet another program which allows you to select between multiple
+AUTOEXEC.BAT and CONFIG.SYS files when you turn on your computer. It can
+also be used to provide menu access to various "turnkey" applications,
+with or without switching to a new system configuration.
+
+- Easy to install and use... Single .COM file you call from AUTOEXEC.BAT's
+- "Smart" re-boot, only reloads DOS if the selection you make requires a
+  different AUTOEXEC or CONFIG file. You can have several selections, which
+  use the same files, but perform different functions based on the selection
+  number passed to AUTOEXEC.
+- Programmable timeout allows you to assume either a default configuration,
+  or the last one loaded if no selection is made.
+- AUTOEXEC's and CONFIG's can be separate files, or maintained in one large
+  file (or any combination thereof). You can piece together several small
+  files "on the fly" to build the actual AUTOEXEC or CONFIG that is used.
+
+** HOW IT WORKS:
+
+When DOS first loads, BOOTMENU presents you with a menu of available
+configurations (up to 10), and allows you to select one, by pressing the
+corresponding digit. A programmable timeout (in seconds) counts down, and
+will assume either a default configuration or the last one loaded if you
+do not select one before it expires. Pressing SPACE, RETURN or ESCAPE will
+proceed to load the default or last configuration immediately.
+
+Once a configuration has been determined, BOOTMENU looks at the AUTOEXEC
+and CONFIG file names defined for it, and if they are the same as the ones
+already in effect, BOOTMENU simply terminates, passing back the selection
+number as its ERRORLEVEL, this can be used by AUTOEXEC.BAT to perform
+different actions for the different selections.
+
+If one or both configuration files are different than the files which were
+in effect when DOS last booted, BOOTMENU copies the required one(s) (from the
+BOOTMENU directory) into \AUTOEXEC.BAT and/or \CONFIG.SYS, sets a flag for
+itself in the file BOOTMENU.CTL, and then performs a warm-start of the PC,
+rebooting DOS with the new configuration.
+
+When the PC re-boots, BOOTMENU knows from BOOTMENU.CTL that it is in a "reboot"
+phase, bypasses the menu, clears the BOOTMENU.CTL flag, and terminates with
+the selection number as its ERRORLEVEL.
+
+** SETTING UP BOOTMENU:
+
+To configure BOOTMENU, you must set up a file called BOOTMENU.CFG, which
+contains information used by the program.
+
+Thr first line in BOOTMENU.CFG has the following format:
+
+                    <timeout>[|default]
+
+    <timeout>   = This specifies the time (in seconds) that BOOTMENU will
+                  wait for you to pick a selection, before it proceeds to
+                  use its default value.
+
+    <default>   = The default menu selection number to assume when no
+                  other selection is made. If this is not defined, the
+                  the LAST configuration loaded becomes the default.
+
+The remaining lines in BOOTMENU.CFG have the following format:
+
+                <description>|<autoexec>|<config>
+
+    <dscription>= This is the text which will appear in the menu selection.
+                  It should not be longer than 70 characters.
+    <autoexec>  = This is the file that will be used as AUTOEXEC.BAT when
+                  this selection is made.
+    <config>    = This is the file that will be used as CONFIG.SYS when
+                  this selection is made.
+
+NOTES:  The <autoexec> and <config> files are kept in the BOOTMENU directory,
+        under any names you care to use, BOOTMENU copies them to \AUTOEXEC.BAT
+        or \CONFIG.SYS as necessary before re-booting dos.
+
+        You may specify several files for <autoexec> or <config>, with each
+        name separated by a comma (','). BOOTMENU will concatinate all of the
+        files into a single AUTOEXEC.BAT or CONFIG.SYS.
+
+        If you are using several small files, you may wish to group them
+        together into a single file. See "grouping files" later in this doc.
+
+        If an entry for <autoexec> or <config> is left blank, BOOTMENU will
+        leave the existing files installed for that selection.
+
+Each AUTOEXEC file should run the BOOTMENU program as near to the beginning
+as possible. !!! ALL AUTOEXEC's MUST EXECUTE BOOTMENU !!! If for some reason
+BOOTMENU is not executed after it has rebooted the system, it will fail to
+offer a menu the next time it is run (it thinks it's being run as a result of
+the re-boot it previously initiated).
+
+BOOTMENU looks for all of its file in the same directory in which BOOTMENU.COM
+is located. If you wish to use a different directory, you may specify the path
+to BOOTMENU as a command line argument. If you are using a version of DOS which
+is earlier than 3.0, you should ALWAYS specify the path on the command line.
+
+The first time you run BOOTMENU, you will see a message that it cannot find
+its control file (BOOTMENU.CTL), however it will create it before it terminates,
+and subsequent executions will not issue this message.
+
+** EXAMPLE FILES:
+
+    BOOTMENU.CFG:
+        10|0
+        Standard System|AUTOEXEC.1|CONFIG.1
+        1Meg Ramdisk|AUTOEXEC.1|CONFIG.2
+        Bare system|AUTOEXEC.2|NUL
+
+    AUTOEXEC.1:
+        @echo off
+        \BOOTMENU\BOOTMENU
+        path c:\dos;c:\cmds;c:\mc
+        prompt $p$g
+        set MCDIR=C:\MC
+        set MCTMP=E:\$
+        ver
+
+    AUTOEXEC.2
+        @echo off
+        \BOOTMENU\BOOTMENU
+
+    CONFIG.1
+        DEVICE=MOUSE.SYS 2 9600
+        FILES=20
+
+    CONFIG.2
+        DEVICE=VDISK.SYS 1024 512 64 /E
+        DEVICE=MOUSE.SYS 2 9600
+        FILES=20
+
+GROUPING FILES:
+
+With a hard drive, each file takes a minimum amount of disk space equal to
+one "cluster", and thus if you are using several very small files, you will
+waste some disk space with each file.
+
+BOOTMENU allows you to group some (or all) of your AUTOEXEC and CONFIG files
+into the single file "BOOTMENU.DAT". Each file is tagged with a line that
+begins with '!', and contains the logical name by which you wish to refer
+to the file. The '!' character is also used in the BOOTMENU.CFG file to
+indicate files which are to be extracted from BOOTMENU.DAT.
+
+For example, the above sample files could also be setup as:
+
+    BOOTMENU.CFG:
+        10|0
+        Standard System|!AUTOEXEC.1|!CONFIG.1
+        1Meg Ramdisk|!AUTOEXEC.1|!CONFIG.2
+        Bare system|!AUTOEXEC.2|NUL
+
+    BOOTMENU.DAT
+        !AUTOEXEC.1
+        @echo off
+        \BOOTMENU\BOOTMENU
+        path c:\dos;c:\cmds;c:\mc
+        prompt $p$g
+        set MCDIR=C:\MC
+        set MCTMP=E:\$
+        ver
+        !AUTOEXEC.2
+        @echo off
+        \BOOTMENU\BOOTMENU
+        !CONFIG.1
+        DEVICE=MOUSE.SYS 2 9600
+        FILES=20
+        !CONFIG.2
+        DEVICE=VDISK.SYS 1024 512 64 /E
+        DEVICE=MOUSE.SYS 2 9600
+        FILES=20
+
+SOURCE CODE:
+
+The MICRO-C source code for BOOTMENU is included. Permission is given to
+modify and use this program for personal (non-commerical) use only.
+
+Note: Since BOOTMENU uses the MICRO-C Windowing Library (which is not included
+      in the shareware demo version of the compiler, you will need the
+      commercial MICRO-C package to re-compile BOOTMENU.C
+
+Enjoy!
+
+Dave Dunfield

@@ -1,0 +1,218 @@
+Notes on CUBIX FORTH implementation:
+
+>> Stack Manipulation Operators
+
+    DROP        -   Drop one entry from the stack
+    DROPN       -   Drop TOS entries from the stack
+    DUP         -   Push TOS (duplicate TOS)
+    OVER        -   Push TOS-1 (copy TOS-1)
+    ROT         -   Rotate top three stack entries
+                    (TOS-2 = TOS-1, TOS-1 = TOS, TOS = TOS-2)
+
+>> Binary Arithmetic Operators
+
+    +           -   Push TOS added to  TOS-1
+    -           -   Push TOS subtracted from TOS-1
+    D+          -   Push(2) (TOS,TOS-1) added to (TOS-2,TOS-3)
+    D-          -   Push(2) (TOS,TOS-1) subtracted from (TOS-2,TOS-3)
+    *           -   Push TOS multiplied by TOS-1 (Signed)
+    U*          -   Push TOS multiplied by TOS-1 (Unsigned)
+    /           -   Push TOS-1 Divided by TOS (Signed)
+    /MOD        -
+    U/MOD       -
+    M/MOD       -
+    AND         -   Push TOS logically anded with TOS-1
+    OR          -   Push TOS logically ored with TOS-1
+    XOR         -   Push TOS exclusively ored with TOS-1
+    =           -   Push 1 if TOS-1 is equal to TOS, 0 otherwise
+    <>          -   Push 1 if TOS-1 is not equal to TOS, 0 otherwise
+    >           -   Push 1 if TOS-1 is greater than TOS, 0 otherwise
+    <           -   Push 1 if TOS-1 is less than TOS, 0 otherwise
+    >=          -   Push 1 if TOS-1 is greater than or equal to
+                    TOS, 0 otherwise.
+    <=          -   Push 1 of TOS-1 is less than or equal to
+                    TOS, 0 otherwise.
+
+> Unary Arithmetic Operators
+
+    COM         -   Complement TOS (one's complement)
+    NEG         -   Negate TOS (two's complement)
+    ABS         -   Push ABSOLUTE value of TOS
+    1+          -   Increment TOS
+    1-          -   Decrement TOS
+    2+          -   Increment TOS by 2
+    2-          -   Decrement TOS by 2
+    2*          -   Multiply TOS by 2
+    2/          -   Divide TOS by 2
+    0=          -   Push 1 if TOS is equal to zero, 0 otherwise
+
+> Input/Output Operators
+
+    KEY         -   Push character from general input device
+                    [see '(IN)'].
+    EMIT        -   Write TOS as a character to general output
+                    device. [see '(OUT)'].
+    SPACE       -   Display a space on general output device.
+    CR          -   Display carriage return & line feed on general
+                    output device.
+    ." string"  -   Outputs the operand string to the general output
+                    device (Compile only word).
+    .MSG        -   Display string at address in TOS on general
+                    output device. (zero terminates)
+    .WRD        -   Display word at address in TOS on general
+                    output device. (Space or zero terminates)
+    .           -   Write TOS to general output device  [see '(OUT)']
+                    as signed number in current base.   [See 'BASE']
+    U.          -   Write TOS to general output device  [see '(OUT)']
+                    as unsigned number in current base. [see 'BASE']. 
+    READ        -   Read a line from the general input device into
+                    the input buffer.
+    SKIP        -   Advance the input scanner pointer to the
+                    next non-blank.
+    NUMBER      -   Get a number from the input stream in the
+                    current number base [see 'BASE'].
+    $IN         -   Push character from console terminal.
+    $OUT        -   Write TOS as a character to console terminal.
+
+> Variable and Storage Manipulation Operators
+
+    @           -   Push word value read from address in TOS
+    C@          -   Push byte value read from address in TOS
+    !           -   Word store of TOS-1 at address in TOS
+    C!          -   Byte store of TOS-1 at address in TOS
+    +!          -   Add TOS-1 to contents of address in TOS
+                    and resave result at that address.
+    -!          -   Subtract TOS-1 from contents of address in TOS
+                    and resave result at that address.
+
+> Conditional and Looping Operators
+
+    IF          -   Executes the following code (up to ELSE or ENDIF)
+                    only if TOS is not zero.
+    ELSE        -   Executes the following code only if the preceeding
+                    IF statment found TOS to be zero.
+    ENDIF       -   Terminates an IF/ELSE construct.
+    DO          -   Begins a DO loop construct, using a beginning
+                    counter value of TOS, and an ending value of TOS-1
+    LOOP        -   Increments the counter, and jumps back to the
+                    beginning of the code following 'DO' if it does not
+                    match the ending value specified to the 'DO'
+                    statement.
+    +LOOP       -   Adds TOS to the counter and jumps back to the
+                    beginning of the code following 'DO' if it does
+                    not match the ending value specified to the 'DO'
+                    statement.
+    I           -   Pushes value of the innermost 'DO' counter.
+    J           -   Pushes value of the second innermost 'DO' counter.
+    K           -   Pushes value of the third innermost 'DO' counter.
+    BEGIN       -   Begins a BEGIN loop construct
+    FOREVER     -   Unconditionaly jumps back to the beginning of the
+                    code following the matching 'BEGIN' statement.
+    WHILE       -   Tests TOS, and jumps back to the code following
+                    the matching 'BEGIN' statement if it is not zero.
+    UNTIL       -   Tests TOS, and jumps back to the code following
+                    the matching 'BEGIN' statement if it is zero.
+> Misc. Operators
+
+    EXEC        -   Begin execution at address in TOS.
+    ' <word>    -   Push the address of the following word.
+    QUIT        -   Invokes the console command interpreter,
+                    used to terminate word execution.
+    BYE         -   Exit FORTH and return to the operating system.
+    >R          -   Push TOS on the return stack
+    <R          -   Pop the top of the return stack and push
+                    value on the data stack.
+    RP!         -   Reset the return stack. Note, after using
+                    this operator, a word may not return to its
+                    calling word, but must use the 'QUIT' word
+                    to terminate.
+    SP!         -   Reset the data stack (Remove all entries)
+    'S          -   Push the address of the top of the stack (TOS)
+    ( )         -   Comment definition, all data between the
+                    brackets is ignored.
+
+> Dictionary Manipulation Operators
+
+    VLIST       -   Display names of all defined words
+    FORGET <word>
+                -   Remove the named word and all subsequently
+                    defined words from the dictionary.
+    CREATE <name>
+                -   Create an entry for the named word in the
+                    dictionary. The word defintion points to
+                    first free memory address at the end of
+                    the dictionary.
+    ALLOT       -   Allocate TOS bytes of free space at the end
+                    of the dictionary.
+    VARIABLE <name>
+                -   Defines a variable with the indicated name.
+                    Execution of the name will place on the stack
+                    the address of the variable (1 word). The variable
+                    may then be read or set using the '@' and '!'
+                    operators or their variants.
+    " string"   -   Compilies the operand string at the end of the
+                    dictionary. At execution time, the address of the
+                    string will be placed on TOS, and a jump around
+                    the string executed.
+    : <name>    -   Begins defintion of a new word which will
+                    be created with the indicated name. All following
+                    words up to a ';' will be compiled into the
+                    word, and will be executed sequentially when the
+                    word is invoked.
+    ;           -   Ends definition of a new word.
+    [CR]        -   Compile a return instruction at the end of the
+                    dictionary (in the word currently being defined).
+    [CL]        -   Compile the value of TOS as a literal value at the
+                    end of the dictionary (in the word currently being
+                    defined).
+    [CW]        -   Compile a call to the word address in TOS at the end
+                    of the dictionary (in the word currently being
+                    defined).
+    [C1]        -   Compile a single byte value TOS at the end of the
+                    dictionary (in the word currently being defined).
+    [C2]        -   Compile a word value TOS at the end of the dictionary
+                    (In the word currently being defined).
+    [EC]        -   Causes last (or currently) defined word to be set
+                    to execute during compilation. This will cause the
+                    word to be executed whenever it is used in a ':'
+                    definition, rather than being compiled into the new
+                    word defintion. This allows the word to "become"
+                    part of the compiler, and "build" its own entries
+                    into the new words defintion.
+    [FC] <word> -   Force compilation of a call to the next word, even
+                    if it is normally executed during compilation.
+    [NI]        -   Causes last (or currently) defined word to be set
+                    to non-interactive. This causes an error message to
+                    be issued if the word is executed from the keyboard,
+                    allowing it only to be used during the compilation
+                    of other words. This is particularly useful when the
+                    word in question builds onto the definition of a word
+                    under compilation, and therefore could corrupt the
+                    dictionary is used outside of the context of a
+                    compilation.
+    [NC]        -   Causes last (or currently) defined word to be set to
+                    be non-compiling. This causes an error message to
+                    be issued if an attempt is made to use this word in
+                    the compilation of a new word.
+    EXEC>       -   Compiles a jump to the remainder of this word at the
+                    end of the dictionary (in the word currently being
+                    compiled). This allows a word to perform some
+                    dictionary building at compile time, and then
+                    to perform some other operations at run time.
+
+> System Variables
+
+    HERE        -   Contains the address of the last word defined
+                    in the dictionary.
+    FREE        -   Contains the address of the first free memory
+                    memory location at the end of the dictionary.
+    BASE        -   Contains the current number base [Default 10].
+                    Used by '.' and 'U.', as well as 'NUMBER'.
+    >IN         -   Contains the address of the current position of
+                    the input scanner pointer in the input buffer.
+    (IN)        -   Contains address of word to execute for general
+                    input device. [Default $IN]
+    (OUT)       -   Contains address of word to execute for general
+                    output device. [Default $OUT]
+    (GO)        -   Contains address of word to execute when the
+                    forth system is first started [Default 'QUIT'].

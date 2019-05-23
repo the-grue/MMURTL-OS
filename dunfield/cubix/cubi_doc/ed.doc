@@ -1,0 +1,332 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                       ED
+    
+                             A tiny screen oriented
+                             text editor for CUBIX.
+    
+                               Revised: 30-Jul-90
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1983,1990 Dave Dunfield
+                              All rights Reserved
+    ED USERS GUIDE                                                   Page: 1
+
+
+    1. INTRODUCTION
+    
+          ED is a tiny screen oriented window  editor,  which  runs  on  the
+       motorola 6809 under the CUBIX operating  system,  using  a  VT100  or
+       compatable terminal. It is patterned after  a  screen  editor  widely
+       used on popular minicomputers, but is much simpler and supports  only
+       a small subset of that editors  features.  Its  main  advantages  are
+       small size and simple user interface.
+    
+    2. INVOKING ED
+    
+          To use ED to edit a file, issue the following command to the DOS:
+    
+                               ' ED <filename> '
+    
+          Where <filename> is the name of the file you wish to edit. If  the
+       named file already exists, then ED will  load  it  into  memory,  and
+       begin the editing session. If the file did not already exist, ED will
+       display the message 'NEW FILE' in the message window  at  the  bottom
+       left hand corner of the screen, and present you with a  blank  screen
+       into which you can enter and  edit  data.  When  the  data  entry  is
+       complete, and you issue the 'EXIT' command, ED will create the  file,
+       and save the data in it.
+    ED USERS GUIDE                                                   Page: 2
+
+
+    3. EDITING WITH ED
+    
+          When ED is invoked, it will clear  the  screen,  and  display  the
+       first 22 lines of the file. The message '[EOF]' is displayed  at  the
+       end of the file, if that portion  of  the  file  is  visible  on  the
+       screen.
+    
+          Any non-displayable (control) characters will be  displayed  as  a
+       printable character in reverse video. EG:  A  BELL  character,  is  a
+       CONTROL-G, and will be shown on the screen as a reverse 'G'.
+    
+          The ASCII  delete  character  'DEL'  is  displayed  as  a  reverse
+       underline.
+    
+          ED allows data to be entered into the file, always at the position
+       of the terminal cursor on the screen. Any ASCII text can be typed in,
+       and will be inserted at the position indicated by the cursor.
+    
+          In order  to  help  avoid  errors,  ED  normally  rejects  control
+       characters if they are entered, but will  accept  them  if  they  are
+       preceded by an <escape> character. To  enter  an  <escape>  character
+       into the text, simply press the escape key twice.
+    
+          The cursor keys on the terminal can  be  used  to  reposition  the
+       cursor to any desired position within the text. If the cursor reaches
+       the upper or lower boundarys of the editing window, then the text  in
+       the window will be scrolled in the direction desired.
+    
+          The cursor may only move over the areas of screen which represents
+       actual text in the file. If the cursor is moved up or  down  via  the
+       cursor keys to a line which is not long enough to reach the  previous
+       horizontal cursor position, then ED will move the cursor in  the  the
+       end of that line. In this case, ED will remember the previous  cursor
+       position, and if further up or down movement is made via  the  cursor
+       keys, ED will attempt to restore the cursor to it's  previous  cursor
+       position. Any other key except for the up and down cursor  keys  will
+       reset this "remembered" horizontal position.
+    ED USERS GUIDE                                                   Page: 3
+
+
+       3.1 Keypad key functions
+    
+             The keypad of the VT-100 or compatable terminal is used  by  ED
+          to perform several editing functions. The keys on the keypad  have
+          the following meaning to ED:
+    
+          3.1.1 PF1 (Command)
+    
+                Pressing this key causes ED to prompt for a command  in  the
+             message window (at the bottom lefthand corner of  the  screen),
+             and allows an ED  command  to  be  typed  in.  The  command  is
+             terminated by pressing of the keypad keys, or the cursor keys.
+    
+          3.1.2 PF2 (Help)
+    
+                Pressing this key causes ED to display a  short  summary  of
+             the special keys used by ED, and a summary of commands.
+    
+          3.1.3 PF3 (Find)
+    
+                Pressing this key causes ED to prompt for a  string  in  the
+             messasge window, and allows a string to be entered  (Terminated
+             by any keypad key).  ED  will  then  search  for  that  string,
+             starting with  the  second  line  currently  displayed  on  the
+             screen, and if it finds it, will move the display such that the
+             line containing the string is at the top of the screen. If  the
+             string is not found,a  message  is  displayed  in  the  message
+             window, indicating so.
+    
+          3.1.4 PF4 (Delete Line)
+    
+                Pressing this key causes ED to delete  all  characters  from
+             the cursor up to and including the end of the line  the  cursor
+             is on.
+    
+          3.1.5 [0] (Advance line)
+    
+                This key moves the cursor  to  the  beginning  of  the  line
+             following the line is which it is currently positioned.
+    
+          3.1.6 [1] (Backup Line)
+    
+                This key moves the cursor to the beginning of the line it is
+             on. If the cursor was already at the start of the line, then it
+             is moved to the start of the previous line.
+    
+          3.1.7 [2] (End of line)
+    
+                This key moves the cursor to the  end  of  the  line  it  is
+             currently on. If the cursor was already at the end of the line,
+             then it is moved to the end of the next line.
+    ED USERS GUIDE                                                   Page: 4
+
+
+          3.1.8 [3] (Delete to Buffer)
+    
+                This key functions exactly the same as the (Delete Line) key
+             except that the text which is deleted is  also  appended  to  a
+             buffer  called  the  "insert  buffer".  This  buffer   may   be
+             reinserted into the text at  a  different  location  using  the
+             (Insert Buffer) key.
+    
+          3.1.9 [4] (Top of File)
+    
+                This key moves to and displays the first  22  lines  of  the
+             file.
+    
+          3.1.10 [5] (Bottom of File)
+    
+                This key moves to and displays the  last  22  lines  of  the
+             file.
+    
+          3.1.11 [6] (Insert Buffer)
+    
+                Pressing this key inserts the entire contents of the  insert
+             buffer at the current cursor position. This has the  effect  of
+             inserting all lines which were deleted  using  the  (Delete  to
+             Buffer) key. The insert buffer is also reset,  causing  further
+             Deletes to the buffer to start with an empty buffer.
+    
+          3.1.12 [7] (Page Back)
+    
+                Pressing this key causes ED to  backup  the  display  by  21
+             lines, thereby moving the line currently displayed at  the  top
+             of the screen to the bottom of the screen.
+    
+          3.1.13 [8] (Page forward)
+    
+                Pressing this key causes ED to advance  the  display  by  21
+             lines, threreby moving the  line  currently  displayed  at  the
+             bottom of the screen to the top of the screen.
+    
+          3.1.14 [9] (Find Next)
+    
+                This key operates the same as the (Find) key, except that ED
+             does not prompt for the string to  search  for,  but  uses  the
+             string from the last find operation.
+    
+          3.1.15 [-] (Undelete Line)
+    
+                This key inserts all of the text which was deleted  via  the
+             (Delete Line) key, at the current cursor position.
+    
+          3.1.16 [,] (Delete Character)
+    
+                This key delete's the character under the cursor.
+    
+          3.1.17 [.] (Reset Buffer)
+    
+                This  key  resets  the  insert  buffer,  causing  subsequent
+             deletes to the buffer to begin with an empty buffer.
+    ED USERS GUIDE                                                   Page: 5
+
+
+          3.1.18 [ENTER] (Toggle Insert Mode)
+    
+                Pressing this key toggles INSERT mode on and off. A  message
+             is shown in the message window, indicating the  current  insert
+             status (After it is toggled). When INSERT mode is toggled  OFF,
+             any text that is typed  into  the  editor  will  overwrite  the
+             current contents of the  file.  The  following  characters  are
+             always inserted, regardless of the state of INSERT mode:
+    
+                1) - Carriage returns (new lines)
+                2) - Spaces produced by the TAB key.
+                3) - Any character typed at the end of a line.
+    
+       3.2 Other keys
+    
+             The following other (non keypad) keys have special  meaning  to
+          ED:
+    
+    
+          3.2.1 <ESC> (Escape Key)
+    
+                This key if pressed will cause the next character  typed  to
+             be entered into the text exactly as it is received. This allows
+             control codes, and keys  recognized  by  ED  (EG:  TAB)  to  be
+             entered into the text.
+    
+          3.2.2 <TAB> (Tab Key)
+    
+                Pressing this key will insert spaces into the text, up until
+             the next TAB STOP. Tab stops begin in column number  nine,  and
+             continue every eight character positions after that.
+    
+          3.2.3 <DEL> (Delete Key)
+    
+                Pressing this key deletes the  character  to  the  immediate
+             left of the cursor, and backs the cursor up one position.
+    ED USERS GUIDE                                                   Page: 6
+
+
+       3.3 ED Commands
+    
+             The following commands can be entered by pressing the (Command)
+          Key (PF1).
+    
+             (Capital letters indicate minimum abreviation required).
+             (Square braces indicate optional operands)
+    
+          3.3.1 APpend <filename>
+    
+                Appends the specified  file  to  the  file  currently  being
+             edited.
+    
+          3.3.2 DOs [<command>]
+    
+                Executed the DOS  command  specified  by  <command>.  If  no
+             command is given, then the DOS is entered, allowing  return  to
+             ED via the DOS 'RETURN' command. Care must be taken not to load
+             of execute anything which would load or use memory  on  top  of
+             ED, or the file being edited.
+    
+          3.3.3 EXit
+    
+                Terminates ED, saving the file.
+    
+          3.3.4 QUIT
+    
+                Terminates ED, without saving the  file.  Any  changes  made
+             since the start of the editing  session,  or  the  last  'SAVE'
+             command are lost.
+    
+          3.3.5 SAve <filename>
+    
+                Saves the contents of the file being edited in the specified
+             file. If no <filename> is specified, the file  is  saved  under
+             it's own name.
+    
+          3.3.6 SPAces
+    
+                Expands any tab characters in the file to the correct number
+             of spaces, using the same tab stops as the TAB key.  For  large
+             files, this command may take some time to execute.
+    
+          3.3.7 TABs
+    
+                Converts spaces in a file to TAB characters, using the  same
+             tab stops as the TAB key.
+    
+                If a NULL LINE is entered in response to the command prompt,
+             ED will refresh the screen. IE: To get a screen refresh,  press
+             the command key twice.
+
+
+
+                                 ED USERS GUIDE
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. INVOKING ED                                                         1
+
+
+     3. EDITING WITH ED                                                     2
+
+        3.1 Keypad key functions                                            3
+        3.2 Other keys                                                      5
+        3.3 ED Commands                                                     6

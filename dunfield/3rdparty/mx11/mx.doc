@@ -1,0 +1,1181 @@
+
+
+
+
+
+
+
+
+
+
+
+
+                  MX-11: A Multitasking Executive for the MC68HC11.
+
+                                     Version 1.0
+
+                                    Kevin J White
+
+                                      12/12/93
+
+          Introduction
+
+          MX-11 provides a pre-emptive multitasking environment for the
+          Motorola MC68HC11 that can be used with programs written using
+          Dunfield Development Systems' MICRO-C/11.
+
+          I created MX-11 to simplify the task of writing software for data
+          acquisition and house automation projects.  I wanted to be able
+          to write modular software in a high-level language that could
+          retrieve data from sensors or switches, operate on the data and
+          then feed the data to displays or control other peripherals.
+          MX-11 does this by providing a library of C callable functions
+          that allow multiple operations to be performed on one processor
+          in an event-driven manner.  Actions can be triggered by external
+          events or internally by timers or another software task.
+
+          I have used the software mainly on MC68HC11A8's using the BUFFALO
+          monitor, it can be configured for other monitors,and other
+          variants of the 68HC11 by modifying the equate files.
+
+          Using MX-11
+
+          MX-11 is used by defining one or more tasks in your code and then
+          activating them according to your needs.
+
+          A task is created by writing a C function, and then defining it
+          as a MX-11 task using the function deftask().  This task can then
+          be activated by passing a message from another task or at
+          specific time intervals by adding the task to the polling list.
+
+          When a task is running it can communicate with other tasks by
+          messages or semaphores.  It can also use sleep() to inhibit the
+          task for a specified period.  If a task terminates it can be
+          reactivated by another task sending it a message
+
+          Tasks have a fixed priority that is set when the task is defined.
+          Whenever a task is made runnable or a running task is blocked,
+
+
+                                                                   Page - 2
+
+
+          MX-11 will enable the highest priority runnable task.  A
+          suspended task will be reactivated when the task is unblocked by,
+          for example a timer expiring or a semaphore being set.
+
+          MX-11 takes about 1.5-2.5k of memory space (depending upon which
+          functions you link in).  There are some areas where it could be
+          shrunk a bit.  For most of the applications I have had so far it
+          has not been a critical problem.
+
+          Compiling your program with MX-11.
+
+          In order to use the MX-11 functions they must be made available
+          to the MICRO-C source linker.  This is done by putting the
+          library files in the appropriate directory (usually \mc\lib11),
+          modifying the index file so that MICRO-C knows in which file the
+          functions are placed and then compiling and assembling the source
+          in the normal fashion to produce a hex file for download to the
+          target processor.
+
+          Running your Program.
+
+          The hexfile should be transferred to the target using a terminal
+          emulation program and a monitor such as BUFFALO or MON11.  When
+          the program is started the mxinit() function will set up the data
+          structures for MX-11 and output compare 1 for its real-time
+          clock.  The MX-11 function are then available for use.
+
+          Installation.
+
+          MX-11 should be installed on a machine that has the Dunfield
+          Development Systems Micro-C MC68HC11 compiler already in place.
+          I have used it with both version 2.14 and 3.0 although the examples
+          use structs which are not provided in version 2.14  The following
+          steps should be performed:
+
+          1:   Copy all of the files from the "obj" directory into your
+               LIB11 directory (usually c:\mc\lib11).  These files are the
+               sources that have been processed by sconvert.  For debugging
+               purposes you may want to copy the files directly from the
+               "src" directory so that the comments are included in the
+               linked output.
+
+          2:   Merge the file "MXINDEX.LIB" into the file "EXTINDEX.LIB"
+               which is usually in \MC\LIB11.  (This is so SLINK can find
+               the MX functions).  If you are using MON11 rather than the
+               BUFFALO monitor you should edit the MXVECT.EQU file.
+
+          Edit and compile your Micro-C programs in the normal fashion.
+          The MX-11 code will be linked with your software by the MICRO-C
+          source linker.
+
+
+                                                                   Page - 3
+
+
+
+          The example programs show the basic methods of using MX-11.
+          EX2.c has a monitor section that displays the MX-11 variables
+          displaying the status of the various tasks.  You could include
+          that code in your own programs.  Since MX-11 is multitasking the
+          monitor can be active simultaneously with the other tasks your
+          program needs to perform.  You can view memory or the activities
+          of your software while it is running.
+
+          Notice that the header file "MX.H" must be included in your
+          program, and "mxinit()" called before you use any of the MX-11
+          functions.
+
+          Hardware Configuration
+
+          My designs have all used a MC68HC11A8 with the BUFFALO monitor
+          (version 2.5 in ROM or 3.4 in non-volatile RAM).  For the
+          development of MX-11 I used a system with 32k of SRAM from $0-
+          $7FFF and 32k of non-volatile RAM from $8000-$FFFF (this is a 32k
+          RAM in a DALLAS Smartsocket).  I use BUFFALO version 3.4 with the
+          registers allocated at $1000.  Programs (Including the example
+          programs) start at $1040.
+
+          MX-11 uses output compare 1 for its real-time clock to give the
+          main system tick at 20Hz.  It assumes an 8MHz clock.  If the
+          clock is different you will need to adjust the divide ratio
+          defined by TM1CNT in MX.EQU.  (The counter actually runs at 40Hz
+          and divides by 2 because the maximum time for the counter is 32
+          milliseconds).
+
+          The SCI and its interrupt vector is also used by the serial port
+          driver.  No other hardware specific resources are used.  Note
+          that BUFFALO uses 0C5 and the XIRQ for its trace function.
+
+          The addresses of the interrupt vectors are defined in the
+          MXVECT.EQU file.  Edit this if your system uses has the interrupt
+          vectors at a different location.
+
+          MX-11 could run out of ROM.  The only function that would need
+          modification is the MXSTKCHK() function that patches the core
+          task dispatcher.  The stack check function is mainly for debug
+          purposes so this should not be a problem.
+
+          How does MX-11 work?
+
+          The core parts of MX-11 are in the file MXKERNAL.ASM.  The
+          central routine is MXSWCH: the task switcher.  Whenever a
+          significant event, such as the expiration of a timer, or any of
+          the MX-11 function calls are made, they exit through MXSWCH.  It
+          then searches through all the tasks that have been defined and
+          starts up the highest priority one that is runnable.
+
+
+                                                                   Page - 4
+
+
+
+          Information about athe task is contained in the Task Control
+          Block (TCB) that is allocated for every task when it is defined.
+          The address of the TCB is returned by deftask() when a task is
+          defined.  It should be saved in a variable as many of the MX-11
+          functions require that you pass the TCB of the target task.
+
+          When mxswch is called the current task has it's context stored on
+          the stack as if it had been interrupted.  MX-11 can then use an
+          RTI to resume a task.  It also saves the contents of the ?PARM
+          and ?TEMP locations that are used by the MICRO-C library.
+
+          The current status of a task is maintained in the "tstat" record
+          of the TCB.  A task can be dormant, sleeping, waiting on a
+          semaphore etc.  (The various states are defined in MX.EQU).  Some
+          of the function calls modify the state of a task.  For example
+          the sleep() call puts the task into a sleep state and also sets
+          up a timer to reawaken the task after a specified interval.
+
+          MX-11 sets up OC1 as a real time clock to interrupt every 25
+          milliseconds, on alternate ticks the timer functions are
+          processed.  The timers use another important data structure, the
+          Message Control Block (MCB).  A pool of these structures is
+          created in the heap at initialization time and they are used for
+          messages, timers, semaphores and the pollqueue.
+
+          When a timer is created the differential time relative to other
+          timers is calculated and the MCB is inserted into the list of
+          timers.  Normally only the head of the timer chain has to be
+          processed.  When it does expire the other MCB's are inspected in
+          case any timers are coterminous.  At expiration the command that
+          was stored with the MCB is executed: eg. send a message or awaken
+          a task.
+
+          Another use of the MCB is for defining the pollqueue.  A task can
+          be linked onto one of four pollqueues.  Every task is sent a
+          defined message at the interval for that queue.  Currently there
+          are queues defined for 1/20 second, second and minute polling.
+
+          Messages and semaphores also use MCB's, they are linked in a
+          chain to the destination task.  When the message is received or
+          the semaphore is closed the MCB is returned to the pool.
+
+          Hints for writing software using MX-11.
+
+          Writing code for use in a multitasking environment requires that
+          you be aware of the activity of all tasks. Any particular task
+          may be paused and another start executing at any moment.  Be
+          especially careful of global variables or transferring data from
+          one task to another in pieces larger than the processor can
+          handle in an atomic operation.  If multiple tasks need access to
+
+
+                                                                   Page - 5
+
+
+          a common resource then you should use a semaphore to control
+          access.  Cputstr() and Cprintf() use one to ensure that one task
+          does not interrupt data coming from another task.  You can also
+          disable interrupts, but this prevents any other tasks from
+          executing and is not recommended.
+
+          Be careful if you are writing ISR's:  They execute using the
+          stack of the task they interrupt and if they become blocked by
+          MX-11 they could cause a deadlock.
+
+          If an interrupt service routine changes the state of any task it
+          needs to allow "mxswch" to run.  This can be by exiting the ISR
+          through "mxswchi" or by calling another MX-11 function that will
+          do it.  If there was no change to any task status then it is
+          faster to do a normal RTI exit.  As an example look at the code
+          for the serial port in MXCOMM.ASM to see how I use semaphores
+          within an ISR (These ISRs don't call mxswchi since the call to
+          ssignal already does that).
+
+          Future Development.
+
+          The current version of MX-11 has enough functionality for use in
+          many projects.  There are areas where its capabilities could be
+          enhanced, I intend to add additional features as needs become
+          evident.
+
+          Currently I am working on improving the handling of task
+          priorities, adding queues for inter-process communication and a
+          library module to allow easy time manipulation for use in a
+          script driven home-controller project.
+
+          Please contact me if you find bugs or if there are any features
+          that you would find useful.  I would also like to know if you
+          successfully use the software.  Good luck.
+
+          Kevin J. White.
+          337 Pennsylvania Avenue
+          Los Gatos
+          CA 95030
+
+          Internet address kevin@novell.com
+
+
+                                                                   Page - 6
+
+
+                             Summary of MX-11 functions.
+                             ---------------------------
+          Initialization functions
+          ------------------------
+          defpoll(taskh,pollq,msg)           add task to poll list.
+          deftask(&task, stack_size, name)   initialize task.
+          mxinit(stack_size,num_tcb,num_mcb) initialize MX-11.
+
+          Timer functions
+          ---------------
+          gettime()                     get hardware timer.
+          getTOD(time)                  get time of day.
+          setTOD(time)                  set time of day.
+          sleep(timeout)                pause task.
+
+          Message Functions
+          -----------------
+          chkmsg()                      check if message available.
+          flushmsg()                    flush all messages for task.
+          getmsg()                      get next message from queue.
+          sendmsg(taskh,msg)            send message to task.
+          sendmsgd(timeout,msg)         send message to self after delay.
+
+          Semaphore functions
+          -------------------
+          sclose(&sema)                 close semaphore.
+          sopen(initial_value)          get handle to semaphore.
+          ssignal(&sema)                signal semaphore.
+          swait(&sema,timeout)          wait on semaphore.
+          swaittim(&sema,timeout)       wait on semaphore with timeout.
+
+          Serial port functions
+          ---------------------
+          Cgetc()                       get character from serial port.
+          Copen(inbufsize,outbufsize)   initialize serial I/O.
+          Cprintf(format_string,args..) printf to serial port.
+          Cputc(c)                      print character to serial port.
+          Cputstr(string)               print string to serial port.
+          Ctestc()                      test for character at serial port.
+
+
+                                                                   Page - 7
+
+
+          CGETC
+
+          PROTOTYPE:
+
+          char Cgetc ()
+
+          ARGUMENTS:
+
+          none.
+
+          RETURN VALUE:
+
+          character from serial port.
+
+          DESCRIPTION:
+
+          The "Cgetc" function obtains a character from the serial port.
+          Copen must have been called to initialize the serial port.
+
+          If there is already a character in the input buffer, the function
+          will return immediately.  If not the task will block waiting for
+          one.  Multiple tasks can wait simultaneously, although it will be
+          ambiguous which task receives which character.
+
+          EXAMPLE:
+
+          c=Cgetc(); /* Get a character from the serial port */
+
+
+                                                                   Page - 8
+
+
+          CHKMSG
+
+          PROTOTYPE:
+
+          int chkmsg()
+
+          ARGUMENTS:
+
+          None
+
+          RETURN VALUE:
+
+          Zero if none available.
+          One if at least one message available.
+
+          DESCRIPTION:
+
+          This function checks for availability of a message without
+          blocking the task.
+
+          EXAMPLE:
+
+          if (chkmsg()) printf("Message is %d\n", getmsg());
+
+          else printf("No Message Available\n");
+
+
+                                                                   Page - 9
+
+
+          COPEN
+
+          PROTOTYPE:
+
+          Copen(int in_buffer_size, int out_buffer_size)
+
+          ARGUMENTS:
+
+          in_buffer_size      Size of input buffer to allocate (bytes).
+          out_buffer_size     Size of output buffer to allocate (bytes).
+
+          RETURN VALUE:
+
+          0 for success
+          -1 for failure.
+
+          DESCRIPTION:
+
+          The "Copen" initializes the interrupt driven serial I/O driver.
+          It allocates buffer space from the heap for circular input and
+          output buffers.  It is assumed that the monitor program will have
+          initialized the baud rate, and this is not changed (BUFFALO sets
+          it to 9600bps).
+
+          This function must be called before any of the communication
+          functions are called.  The driver is interrupt driven and uses
+          semaphores to block tasks waiting for data transmission or
+          reception.  The communication functions are provided in module
+          MXCOMM.ASM.
+
+          EXAMPLE:
+
+          Error=Copen(8,80);/* byte input buffer, 80 byte output buffer */
+
+
+                                                                  Page - 10
+
+
+          CPRINTF
+
+          PROTOTYPE:
+
+          Cprintf(char *format_string, arg, arg,..)
+
+          ARGUMENTS:
+
+          Same as standard printf()
+
+          RETURN VALUE:
+
+          None
+
+          DESCRIPTION:
+
+          The "Cprintf" function prints to the serial port as in the
+          conventional printf.  A semaphore is used to ensure that the
+          entire string will be printed as one stream, not being
+          interspersed with characters from other tasks.
+
+          If the serial transmit buffer is full or another task has the use
+          of the port, then the task will be blocked.
+
+          Cprintf() passes the number of parameters in the D register, it
+          must be declared as a register function.  This can be done by
+          including mx.h in your program.
+
+          EXAMPLE:
+
+          Cprintf("This is some text to printf and a number %d\n",j);
+
+
+                                                                  Page - 11
+
+
+          CPUTC
+
+          PROTOTYPE:
+
+          Cputc (char c)
+
+          ARGUMENTS:
+
+          c              character to print.
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          The "Cputc" function prints one character to the serial port.
+          Copen must have been called to initialize the serial port.
+          If the transmit buffer has space the character is put into the
+          buffer and the function returns.  If the buffer is full, the task
+          is set waiting on a semaphore and will be blocked.  If multiple
+          tasks attempt to transmit simultaneously, the characters will be
+          transmitted in the order of function calls, regardless of the
+          priority of the calling task.  If the buffer is full there may be
+          multiple tasks waiting on the semaphore.
+
+          EXAMPLE:
+
+          Cputc('A'); /* Output the letter 'A' to the serial port */
+
+
+                                                                  Page - 12
+
+
+          CPUTSTR
+
+          PROTOTYPE:
+
+          Cputstr(char *s)
+
+          ARGUMENTS:
+
+          char           pointer to a string
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          The "Cputstr" function prints a string to the serial port.  A
+          semaphore is used to ensure that the entire string will be
+          printed as one stream, not being interspersed with characters
+          from other tasks.
+
+          If the serial transmit buffer is full or another task has the use
+          of the port, then the task will be blocked.
+
+          EXAMPLE:
+
+          Cputstr("This is some text to print\n");
+
+
+                                                                  Page - 13
+
+
+          CTESTC
+
+          PROTOTYPE:
+
+          int  Ctestc()
+
+          ARGUMENTS:
+
+          None
+
+          RETURN VALUE:
+
+          0-255          Character from serial port.
+          -1             No character available.
+
+          DESCRIPTION:
+
+          Ctestc() tests for a character at the serial port.  If none
+          available then -1 is returned.  If a character is available its
+          value is returned.  This function does not block if no character
+          is available.
+
+          EXAMPLE:
+
+          if ((i = ctestc())==-1) printf("No character available\n");
+
+
+                                                                  Page - 14
+
+
+          DEFPOLL
+
+          PROTOTYPE:
+
+          defpoll( char *taskh, int pollq, int msg)
+
+          ARGUMENTS:
+
+          taskh          task handle.
+          pollq          queue to attach task to.
+          msg            integer message to send to task at each wake up.
+
+          RETURN VALUE:
+
+          Zero if error, one if no error.
+
+          DESCRIPTION:
+
+          The "defpoll" function attaches a task to a poll queue to be sent
+          a message at regular intervals.  If the task is dormant it is
+          woken with the message available as its argument.  If it is awake
+          the message is queued for the task to retrieve it by a getmsg()
+          call or the the task will be re-awoken when the task becomes
+          dormant.  An error will be returned if an MCB cannot be obtained.
+
+          The implemented polling queues currently are:
+
+          0    Once per tick (1/20 second)
+          1    Once per second
+          2    Once per minute
+
+          EXAMPLE:
+
+          char task1h;/* Handle for task1 */
+          task1()
+               {
+               ...
+               }
+          task1h = deftask(&task1, 128, "Task One");
+
+          defpoll(task1h, 1, 255); /* Send value of 255 once per second */
+
+
+                                                                  Page - 15
+
+
+          DEFTASK
+
+          PROTOTYPE:
+
+          char *deftask( char *function, int stack_size, char *name)
+
+          ARGUMENTS:
+          function       address of function to be defined as a task
+          stack_size     number of bytes on stack to reserve for task
+          name           pointer to name of task
+
+          RETURN VALUE:
+
+          Pointer to Task Control Block for task().
+
+          DESCRIPTION:
+
+          The "deftask" function allocates a Task Control Block for the
+          task and initializes it with starting address and stack.  The
+          task is set into a dormant state.  Tasks are assigned priority in
+          ascending order of their definition so define low priority tasks
+          first.  A task is started by sending a message to it or putting
+          it on a poll queue.
+
+          The address of the TCB for the task is returned by deftask.  The
+          value should be stored in a variable for use as a task handle in
+          later MX-11 calls eg. to send a message to it.
+
+          EXAMPLE:
+
+          char *task1h; /* Handle for task1 */
+
+          task1()
+               {
+
+               }
+
+          task1h = deftask(&task1, 128, "Task One");
+          /* Provide for 128 bytes of stack and give it a name */
+          sendmsg(task1h,0); /* Start it */
+
+
+                                                                  Page - 16
+
+
+          FLUSHMSG
+
+          PROTOTYPE:
+
+          flushmsg()
+
+          ARGUMENTS:
+
+          none
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          This function discards all messages pending on the current task's
+          message queue.
+
+          EXAMPLE:
+
+          flushmsg();  /* Discard messages */
+
+
+                                                                  Page - 17
+
+
+          GETMSG
+
+          PROTOTYPE:
+
+          int getmsg()
+
+          ARGUMENTS:
+
+          None
+
+          RETURN VALUE:
+
+          Value of message (Task blocked until message available).
+
+          DESCRIPTION:
+
+          Retrieve next message of current task's message queue, if none
+          available the task is blocked until one is available.
+
+          The message can be sent by sendmsg() or defpoll().
+
+          EXAMPLE:
+          int message;
+
+          message = getmsg();/* Obtain next message, wait until available*/
+
+
+                                                                  Page - 18
+
+
+          GETTIME
+
+          PROTOTYPE:
+
+          int gettime()
+
+          ARGUMENTS:
+
+          None
+
+          RETURN VALUE:
+
+          Value of 68HC11 hardware timer.
+
+          DESCRIPTION:
+
+          Get the value of the hardware timer.  With an 8MHz clock this
+          timer does two counts per microsecond.  This function is useful
+          for timing very short events.  Since the maximum time is less
+          than one system tick, the timer will wrap between clock ticks.
+
+          EXAMPLE:
+          int i,j;
+
+          i=gettime();
+          ...            /* Do function you wish to time */
+          j=gettime();
+          printf("Function takes %d microseconds\n",(j-i)/2);
+
+
+                                                                  Page - 19
+
+
+          GETTOD
+
+          PROTOTYPE:
+
+          int getTOD(char *time)
+
+          ARGUMENTS:
+
+          Pointer to 4 byte array to receive time of day.
+
+          RETURN VALUE:
+
+          Time of day.
+
+          DESCRIPTION:
+
+          MX-11 maintains a time of day clock with a resolution of a
+          twentieth of a second.  It operates as a twenty four hour clock
+          and rolls over at 23:59:59.  This function copies the time into
+          the array given as an argument.
+
+          The time is incremented every twentieth of a second, and is
+          updated before tasks on the pollqueue are called.
+
+          time[0]=1/20 seconds
+          time[1]=seconds
+          time[2]=minutes
+          time[3]=hours.
+
+          EXAMPLE:
+
+          char time[4];
+
+          getTOD(time);
+          printf("The time is %2d:%02d:%02d\n",time[3], time[2], time[1]);
+
+
+                                                                  Page - 20
+
+
+          MXINIT
+
+          PROTOTYPE:
+
+          char *mxinit(int stack_size, int numtcb, int nummcb);
+
+          ARGUMENTS:
+
+          stack_size     number of bytes on stack to reserve for main().
+          numtcb         number of Task Control Blocks to create.
+          nummcb         number of Message Control Blocks to create.
+
+          RETURN VALUE:
+
+          Pointer to Task Control Block for main().
+
+          DESCRIPTION:
+
+          The "mxinit" function initializes MX-11.  It must be executed
+          from main() before any other MX-11 functions are called.  It
+          allocates memory from the heap for the TCBs and MCBs, sets up the
+          task main() and nulltask().  Timer OC1 is used to provide a 20 Hz
+          real time interrupt.
+
+          Be careful about the amount of stack space that is set aside,
+          some library functions require large amounts for local variables.
+          eg. printf uses a 100 byte buffer.
+
+          MXSTKCHK can assist in avoiding stack overflow problems.
+
+          EXAMPLE:
+
+          char mainh; /* Handle for main */
+
+          mainh = mxinit(256, 8, 32); /* Provide for 8 tasks and 32 MCBs */
+
+
+                                                                  Page - 21
+
+
+          MXSTKCHK
+
+          PROTOTYPE:
+
+          mxstkchk()
+
+          ARGUMENTS:
+
+          none
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          This enables stack checking whenever a taskswitch occurs.  This
+          adds about 250 microseconds to each task switch.  It patches the
+          mxswch function so will only function correctly when loaded into
+          RAM.  If ROM use is desired the file mxkernal.asm should be
+          modified.
+
+          It should be invoked after mxinit().
+
+          When a task is defined the maximum stack extent is recorded in
+          the TCB, also a stack signature is placed at the maximum stack-1.
+          At every task switch all tasks are checked to verify whether
+          there is sufficient space to support the space needed for an
+          interrupt, and whether the stack signature has been corrupted.
+          If it has, a message is output via the SCI and execution
+          transfers to the debugger routine "monitor" as defined in MX.EQU
+          file.
+
+          EXAMPLE:
+
+          char mainh; /* Handle for main */
+
+          mainh = mxinit(256, 8, 32);/* Provide for 8 tasks and 32 MCBs */
+
+          mxstkchk();
+
+
+                                                                  Page - 22
+
+
+          SCLOSE
+
+          PROTOTYPE:
+
+          int sclose(char * semaphore_handle)
+
+          ARGUMENTS:
+
+          semaphore_handle    Pointer to semaphore
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          Returns a semaphore to kernal after completion of use.  Recycles
+          the data structure for other tasks.
+
+          EXAMPLE:
+
+          char *sema1; /* Handle for semaphore 1 */
+          ...
+          if !(sema1 = sopen(0)) printf("Error opening Semaphore\n");
+          ...
+          swait(sema1); /* wait for it to be signalled */
+          ...
+          sclose(sema1); /* Not needed any more, recycle it */
+
+
+                                                                  Page - 23
+
+
+          SENDMSG
+
+          PROTOTYPE:
+
+          sendmsg (char *taskh, int msg)
+
+          ARGUMENTS:
+
+          taskh          task handle
+          msg            integer message to send to task
+
+          RETURN VALUE:
+
+          0 if error.
+          1 if no error.
+
+          DESCRIPTION:
+
+          This function puts a message on a task's message queue.  If the
+          task is dormant, the task is scheduled to be run with the message
+          as its input parameter.  Alternatively the task can obtain the
+          message by performing the getmsg() call.
+
+          Although the message is only a 16 bit variable, it can be used as
+          a pointer so data of any size can be passed
+
+          EXAMPLE:
+
+          char *task1h; /* Handle for task1 */
+          task1(msg)
+          {
+               switch (msg)
+               {
+               ...
+               }
+          }
+
+          task1h = deftask(&task1, 128, "Task One");
+
+          sendmsg (task1h, 127); /* Send value of 127 to task 1 */
+
+
+                                                                  Page - 24
+
+
+          SENDMSGD
+
+          PROTOTYPE:
+
+          sendmsgd (int time_delay, int msg)
+
+          ARGUMENTS:
+
+          time_delay     delay in ticks before message sent
+          msg            integer message to send to task
+
+          RETURN VALUE:
+
+          Zero if error, one if no error.
+
+          DESCRIPTION:
+
+          Sends a message to self after a time delay.  This can be used to
+          re-awaken a task or to provide a time-out function while waiting
+          for a message from another task.  The value of the message can be
+          used to indicate the time-out cause or can be a pointer to a data
+          object.
+          A task can have multiple timers operating simultaneously.
+
+          EXAMPLE:
+
+          #define timout_message 255
+
+               sendmsgd( 100, timeout_message);
+               /* wake us up in 5 seconds if nobody else calls */
+               ...
+
+          if (getmsg()==timeout_message) printf("Timed out\n");
+
+
+                                                                  Page - 25
+
+
+          SETTOD
+
+          PROTOTYPE:
+
+          int setTOD(char *time)
+
+          ARGUMENTS:
+
+          Pointer to 4 byte array containing time of day.
+
+          RETURN VALUE:
+
+          None.
+
+          DESCRIPTION:
+
+          MX-11 maintains a time of day clock with a resolution of a
+          twentieth of a second.  It operates as a twenty four hour clock
+          and rolls over at 23:59:59.  This function copies the time from
+          the array given as an argument.
+
+          EXAMPLE:
+
+          char time[4];
+
+          /* Set time to 13:20 */
+
+          time[0]=0;
+          time[1]=0;
+          time[2]=20;
+          time[3]=13;
+
+          setTOD(time);
+
+
+                                                                  Page - 26
+
+
+          SLEEP
+
+          PROTOTYPE:
+
+          sleep( int timeout)
+
+          ARGUMENTS:
+
+          timeout        Value for timeout in clock ticks (1/20 second)
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          This function causes a pause in the execution of the calling
+          task.  Other tasks can still execute.
+
+          EXAMPLE:
+
+          sleep (20);    /* Cause a one second pause */
+
+
+                                                                  Page - 27
+
+
+          SOPEN
+
+          PROTOTYPE:
+
+          char *sopen(int initial_value)
+
+          ARGUMENTS:
+
+          initial_value  Starting value of the semaphore
+
+          RETURN VALUE:
+
+          handle to semaphore data structure
+
+          DESCRIPTION:
+
+           This function obtains a handle to a semaphore data structure for
+          use with the swait() and ssignal() functions.  The initial value
+          can be in the range zero to 32767 and determines how many
+          resources can be consumed before the task will be blocked.  If it
+          is set to zero the task will be blocked initially.
+
+          EXAMPLE:
+
+          char *sema1; /* Handle for semaphore 1 */
+
+          if !(sema1 = sopen(0)) printf("Error opening Semaphore\n");
+
+
+                                                                  Page - 28
+
+
+          SSIGNAL
+
+          PROTOTYPE:
+
+          void ssignal(char *semaphore_handle)
+
+          ARGUMENTS:
+
+          semaphore_handle    Pointer to semaphore
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          Increments the value of a  semaphore if no tasks are waiting on
+          the semaphore.  If any tasks are waiting in the semaphore, the
+          first one on the list is unblocked and the semaphore is left at
+          zero.
+
+          A semaphore can be used to provide mutual exclusion of use of a
+          resource.
+
+          EXAMPLE:
+
+          task1()
+          {
+          swait(sema1);   /* wait for serial I/O to be available */
+          printf("We don't want this to be interrupted by another task\n");
+          ssignal(sema1); /* Somebody else can use the serial I/O now */
+          }
+
+
+                                                                  Page - 29
+
+
+          SWAIT
+
+          PROTOTYPE:
+
+          int swait(char *semaphore_handle)
+
+          ARGUMENTS:
+
+          semaphore_handle    Pointer to semaphore
+
+          RETURN VALUE:
+
+          none
+
+          DESCRIPTION:
+
+          MX-11 supports counting semaphores for inter-task
+          synchronization.  The "swait" function tests a semaphore
+          previously opened with "sopen", if it has a value greater than
+          zero, it is decremented and the task continues.  If the value is
+          zero, then the task is placed on the end of the list of tasks
+          waiting on the semaphore and the task is blocked.  Multiple tasks
+          can be waiting on a semaphore and will be unblocked in list order
+          as "ssignal" called.
+
+          A semaphore can be used to provide mutual exclusion of use of a
+          resource.
+
+          EXAMPLE:
+
+          task1()
+          {
+          swait(sema1);   /* wait for serial I/O to be available */
+          printf("We don't want this to be interrupted by another task\n");
+          ssignal(sema1); /* Somebody else can use the serial I/O now */
+          }
+
+
+                                                                  Page - 30
+
+
+          SWAITTIM
+
+          PROTOTYPE:
+
+          int swait(char *semaphore_handle, int timeout)
+
+          ARGUMENTS:
+
+          semaphore_handle    Pointer to semaphore.
+          timeout             timeout value in ticks.
+          RETURN VALUE:
+
+          one if signalled.
+          Zero if time out before signalled.
+
+          DESCRIPTION:
+
+          The "swaittim" operates identically to the swait function except
+          that a timeout value can be specified that will cause the
+          function to return without if the timeout expires before the
+          semaphore is signalled.  The return value indicates whether a
+          timeout or signal occurred.
+
+          The timeout value should be specified in 1/20 second intervals.
+
+          EXAMPLE:
+
+          task1()
+          {
+          #define time_out 20
+          if !(swaittim(sema1, time_out))
+              Cprintf("Semaphore timed out\n");
+          }

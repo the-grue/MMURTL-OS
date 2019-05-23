@@ -1,0 +1,1088 @@
+*
+* DBOX: RS-232 to CONTROL-L protocol convertor
+*
+* Controls up to 8 CONTROL-L devices (VCRs, Cameras etc.) from a single
+* RS-232 asynchronous interface. See DBOX.DOC for operation details.
+*
+* Code contains timing loops etc. that assume an 11.059Mhz 8051/31.
+* Assemble with DDS XASM package, using:
+*	macro DBOX.MAC >DBOX.ASM
+*	asm51 dbox
+*
+* Copyright 1992-1995 Dave Dunfield
+* All rights reserved.
+*
+* Permission granted for personal (non-commercial) use only.
+* Authors name and Copyright notice may not be altered or removed.
+*
+* Operational parameters
+ROM	EQU	$0000		CODE is placed here
+BAUD	EQU	3		xtal/384/baud 3=9600 BPS at 11059200
+NUMVCR	EQU	8		Number of VCR's supported
+* ERROR Codes
+BADCMD	EQU	1		Unrecognized command
+BADOPR	EQU	2		Invalid operand
+BADVCR	EQU	3		VCR not responding
+* CONTROL-L VCR Command codes
+STOP	EQU	$30		Stop Transport
+PLAY	EQU	$34		Begin play operation
+RECORD	EQU	$3A		Begin record operation
+FORWARD	EQU	$62		Set direction to forward
+REVERSE	EQU	$60		Set direction to reverse
+FASTF	EQU	$38		Fast wind in forward
+REWIND	EQU	$36		Fast wind in reverse
+REWPLAY	EQU	$74		Rewind and play videotape
+PAUSE	EQU	$32		Enter pause mode
+CUE	EQU	$52		Fast play in forward direction
+REVIEW	EQU	$50		Fast play in reverse direction
+STILL	EQU	$40		Set speed to 0 (still)
+SLOW1	EQU	$44		Set speed to slow1 (1/10)
+SLOW2	EQU	$46		Set speed to slow2 (1/5)
+NORM	EQU	$66		Set speed to normal (x1)
+DOUBLE	EQU	$28		Set speed to double (x2)
+HIGHS	EQU	$4C		Set speed to high (cue)
+RESET	EQU	$8C		Reset tape counter
+ZOOMI	EQU	$35		Zoom in camera
+ZOOMO	EQU	$37		Zoom out camera
+STSTOP	EQU	$33		Start/Stop camera
+* Bitmapped configuration definitions
+ECHO	EQU	0		Echo command input
+NODR	EQU	1		VCR does not PLAY in reverse
+FOUR	EQU	2		VCR has FOUR DIGIT counter
+STVCR	EQU	3		VCR ID is displayed
+MONIT	EQU	4		Auto-monitor option
+*
+	ORG	$0020		Bit addressable memory
+* Configuration Control variables
+SETVARS	EQU	*		Beginning of configuration variables
+VCRID	DS	1		CONTROL-L ID for VCR commands
+CAMID	DS	1		CONTROL-L ID for CAMERA commands
+MARGINF	DS	1		MARGIN for FORWARD positioning
+MARGINR	DS	1		MARGIN for REVERSE positioning
+STOPTIM	DS	1		Time for stop allowance
+STOPDET	DS	1		Timer for detection of no counter
+ESCAPE	DS	1		Escape character
+BITVARS	DS	1		Bitmapped configuration variables
+BITMON	DS	1		Bitmapped monitor flags
+STCHAR	DS	1		Status prefix character
+NSVARS	EQU	*-SETVARS	Number of configuration variables
+* Internal memory locations
+RXFLAGS	DS	1		Receive portion flags
+VCRSEL	DS	1		VCR Select byte
+TXWORD1	DS	1		Transmit code 1
+TXWORD2	DS	1		Transmit code 2
+RXWORD1	DS	1		Received Tuner code 1
+RXWORD2	DS	1		Received Tuner code 2
+VCRMODE	DS	1		Received VCR mode
+VCRSTAT	DS	1		Received VCR Status
+VCRSTA1	DS	1		Received VCR Status 1
+VCRSTA2	DS	1		Received VCR Status 2
+VCRCNT1	DS	1		Received VCR Counter
+VCRCNT2	DS	1		Received VCR Counter
+VCRCNT3	DS	1		Received VCR Counter
+VCRCNT4	DS	1		Received VCR Counter
+TSTCNT1	DS	1		Timer change - last seconds value
+TSTCNT2	DS	1		Timer change - timeout counter
+TSTMODE	DS	8		Saved VCR modes
+*
+STACK	EQU	*		Stack grows up from here
+*
+* Startup code - Execution begins here
+*
+	ORG	ROM		Code starts here
+*
+	MOV	SP,#STACK	Set up initial stack
+* Initialize the timer 1 for auto-reload at 32xN
+	MOV	TMOD,#%00100000	T1=8 bit auto-reload
+	MOV	TH1,#-BAUD	Timer 1 reload value
+	MOV	TL1,#-BAUD	Timer 1 initial value
+	MOV	TCON,#%01001001	Run 1, Hold 0
+* Initialize the serial port
+	MOV	SCON,#%01010010	Mode 1, REN, TXRDY, RXEMPTY
+* Zero internal memory
+	MOV	R0,#0		Point at location zero
+INIT1	MOV	[R0],#0		Zero memory
+	INC	R0		Advance pointer
+	CJNE	R0,#STACK,INIT1	Zero it all
+* Establish defaults
+	MOV	DPTR,#SETABLE	Point to set variable table
+	MOV	R0,#SETVARS	Point to first variable
+INIT2	CLR	A		Zero A
+	MOVC	A,[A+DPTR]	Get byte from table
+	MOV	[R0],A		Set memory
+	INC	DPTR		Next byte
+	INC	R0		Advance R0
+	CJNE	R0,#SETVARS+NSVARS,INIT2 Do them all
+* Output startup message and proceed
+	ACALL	WRMSG		Output message
+	DB	$0A,$0D
+	STR	'D-BOX release 1.1'
+	DB	$0A,$0D,$0A
+	STR	'Copyright 1992-1995 Dave Dunfield'
+	DB	$0A,$0D
+	STR	'All rights reserved.'
+	DB	$0A,$0D,$0A
+	STRZ	"Use '?' for help"
+* If auto-monitor enabled, monitor for status change
+PROMPT	JNB	BITVARS.MONIT,PROMPT2 Auto monitor not enabled
+PROM1	PUSH	VCRSEL		Save VCR select
+PROM2	MOV	R0,#TSTMODE	Point to saved vectors
+	MOV	VCRSEL,#0	Select VCR 0
+	MOV	A,BITMON	Get monitor mask
+PROM3	CLR	C		Zero carry
+	RRC	A		Shift it over
+	MOV	R4,A		Resave
+	JNC	PROM4		Not enabled
+	ACALL	EXNULL		Exchange data
+	MOV	A,[R0]		Get VCR info
+	CJNE	A,VCRMODE,PROM6	Mode has changed
+PROM4	JNB	SCON.0,PROM5	No key, keep going
+	CLR	SCON.0		Indicate we received it
+	MOV	A,SBUF		Read the data
+	CLR	C		Zero carrt
+	SUBB	A,ESCAPE	Test for escape
+	JZ	PROM7		Yes, exit
+PROM5	INC	VCRSEL		Advance select
+	INC	R0		Advance pointer
+	MOV	A,R4		Get mask back
+	JNZ	PROM3		And proceed
+	SJMP	PROM2		Restart from beginning
+* Display VCR status
+PROM6	ACALL	WRLFCR		New line
+	ACALL	DSTATUS		Display VCR status
+	SJMP	PROM2		And go again
+PROM7	POP	VCRSEL		Restore VCR select
+* Reset stack & prompt for command
+PROMPT2	MOV	SP,#STACK	Reset stack incase abort
+	ACALL	WRMSG		Output string
+	DB	$0A,$0D,'>',0
+	MOV	R6,#BADCMD	And errors occuring here
+	ACALL	RDCHRE		Get 1st character
+* If leading digit, select VCR
+	MOV	R4,#'0'		Valid range
+	MOV	R5,#'0'+NUMVCR	To test
+	ACALL	COMP		Compare in range?
+	JC	PROMPT3		No, handle it
+	ADD	A,#-'0'		Convert to binary
+	MOV	VCRSEL,A	Save select
+	ACALL	RDCHRE		Get another char
+PROMPT3	MOV	R0,A		Save for later
+	ADD	A,#-$0D		Test for CR
+	JZ	PROMPT		If so, skip
+	ACALL	RDCHRE		GET 2nd character
+	MOV	R1,A
+	MOV	DPTR,#CTABLE	Point to command table
+PROMPT4	CLR	A		Zero offset
+	MOVC	A,[A+DPTR]	Get value
+	JZ	ERROR		Report error
+	INC	DPTR		Advance
+	CJNE	A,0,PROMPT5	Not same
+	CLR	A		Zero offset
+	MOVC	A,[A+DPTR]	Get second
+	INC	DPTR		Advance
+	CJNE	A,1,PROMPT6	Invalid, try next
+	MOV	A,VCRID		Get VCR id
+	MOV	TXWORD1,A	Set EXEC ID
+	CLR	A		Zero A
+	MOVC	A,[A+DPTR]	Get value
+	PUSH	A		Save for later
+	INC	DPTR		Advance
+	CLR	A		Zero A
+	MOVC	A,[A+DPTR]	Get LOW
+	MOV	DPL,A		Set LOW
+	POP	DPH		Set HIGH
+	CLR	A		Zero OFFSET
+	MOV	R6,#BADOPR	From now on... bad operand
+	JMP	[A+DPTR]	Execute code
+PROMPT5	INC	DPTR		Skip next
+PROMPT6	INC	DPTR		Skip next
+	INC	DPTR		Skip next
+	SJMP	PROMPT4		And keep looking
+*
+* Get a counter value from the command line
+*
+COUNTER	MOV	R3,#$00		Zero SIGN
+	ACALL	RDHEX		Get char
+	JNC	CNTR2		Its OK
+	CJNE	A,#'-',CNTR4	Report error
+	MOV	R3,#$80		Set negative sign
+CNTR1	ACALL	RDHEX		Get HH
+	JC	ERROR		Report error
+CNTR2	MOV	R2,A		Set counter
+	ACALL	RDMSEC		Get MM
+	MOV	R1,A		Set counter
+	ACALL	RDMSEC		Get SS
+	MOV	R0,A		Set counter
+	ORL	A,R1		Test MM
+	ORL	A,R2		Test HH
+	JNZ	CNTR3		Its OK
+	MOV	R3,A		No SIGN
+CNTR3	RET
+CNTR4	ADD	A,#-'+'		Positive?
+	JZ	CNTR1		Ignore
+*
+* An error has occured.
+*
+ERROR	MOV	A,#'?'		Error prompt
+	ACALL	WRCHR		Output
+	MOV	A,R6		Get code
+	ADD	A,#'0'		Error code
+	LCALL	WRCHR		Output
+	AJMP	PROMPT2		And proceed
+*
+* Get timer value & test 00-59 if H:M:S timer (Minite/Second validity)
+*
+RDMSEC	ACALL	RDHEX		Get value
+	JC	ERROR		Report error
+	MOV	B,#$60		Assume H:M:S
+	JNB	BITVARS.FOUR,RDMSE1 Not four digit
+	MOV	B,#$A0		Four digit
+RDMSE1	CJNE	A,B,*+3		Perform test
+	JNC	ERROR		Report error
+	SWAP	A		Change for test
+	CJNE	A,#$A0,*+3	Perform test
+	JNC	ERROR		Report error
+	SWAP	A		Swap back
+	RET
+*
+* Command handler table
+*
+CTABLE	DW	'ST',XSTOP		Stop transport
+	DW	'PL',XPLAY		Play
+	DW	'PU',XPAUSE		Pause
+	DW	'RE',XREC		Record
+	DW	'DF',XFWD		Direction forward
+	DW	'DR',XREVE		Direction reverse
+	DW	'FF',XFAST		Fast forward
+	DW	'FR',XREW		Fast rewind
+	DW	'CF',XCUE		Cue forward
+	DW	'CR',XREV		Cue reverse
+	DW	'RP',XREWPLA		Rewind and play
+	DW	'S0',XSTILL		Speed still
+	DW	'S1',XSLOW1		Speed slow 1
+	DW	'S2',XSLOW2		Speed slow 2
+	DW	'S3',XNORM		Speed Normal
+	DW	'S4',XDOUBLE		Speed double
+	DW	'S5',XHIGHS		Speed high
+	DW	'QU',XQUERY		Query function
+	DW	'RC',XRESET		Reset counter
+	DW	'RZ',XREWZER		Rewind tape
+	DW	'GO',XGOTO		Goto position
+	DW	'GT',XGOTILL		Goto unTill position
+	DW	'GS',XGOSTOP		Goto counter and Stop
+	DW	'GP',XGOPAUS		Goto counter and Pause
+	DW	'MM',XMONIT		Monitor Mode
+	DW	'EX',XEXEC		Execute command
+	DW	'ER',XEXECR		Execute repeated command
+	DW	'CO',XID		Set configuration
+	DW	'ZI',XZOOMI		Zoom IN
+	DW	'ZO',XZOOMO		Zoom OUT
+	DW	'SS',XSTSTOP		Start/Stop
+	DB	'?',$0D
+	DW	HELP
+	DB	0
+* PLAY/RECORD/STOP/PAUSE commands
+XPLAY	MOV	TXWORD2,#PLAY	
+	SJMP	STATCMD
+XREC	MOV	TXWORD2,#RECORD
+	SJMP	STATCMD
+XSTOP	MOV	TXWORD2,#STOP
+	SJMP	STATCMD
+XPAUSE	MOV	TXWORD2,#PAUSE
+	SJMP	STATCMD
+* FAST FORWARD/REWIND commands
+XFAST	MOV	TXWORD2,#FASTF
+	SJMP	STATCMD
+XREW	MOV	TXWORD2,#REWIND
+	SJMP	STATCMD
+XREWPLA	MOV	TXWORD2,#REWPLAY
+	SJMP	STATCMD
+* CUE FORWARD/REVERSE commands
+XCUE	MOV	TXWORD2,#CUE
+	SJMP	STATCMD
+XREV	MOV	TXWORD2,#REVIEW
+	SJMP	STATCMD
+XFWD	MOV	TXWORD2,#FORWARD
+	SJMP	STATCMD
+XREVE	MOV	TXWORD2,#REVERSE
+	SJMP	STATCMD
+* Speed commands
+XSTILL	MOV	TXWORD2,#STILL
+	SJMP	STATCMD
+XSLOW1	MOV	TXWORD2,#SLOW1
+	SJMP	STATCMD
+XSLOW2	MOV	TXWORD2,#SLOW2
+	SJMP	STATCMD
+XNORM	MOV	TXWORD2,#NORM
+	SJMP	STATCMD
+XDOUBLE	MOV	TXWORD2,#DOUBLE
+	SJMP	STATCMD
+XHIGHS	MOV	TXWORD2,#HIGHS
+	SJMP	STATCMD
+* Misc commands
+XRESET	MOV	TXWORD2,#RESET	Reset counter
+	SJMP	STATCMD
+XSTSTOP	MOV	TXWORD2,#STSTOP	Start/Stop camera
+* Issue command & wait return status to
+STATCMD	ACALL	CPROMPT		Wait for terminator
+STATGO	ACALL	EXDATA		Send to VCR
+SHOSTAT	ACALL	DSTATUS		Display status
+	AJMP	PROMPT		Next command
+* Rewind and ZERO counter
+XREWZER	ACALL	CPROMPT
+	MOV	TXWORD2,#STOP	STOP transport
+	ACALL	EXDATA
+	MOV	TXWORD2,#REWIND	REWIND command
+	ACALL	EXDATA
+XREWZ1	MOV	TSTCNT2,#0	Reset timer (so it will never expire)
+	ACALL	GETCNTR		Get counter
+	JNZ	XREWZ1		Till STOP
+	MOV	TXWORD2,#STOP	Stop transport
+	LCALL	EXDATA		Issue command
+	MOV	TXWORD2,#RESET	RESET command
+	AJMP	STATGO		Reset counter
+* GOTO command
+XGOTO	ACALL	COUNTER		Get counter value
+	ACALL	CPROMPT
+	ACALL	GOTO		Position TAPE
+	AJMP	SHOSTAT		Display status
+* Wait until counter
+XGOTILL	ACALL	WAITCTR		Wait for counter
+	AJMP	SHOSTAT		And display
+* Stop when counter reaches specified value
+XGOSTOP	ACALL	WAITCTR		Wait for counter
+	MOV	TXWORD2,#STOP	Get termination command
+	AJMP	STATGO		Stop transport
+* Pause when counter reaches specified value
+XGOPAUS	ACALL	WAITCTR		Wait for counter
+	MOV	TXWORD2,#PAUSE	Get termination command
+	AJMP	STATGO		Stop transport
+* Set ID code
+XID	ACALL	RDCHRE		Get a char
+	MOV	R4,#'0'		Lower bound
+	MOV	R5,#'0'+NSVARS	Upper count
+	ACALL	COMP		Do it match?
+	JC	ERROR1		No, report error
+	ADD	A,#SETVARS-'0'	Convert to address
+	MOV	R0,A		Set up R0
+	ACALL	RDCHR		Get char
+	CJNE	A,#$0D,XID1	Setting?
+	MOV	A,#'='		Get '='
+	ACALL	WRCHR		Output
+	MOV	A,[R0]		Get value
+	ACALL	WRHEX		Output
+	AJMP	PROMPT		And go again
+XID1	ACALL	WRECHO		Echo it
+	CJNE	A,#'=',ERROR1	Not setting
+	ACALL	RDHEX		Get value
+	MOV	B,A		Save for later
+	ACALL	RDCHR		Get char
+	CJNE	A,#$0D,ERROR1	Report error
+	MOV	[R0],B		Save it
+	AJMP	PROMPT		Next command
+* Execute direct command
+XEXEC	ACALL	RDHEX		Get command
+	JC	ERROR1		Report error
+	MOV	TXWORD2,A	Save command
+	AJMP	STATCMD		And proceed
+* Execute repeated command
+XEXECR	ACALL	RDHEX		Get HEX value
+	JC	ERROR1		Report error
+	MOV	TXWORD2,A	Set command
+	SJMP	EXECR1		And proceed
+* Zoom commands
+XZOOMI	MOV	TXWORD2,#ZOOMI	Zoom IN
+	SJMP	EXECR1		Execeute
+XZOOMO	MOV	TXWORD2,#ZOOMO	Zoom OUT
+EXECR1	MOV	A,CAMID		Get CAMERA ID code
+	MOV	TXWORD1,A	Set CAMERA ID
+	ACALL	CPROMPT		Get command verify
+EXECR2	ACALL	FRAME		Get FRAME
+	CLR	A		Assume zero
+	JNB	SCON.0,EXECR2	No data, continue
+	CLR	SCON.0		Indicate we received it
+	MOV	A,SBUF		Read the data
+	CJNE	A,ESCAPE,EXECR2	Continue till stop
+	AJMP	SHOSTAT		And output status
+*
+* Wait for terminator & execute
+*
+CPROMPT	ACALL	RDCHR		Get char
+	CJNE	A,#$0D,ERROR1	Report error
+	MOV	A,#'='		Get separator
+	AJMP	WRCHR		Output
+ERROR1	AJMP	ERROR		Report error
+*
+* Help request
+*
+HELP	MOV	DPTR,#HTEXT	Point to help text
+HELP1	ACALL	WRLFCR		New line
+	MOV	R7,#25		Width of screen
+HELP2	CLR	A		Zero offset
+	MOVC	A,[A+DPTR]	Get char
+	INC	DPTR		Advance
+	JZ	HELP4		No suffix
+	CJNE	A,#'|',HELP5	Normal char
+HELP3	ACALL	WRSPACE		Output a space
+	DJNZ	R7,HELP3	And proceed
+	MOV	A,#'-'		Seperator
+	ACALL	WRCHR		Output
+	ACALL	WRSPACE		Another space
+	ACALL	WRSTR		Output rest of
+HELP4	MOVC	A,[A+DPTR]	Get char (A already zero)
+	JNZ	HELP1		Do all lines
+	AJMP	PROMPT		Next command
+HELP5	CJNE	A,#'~',HELP6	Normal char
+	PUSH	DPH		Save DPH
+	PUSH	DPL		Save DPL
+	ACALL	WRMSG		Output message
+	STRZ	'Press a key...'
+	ACALL	RDCHR		Wait for key
+	MOV	A,#$0D		New line
+	ACALL	WRCHR		Output
+	POP	DPL		Restore DPL
+	POP	DPH		Restore DPH
+	SJMP	HELP2		And proceed
+HELP6	ACALL	WRCHR		Echo character
+	DEC	R7		Reduce count
+	SJMP	HELP2		Handle next
+* Issue NULL command to query transport
+XQUERY	ACALL	CPROMPT		Prompt
+	ACALL	EXNULL		Exchange NULL data
+	AJMP	SHOSTAT		Display status
+* Monitor for changes in VCR mode
+XMONIT	ACALL	CPROMPT		Prompt
+	MOV	R0,#TSTMODE	Point to table
+	CLR	A		Zero A
+XMON1	MOV	[R0],A		Write byte
+	INC	R0		Advance
+	CJNE	R0,#TSTMODE+NUMVCR,XMON1 Zero entire table
+	AJMP	PROM1		And monitor
+*
+* Display VCR status
+*
+DSTATUS	MOV	A,#TSTMODE	Point to saved mode table
+	ADD	A,VCRSEL	Shift to VCR
+	MOV	R0,A		Point to VCR mode indicator
+	MOV	A,STCHAR	Get status character
+	JZ	DSTAT1		None defined
+	ACALL	WRCHR		Output character
+DSTAT1	JNB	BITVARS.STVCR,DSTAT2 VCR id not enabled
+	MOV	A,VCRSEL	Get VCR ID
+	ADD	A,#'0'		Convert
+	ACALL	WRCHR		Output
+	ACALL	WRSPACE		Space over
+DSTAT2	MOV	A,VCRMODE	Get VCR mode
+	MOV	[R0],A		Save in table
+	MOV	R0,#VCRMODE	Point to mode
+	ACALL	WRINDEX		Output
+	ACALL	WRSPACE		Separator
+	ACALL	WRINDEX		Output STATUS
+	ACALL	WRINDEX		1
+	ACALL	WRINDEX		2
+	ACALL	WRSPACE		Separator
+	MOV	A,VCRCNT4	Get SIGN
+	RLC	A		C = sign bit
+	MOV	A,#'+'		Assume positive
+	JNC	DSTAT3		Assumption correct
+	MOV	A,#'-'		Minus
+DSTAT3	ACALL	WRCHR		Output
+	MOV	A,VCRCNT3	Get HH
+	ACALL	WRHEX		Output
+	MOV	A,VCRCNT2	Get MM
+	ACALL	WRHEX		Output
+	MOV	A,VCRCNT1	Get SS
+	AJMP	WRHEX		Output
+*
+* Position the deck to a certain location (R0,R1,R2,R3)
+*
+GOTO	ACALL	GETCNTR		Get position
+	ACALL	COMPARE		Test against location
+	JZ	GOTOFX1		We are already there
+	PUSH	0		Save original SS
+	PUSH	1		Save original MM
+	PUSH	2		Save original HH
+	PUSH	3		Save original SIGN
+	MOV	TSTCNT2,STOPDET	Reset timer
+	CJNE	A,#-1,GOTO2	Do REWIND
+* Rewind to tape location
+GOTO1	MOV	R5,MARGINR	Get rewind margin
+GOTO1A	ACALL	INCCTR		Reduce counter
+	DJNZ	R5,GOTO1A	Multi-times
+	ACALL	COMPARE		Test again?
+	CJNE	A,#-1,GOTOF1	Too close
+GOTO1B	MOV	TXWORD2,#REWIND	Set to REWIND
+	ACALL	EXDATA		Send to VCR
+GOTO1C	ACALL	GETCNTR		Get counter
+	JZ	GOTOFZ		VCR is stopped
+	ACALL	COMPARE		Do it match?
+	INC	A		Test for -1
+	JZ	GOTO1C		Wait for it
+	SJMP	GOTOF		Fine-tine
+* Fast-Forward to tape location
+GOTO2	MOV	R5,MARGINF	Get FORWARD margin
+GOTO2A	ACALL	DECCTR		Advance counter
+	DJNZ	R5,GOTO2A	Multi-times
+	ACALL	COMPARE		Test again
+	CJNE	A,#1,GOTOF1	Too close
+	MOV	TXWORD2,#FASTF	Assume FAST FORWARD
+	ACALL	EXDATA		Send to VCR
+GOTO2B	ACALL	GETCNTR		Get counter
+	JZ	GOTOFZ		VCR is stopped
+	ACALL	COMPARE		Do it match?
+	DEC	A		Test for 1
+	JZ	GOTO2B		Keep trying
+* Stop the transport & wait stop allowance time
+GOTOF	MOV	TXWORD2,#STOP	Set STOP command
+	MOV	R4,STOPTIM	Number of times
+GOTOF0	ACALL	EXDATA		Filler
+	DJNZ	R4,GOTOF0	Do them all
+GOTOF1	POP	3		Restore original SIGN
+	POP	2		Restore original HH
+	POP	1		Restore original MM
+	POP	0		Restore origianl SS
+* If tape counters are same - no further action
+	ACALL	COMPARE		Same?
+GOTOFX1	JZ	GOTOFX		If so, stop
+* If we have to backup and VCR does not play in reverse - Rewind again
+	CJNE	A,#-1,GOTOF1A	Reverse not required
+	JNB	BITVARS.NODR,GOTOF1A VCR supports reverse
+	PUSH	0		Resave SS
+	PUSH	1		Resave MM
+	PUSH	2		Resave HH
+	PUSH	3		Resave SIGN
+	SJMP	GOTO1B		Execute rewind
+* Drop into PLAY, & set direction fwd/rev to locate counter
+GOTOF1A	PUSH	A		Save result
+	MOV	TXWORD2,#PLAY	Set a PLAY command
+	ACALL	EXDATA		Send to VCR
+	POP	A		Restore result
+	MOV	TSTCNT2,STOPDET	Reset timer
+	CJNE	A,#-1,GOTOF2
+* Play reverse and wait for counters to match
+	MOV	TXWORD2,#REVERSE Set to reverse motion
+	ACALL	EXDATA		Send to transport
+GOTOF1B	ACALL	GETCNTR		Get counter
+	JZ	GOTOFX		Stopped, exit
+	ACALL	COMPARE		Compare to dest
+	INC	A		Test for -1
+	JZ	GOTOF1B		And proceed
+* Counter just ticked... wait for appox middle of count
+	ACALL	GETCNTR		Wait a bit
+	ACALL	GETCNTR		""
+	ACALL	GETCNTR		""
+	ACALL	GETCNTR		""
+GOTOFY	ACALL	GETCNTR		Wait a bit
+* Stop the transport
+GOTOFX	MOV	TXWORD2,#STOP	Set STOP mode
+	AJMP	EXDATA		Send command
+* Restore reg's and STOP
+GOTOFZ	POP	3
+	POP	2
+	POP	1
+	POP	0
+	SJMP	GOTOFX
+* PLAY forward and wait for counters to match
+GOTOF2	MOV	TXWORD2,#FORWARD Set to forward motion
+	ACALL	EXDATA		Send to transport
+GOTOF2A	ACALL	GETCNTR		Get counter
+	JZ	GOTOFX		Stopped, exit
+	ACALL	COMPARE		Compare to dest
+	DEC	A		Test for 1
+	JZ	GOTOF2A		And proceed
+	SJMP	GOTOFY		Stop transport
+*
+* Wait till counter position reached
+*
+WAITCTR	ACALL	COUNTER		Get counter value
+	ACALL	CPROMPT		Verify command
+	MOV	TSTCNT2,STOPDET	Reset timer
+WAITCT1	ACALL	GETCNTR		Get counter value
+	JZ	WAITCT2		Report deck stopped
+	ACALL	COMPARE		Does it match?
+	JZ	WAITCT2		At value
+	CJNE	A,#-1,WAITCT1	Wait till done
+WAITCT2	RET
+*
+* Compare VCR Counter with R0,R1,R2,R3
+* Returns 0=Equal, -1=R < COUNTER, 1 = R > COUNTER
+*
+COMPARE	MOV	A,R3		Get SIGN
+	MOV	C,A.7		C = SIGN
+	XRL	A,VCRCNT4	Different?
+	JNB	A.7,CMP3	No, its OK
+* Sign flags differ... Test only signs
+CMP1	MOV	A,#1		Assume > (R = Postive)
+	JNC	CMP2		Its OK
+	MOV	A,#-1		Fix mistake (R = Negative)
+CMP2	RET
+* Test positive counters
+CMP3	JC	CMP4		Negative values
+	MOV	A,R2		Get HH
+	CJNE	A,VCRCNT3,CMP1	Test
+	MOV	A,R1		Get MM
+	CJNE	A,VCRCNT2,CMP1	Test
+	MOV	A,R0		Get SS
+	CJNE	A,VCRCNT1,CMP1	Test
+	CLR	A		Indicate EQUAL
+	RET
+* Test negative counters
+CMP4	MOV	A,R2		Get HH
+	CJNE	A,VCRCNT3,CMP5	Test
+	MOV	A,R1		Get MM
+	CJNE	A,VCRCNT2,CMP5	Test
+	MOV	A,R0		Get SS
+	CJNE	A,VCRCNT1,CMP5	Test
+	CLR	A		Indicate EQUAL
+	RET
+CMP5	MOV	A,#1		Assume >
+	JC	CMP2		Its OK
+	MOV	A,#-1		Fix mistake
+	RET
+*
+* Increment destination VCR counter (R0,R1,R2,R3)
+*
+INCCTR	JNB	BITVARS.FOUR,INCCTR1 HH:MM:SS counter
+* Increment the four digit counter
+	MOV	A,R0		Get LOW
+	ADD	A,#1		Increment
+	DA	A		Adjust
+	MOV	R0,A		Resave
+	MOV	A,R1		Get HIGH
+	ADDC	A,#0		Include carry
+	DA	A		Adjust
+	MOV	R1,A		Resave
+	RET
+* Increment the HH:MM:SS counter
+INCCTR1	MOV	A,R3		Get Sign
+	JB	A.7,INCCTR3	Handle negative counts
+INCCTR2	MOV	A,R0		Get SS
+	ADD	A,#1		Increment
+	DA	A		Adjust
+	MOV	R0,A		Resave
+	CJNE	A,#$60,INCCTR4	No overflow
+	MOV	R0,#0		Reset digit
+	MOV	A,R1		Get MM
+	ADD	A,#1		Increment
+	DA	A		Adjust
+	MOV	R1,A		Resave
+	CJNE	A,#$60,INCCTR4	No overflow
+	MOV	R1,#0		Reset digit
+	MOV	A,R2		Get HH
+	ADD	A,#1		Increment
+	DA	A		Adjust
+	MOV	R2,A		Resave
+	RET
+* Handle negative counts
+INCCTR3	MOV	A,R2		Get HH
+	ORL	A,R1		Test with MM
+	JNZ	DECCTR2		Not zero
+	MOV	A,R0		Get SS
+	CJNE	A,#1,DECCTR2	Not 1
+	MOV	R0,#0		Set to zero
+	MOV	R3,#0		Clear sign
+INCCTR4	RET
+*
+* Decrement destination VCR counter (R0,R1,R2,R3)
+*
+DECCTR	JNB	BITVARS.FOUR,DECCTR1 HH:MM:SS counter
+* Decrement the four digit counter
+	MOV	A,R0		Get LOW
+	ADD	A,#$99		Decrement
+	DA	A		Adjust
+	MOV	R0,A		Resave
+	JC	DECCTR3		Didn't wrap
+	MOV	A,R1		Get HIGH
+	ADD	A,#$99		Decrement
+	DA	A		Adjust
+	MOV	R1,A		Resave
+	RET	
+* Decrement the HH:MM:SS counter
+DECCTR1	MOV	A,R3		Get sign
+	JB	A.7,INCCTR2	Handle negative numbers
+	MOV	A,R0		Get SS
+	ORL	A,R1		Include MM
+	ORL	A,R2		Include HH
+	JNZ	DECCTR2		Its OK
+	MOV	R3,#$80		Set SIGN
+	MOV	R0,#1		-1
+	RET
+DECCTR2	MOV	A,R0		Get SS
+	ADD	A,#$99		Decrement
+	DA	A		Adjust
+	MOV	R0,A		Resave
+	JC	DECCTR3		No borrow
+	MOV	R0,#$59		Reset for mod 60
+	MOV	A,R1		Get MM
+	ADD	A,#$99		Decrement
+	DA	A		Adjust
+	MOV	R1,A		Resave
+	JC	DECCTR3		No borrow
+	MOV	R1,#$59		Reset for mod 60
+	MOV	A,R2		Get HH
+	ADD	A,#$99		Decrement
+	DA	A		Adjust
+	MOV	R2,A		Resave
+DECCTR3	RET
+*
+* Console interface routines
+*
+*---------------------------
+*
+* Display info from memory
+WRINDEX	MOV	A,[R0]		Get value
+	INC	R0		Advance
+*
+* Write byte in A to the serial port in HEX
+*
+WRHEX	PUSH	A		Save value
+	SWAP	A		Get high nibble
+	ACALL	WRHEX1		Output it
+	POP	A		Get low nibble
+WRHEX1	ANL	A,#%00001111	Use low digit only
+	ADD	A,#'0'		Convert to ASCII
+	CJNE	A,#'0'+10,*+3	Non-Destructive compare
+	JC	WRCHR		A = 0-9
+	ADD	A,#7		Convert HEX digits
+	SJMP	WRCHR
+*
+* Write LINE-FEED and CARRIAGE-RETURN
+*
+WRLFCR	MOV	A,#$0A		LF
+	ACALL	WRCHR		Output
+	MOV	A,#$0D		CR
+	SJMP	WRCHR		Output
+*
+* Write a SPACE to the console
+*
+WRSPACE	MOV	A,#' '		Get a space
+*
+* Write a character to the serial port
+*
+WRCHR	JNB	SCON.1,*	Wait for the bit
+	CLR	SCON.1		Indicte we are sending
+	MOV	SBUF,A		Write out char
+	RET
+*
+* Read a byte from the serial port
+*
+RDHEX	ACALL	RDNIB		Read a nibble
+	JC	RET1		Error, exit
+	SWAP	A		Get in high nibble
+	MOV	R7,A		Save for later
+	ACALL	RDNIB		Read next nibble
+	JC	RET1		Error, exit
+	ORL	A,R7		Include high nibble
+RET1	RET
+*
+* Read a nibble in HEX from the serial port
+*
+RDNIB	ACALL	RDCHRE		Get character
+* Handle numeric digits '0'-'9'
+	MOV	R4,#'0'		Lower bound
+	MOV	R5,#'9'+1	Higher bound
+	ACALL	COMP		Do the compare
+	JC	RDNIB1		Failed
+	SUBB	A,#'0'		Convert
+	RET
+* Handle HEX digits 'A'-'F'
+RDNIB1	MOV	R4,#'A'		Lower bound
+	MOV	R5,#'F'+1	Higher bound
+	ACALL	COMP		Do the compare
+	JC	RET1		Report error
+	SUBB	A,#'0'+7	Convert
+	RET
+*
+* Read a character from the serial port
+*
+RDCHRE	ACALL	RDCHR		Get char
+WRECHO	JB	BITVARS.ECHO,WRCHR Echo if enabled
+	RET
+* Read character without echo
+RDCHR	JNB	SCON.0,*	Wait for the bit
+	CLR	SCON.0		Indicate we received it
+	MOV	A,SBUF		Read the data
+	CJNE	A,ESCAPE,RDCHR1	Not escape
+	AJMP	PROMPT2		Get command
+* Convert the data to upper case
+RDCHR1	PUSH	A		Save original
+	ADD	A,#-'a'		First test
+	JNC	RDCHR2		< 'a', leave alone
+	SUBB	A,#25		Second test
+	JNC	RDCHR2		> 'z', leave alone
+	POP	A		Restore char
+	SUBB	A,#$1F		Convert to UPPER
+	RET
+RDCHR2	POP	A		Restore
+	RET
+*
+* Compare the ACCUMULATOR with R4&R5
+* Sets the C flag if ACC <R4 or >=R5
+*
+COMP	PUSH	A		Save ACC
+	CLR	C		Clear carry
+	SUBB	A,R4		Test
+	JC	COMP1		< R4, report no
+	POP	A		Restore A
+	PUSH	A		And re-stack
+	SUBB	A,R5		Test
+	CPL	C		C = A >= R5
+COMP1	POP	A		Restore A
+	RET
+*
+* Write message (PC) to the serial port
+*
+WRMSG	POP	DPH		Get high byte of PC
+	POP	DPL		Get low bype of PC
+	ACALL	WRSTR		Output the string
+	JMP	[A+DPTR]	And continue execution
+*
+* Write the string (DPTR) to the serial port
+*
+WRSTR	CLR	A		Zero offset
+	MOVC	A,[A+DPTR]	Get character (From ROM)
+	INC	DPTR		Advance to next
+	JZ	RET1		End of string
+	ACALL	WRCHR		Write it out
+	SJMP	WRSTR		And go again
+*
+* CONTROL-L Interface Routines
+*
+*-----------------------------
+EXNULL	CLR	A		Zero ACC
+	MOV	TXWORD1,A	Null ID
+	MOV	TXWORD2,A	Null command
+*
+* Transmit a command (& receive status) to (from) peripheral device
+*
+EXDATA	MOV	R5,#10		TX minimum of times
+	ANL	RXFLAGS,#$F8	Clear flags
+EXDAT1	ACALL	FRAME		Output one frame
+	DJNZ	R5,EXDAT1	Transmit N times
+	INC	R5		Reset to one
+	MOV	A,RXFLAGS	Get receiver status
+	ANL	A,#$07		Save only LOW bits
+	CJNE	A,#$07,EXDAT1	Wait till all status received
+	RET
+*
+* Get VCR Counter
+*
+GETCNTR	PUSH	TXWORD1		Save ID
+	CLR	A		Zero ACC
+	MOV	TXWORD1,A	Zero ID
+	MOV	TXWORD2,A	Null command
+	ANL	RXFLAGS,#$F8	Clear flags
+GETCNT1	ACALL	FRAME		Get FRAME
+	MOV	A,RXFLAGS	Get flags
+	JNB	A.0,GETCNT1	Wait for LOW
+	JNB	A.1,GETCNT1	And HIGH
+	POP	TXWORD1		Restore ID
+* Test for ESCAPE key from CPU
+	CLR	A		Assume zero
+	JNB	SCON.0,CHKC1	No data, return
+	CLR	SCON.0		Indicate we received it
+	MOV	A,SBUF		Read the data
+	CJNE	A,ESCAPE,CHKC1	Not ESCAPE
+	CLR	A		Indicate STOP
+	RET
+* Test to see if counter is changing
+CHKC1	MOV	A,VCRCNT1	Get second counter
+	CJNE	A,TSTCNT1,CHKC2	It has changed
+	DJNZ	TSTCNT2,CHKC3	No timeout
+	CLR	A		Indicate STOP
+	RET
+* Counter has changed... OK to peoceed
+CHKC2	MOV	TSTCNT1,A	Save new value
+	MOV	TSTCNT2,STOPDET	Reset counter
+* Report (ACC=0) if VCR is stopped
+CHKC3	MOV	A,VCRMODE	Get VCR Mode
+	ANL	A,#%00001111	Save STOP field
+	ADD	A,#-2		Test for STOP
+CHKC9	RET
+*
+* Transmit/receive a frame of data with the peripheral device
+*
+* Synchronize to line by waiting for inter-frame gap
+* line must be high for at least 1000 us
+*
+FRAME	MOV	A,VCRSEL	Get VCR Select
+	RL	A		x2 for convertion
+	MOV	DPTR,#VCRHAND	Point to handlers
+	JMP	[A+DPTR]
+*
+* Position to 2nd 2K page for all non-'A' memory referenced items
+*
+	ORG	(*+2047)&$F800	Origin to 2K boundary
+*
+* VCR handler vector table
+*
+VCRHAND	AJMP	CL0fr		Select VCR 0
+	AJMP	CL1fr		Select VCR 1
+	AJMP	CL2fr		Select VCR 2
+	AJMP	CL3fr		Select VCR 3
+	AJMP	CL4fr		Select VCR 4
+	AJMP	CL5fr		Select VCR 5
+	AJMP	CL6fr		Select VCR 6
+	AJMP	CL7fr		Select VCR 7
+*
+* VCR Driver macro
+*
+VCRDRIV	MACRO
+\1fr	MOV	R7,#235		1: 235x4x1.085 = 1020 us
+\1fr1	JNB	\2,\1fr		2: Line is not high - restart
+	DJNZ	R7,\1fr1	2: Wait for synchronization
+* Output SOURCE/CONTENT code
+	MOV	A,TXWORD1	Word to XMIT
+	ACALL	\1tx		Output
+	MOV	A,TXWORD2	Word to XMIT
+	ACALL	\1tx		Output
+* Receive data from remote device
+	ACALL	\1rx		SOURCE/CONTENT
+	MOV	RXWORD1,A	Stash it away
+	ACALL	\1rx		REMOTE CONTROL CODE
+	MOV	RXWORD2,A	Stash it away
+	ACALL	\1rx		VCR MODE
+	MOV	VCRMODE,A	Stash it away
+	ACALL	\1rx		VCR STATUS & GUIDE CODE
+	MOV	VCRSTAT,A	Stash it away
+	ANL	A,#%11110000	Save only guide code
+* Save tape counters into their own location
+* If 4-digit, save in correct format
+	CJNE	A,#$20,\1fr2	Not 4-digit
+	ACALL	\1rx		Read counter
+	MOV	VCRCNT1,A	Stash it away
+	ACALL	\1rx		Read counter
+	MOV	VCRCNT2,A	Stash it away
+	ORL	RXFLAGS,#$03	Indicate counter received
+	CLR	A		Zero ACC
+	MOV	VCRCNT3,A	Zero HIGH
+	MOV	VCRCNT4,A	ZERO HIGH
+	RET
+* Record low digits of HMS counter
+\1fr2	CJNE	A,#$30,\1fr3	Not HMS low
+	ACALL	\1rx		Read counter
+	MOV	VCRCNT1,A	Stash it away
+	ACALL	\1rx		Read counter
+	MOV	VCRCNT2,A	Stash it away
+	ORL	RXFLAGS,#$01	Indicate LOW received
+	RET
+* Record high digits of HMS counter
+\1fr3	CJNE	A,#$40,\1fr4	Not HMS high
+	ACALL	\1rx		Read counter
+	MOV	VCRCNT3,A	Stash it away
+	ACALL	\1rx		Read counter
+	MOV	VCRCNT4,A	Stash it away
+	ORL	RXFLAGS,#$02	Indicate HIGH received
+	RET
+* Record VCR status bytes
+\1fr4	ACALL	\1rx		Read status
+	MOV	VCRSTA1,A	Stash it away
+	ACALL	\1rx		Read status
+	MOV	VCRSTA2,A	Stash it away
+	ORL	RXFLAGS,#$04	Indicate status received
+	RET
+*
+* Transmit contents of A by bit-banging
+*
+\1tx	MOV	R7,#0		Timeout
+	MOV	R6,#0		Timeout
+\1tx1	JNB	\2,\1tx2	Found start
+	DJNZ	R6,\1tx1	No, keep looking
+	DJNZ	R7,\1tx1	Maximum timeout
+\1err	MOV	R6,#BADVCR	Error=Bad VCR
+	LJMP	ERROR
+\1tx2	MOV	R6,#8		1: TX 8 bits
+* Skip start bit
+	MOV	R7,#44		1: ((R7*2)+8)x1.085 = 104us
+	DJNZ	R7,*		2: Wait for time
+* Shift out each bit
+\1tx3	RRC	A		1: Get low bit into C
+	CPL	C		1: Invert
+	MOV	\2,C		2: Write the bit
+	MOV	R7,#44		1: ((R7*2)+7)x1.085 = 104us
+	DJNZ	R7,*		2: Wait for time
+	DJNZ	R6,\1tx3	2: Shift all bits
+* Set line high for end
+	SETB	\2		1: Set line high
+	RET
+*
+* Receive a byte from the line by bit-banging
+*
+\1rx	JNB	\2,*		Wait for line high
+	MOV	R7,#0		Timeout counter
+	MOV	R6,#0		Timeout counter
+\1rx1	JNB	\2,\1rx2	1: Found start
+	DJNZ	R6,\1rx1	Keep looking
+	DJNZ	R7,\1rx1	Keep looking
+	SJMP	\1err		Report error
+* Skip start bit
+\1rx2	MOV	R7,#70		1: ((R7*2)+3)x1.085 = 156us
+	MOV	R6,#8		1: RX 8 bits
+\1rx3	DJNZ	R7,*		2: Wait for time
+* Read a bit
+	MOV	C,\2		1: Get the bit
+	CPL	C		1: Invert
+	RRC	A		1: Shift into ACC
+	MOV	R7,#45		1: ((R7*2)+6)x1.085 = 104 us
+	DJNZ	R6,\1rx3	2: Do it again
+	RET
+	ENDMAC
+* Create separate instances of the handler for each VCR
+	VCRDRIV	CL0,P1.0
+	VCRDRIV	CL1,P1.1
+	VCRDRIV	CL2,P1.2
+	VCRDRIV	CL3,P1.3
+	VCRDRIV CL4,P1.4
+	VCRDRIV CL5,P1.5
+	VCRDRIV CL6,P1.6
+	VCRDRIV CL7,P1.7
+*
+* DBOX Help text
+*
+HTEXT	STR	'D-BOX Commands:'
+	DB	$0A,0
+	STRZ	'ST|Stop Transport'
+	STRZ	'PL|PLay videotape'
+	STRZ	'PU|PaUse transport'
+	STRZ	'RE|REcord videotape'
+	STRZ	'DF|Direction Forward'
+	STRZ	'DR|Direction Reverse'
+	STRZ	'CF|Cue Forward'
+	STRZ	'CR|Cue Reverse'
+	STRZ	'FF|Fast Forward'
+	STRZ	'FR|Fast Rewind'
+	STRZ	'RP|Rewind and Play'
+	STRZ	'RZ|Rewind and Zero counter'
+	STRZ	'RC|Reset tape Counter'
+	STRZ	'QU|QUery'
+	STRZ	'~S0|Speed 0 (still)'
+	STRZ	'S1|Speed 1 (very slow)'
+	STRZ	'S2|Speed 2 (slow)'
+	STRZ	'S3|Speed 3 (normal)'
+	STRZ	'S4|Speed 4 (double)'
+	STRZ	'S5|Speed 5 (high)'
+	STRZ	'GO[-]nnnnnn|GO to position'
+	STRZ	'GT[-]nnnnnn|Go unTil position'
+	STRZ	'GS[-]nnnnnn|Go until position and Stop'
+	STRZ	'GP[-]nnnnnn|Go until position and Pause'
+	STRZ	'SS|Start/Stop camera recording'
+	STRZ	'ZI|camera Zoom In'
+	STRZ	'ZO|camera Zoom Out'
+	STRZ	'MM|Monitor Modes'
+	STRZ	'EXcc|EXecute direct CONTROL-L command'
+	STRZ	'ERcc|Execute Repeat CONTROL-L command'
+	STRZ	'COr[=xx]|Query/Set configuration registers'
+	DB	0
+*
+* Set variable default configuration table
+*
+SETABLE	DB	$11		VCR CONTROL-L ID
+	DB	$21		CAMERA CONTROL-L ID
+	DB	10		Margin for FAST-FWD
+	DB	10		Margin for FAST-REW
+	DB	10		Stop allowance value
+	DB	100		Stop detection value
+	DB	$1B		Escape code
+	DB	%00000001	ECHO only
+	DB	%00000001	VCR 0 only
+	DB	0		Status prefix - None

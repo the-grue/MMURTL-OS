@@ -1,0 +1,1068 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                          Dunfield Development Systems
+    
+                       Integrated Development Environment
+    
+                                      for
+    
+                           MICRO-C Development Tools
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1994-1995 Dave Dunfield
+                              All rights reserved.
+    DDSIDE                                                           Page: 1
+
+
+    1. INTRODUCTION
+    
+          DDSIDE is a program which brings all  of  your  embedded  software
+       development tools together into a single easy to use interface.  It's
+       "built in" features include an editor,  a  browser,  a  communication
+       program.  and  a  command  shell   which   runs   other   development
+       tools/utilities  from  within  the  integrated  environment.   DDSIDE
+       features user programmable options  and  menus,  which  allow  it  to
+       interface to virtually any command-line development tools.
+    
+          With DDSIDE, you can edit your  program,  reference  other  files,
+       compile your program, review and  correct  errors,  re-compile,  test
+       under a simulator, load and test on a target system with  a  debugger
+       or  resident  monitor,  and  NEVER  leave  the   editor.   With   the
+       multi-configuration feature, you can then repeat  the  whole  process
+       with a completely  different  set  of  tools,  using  the  same  user
+       interface, and still without leaving the editor.
+    
+    2. STARTING DDSIDE
+    
+          DDSIDE locates its  home  directory  by  reading  the  environment
+       variable 'MCDIR'. This variable must be set before  the  DDSIDE  will
+       operate. DDSIDE will look in this directory for default configuration
+       files, its help file,  and  compile  commands  referencing  the  home
+       directory (See CONFIGURATION FILE).
+    
+          Configuration information is read  from  *.IDE  files,  which  are
+       described later in this document.  Sample  .IDE  files  are  provided
+       which are pre-configured for the MICRO-C toolset. These files  should
+       be  edited  to  insure  that  they  are  properly  set  up  for  your
+       preferences. NOTE: The .IDE files provided have  colors  defined.  If
+       you have a MONOCHROME screen, use "REM" to comment  out  the  "COLOR"
+       statement, otherwise you may not be able to read the screens.
+    
+          DDSIDE will look for configuration  files  first  in  the  current
+       directory, and then in the MICRO-C home directory. This allows you to
+       place "common" configurations in the MICRO-C  directory  for  general
+       access, and "custom" configurations in the directories containing the
+       files to which they apply.
+    
+          If only one configuration file is found in a directory, it will be
+       loaded automatically. If more than one configuration file is found, a
+       pop-up  selection  window  will  be  offered.  You  may  specify  the
+       configuration file to load on the command line with the 'C=' option.
+    
+          If a filename is specified as a command line operand, DDSIDE  will
+       automatically load it into the editor, otherwise the default filename
+       defined in the configuration will be used. In  either  case,  of  the
+       filename contains wild card characters ('*' or '?'), a pop-up menu of
+       matching files will be offered.
+    DDSIDE                                                           Page: 2
+
+
+    3. SCREEN EDITOR
+    
+          The focal point of DDSIDE is the screen editor  (EDIT),  which  is
+       automatically invoked when DDSIDE is started. EDIT presents a  window
+       on the screen which displays the contents of a section of  the  file.
+       Editing of the file may be  performed  directly  on  the  screen  via
+       special function keys, and the screen is updated so that you see your
+       changes as they are being performed.
+    
+          Any control characters which exist in the file will  be  displayed
+       as the corresponding printable character in reverse video.
+    
+          If the end of the file is within the area shown on the screen, the
+       message '*END OF FILE*' is displayed using a special video attribute.
+    
+       3.1 Entering text
+    
+             Text may be entered into  the  file  being  edited,  simply  by
+          typeing it at the terminal keyboard. EDIT automatically places the
+          text in the file, and  updates  the  screen  to  reflect  the  new
+          contents. The  position  of  the  terminal  cursor  indicates  the
+          position at which the text will be entered.
+    
+       3.2 Positioning the cursor
+    
+             EDIT supports many function keys which move the cursor position
+          within the displayed image (See Function Keys). Moving beyond  the
+          bottom of the screen causes EDIT to scroll forward one  line,  and
+          shift the display up. Moving beyond the top of the  screen  causes
+          EDIT to scroll backward one line, and shift the display down.
+    
+             EDIT will perform sideways scrolling of the  display  to  allow
+          the cursor to access the entire width of lines  which  are  larger
+          than 80 columns.
+    DDSIDE                                                           Page: 3
+
+
+       3.3 Function Keys
+    
+             The following special function keys are recognized by EDIT. The
+          default IBM PC key assignments are shown in (brackets). Note  that
+          the keys can be re-assigned in the DDSIDE configuration file,  and
+          may differ from those shown.
+    
+          Forward char (Right arrow)
+    
+                Moves the cursor forward one character positon in the  file,
+             if at the end of a line, the cursor will advance to  the  first
+             position of the next line.
+    
+          Back char (Left arrow)
+    
+                Moves the cursor backward one character positon in the file,
+             if at the beginning of a line, the cursor will  backup  to  the
+             last position of the previous line.
+    
+          Forward line (Up arrow)
+    
+                Moves the cursor up one line. If at the top of  the  screen,
+             the display will scroll backwards by one half a screen page.
+    
+          Back line (Down arrow)
+    
+                Moves the cursor down one line. If  at  the  bottom  of  the
+             screen, the display will scroll forward by one line.
+    
+                The cursor may appear to jump back and forth as it is  moved
+             up and down, if it ancounters lines which are shorter than  the
+             current character position within  the  line,  or  lines  which
+             contain tabs. This is because whenever possible, the cursor  is
+             returned to the same number of  physical  characters  from  the
+             start of the line as is was on the first line from which the UP
+             or DOWN arrow was pressed.
+    
+          Forward page (PgDn)
+    
+                This key pages forward one screen. (Bottom line becomes top)
+    
+          Back page (PgUp)
+    
+                This key  pages  backward  one  screen.  (Top  line  becomes
+             bottom)
+    
+          Forward word (CTRL-Right Arrow)
+    
+                Moves the cursor to the beginning of the next word.
+    
+          Back word (CTRL-Left Arrow)
+    
+                Moves the cursor to the beginning of the previous word.
+    DDSIDE                                                           Page: 4
+
+
+          Start of line (Home)
+    
+                Moves the cursor to the beginning of  the  line.  If  it  is
+             already at the  beginning  of  a  line,  it  is  moved  to  the
+             beginning of the previous line.
+    
+          End of line (End)
+    
+                Moves the cursor to the end of the line. If already  at  the
+             end of a line, it is moved to the end of the next line.
+    
+          Start of file (CTRL-PgUp)
+    
+                This key moves the cursor to the beginning of the first line
+             in the file.
+    
+          End of file (CTRL-PgDn)
+    
+                This key moves the cursor to the end of the file.
+    
+          Insert toggle (Ins)
+    
+                Toggles between character  INSERT  and  OVERWRITE  mode.  In
+             INSERT mode, all characters typed at the terminal are  inserted
+             into the text. In OVERWRITE mode, only  the  NEWLINE  character
+             and data entered at the end of a line is  inserted,  all  other
+             characters will overwrite the existing text.
+    
+          Delete character (Del)
+    
+                Deletes the character under the cursor, without  moving  the
+             cursor.
+    
+          Backspace & delete (Backspace)
+    
+                Moves the cursor backward to the  previous  character,  then
+             deletes that character.
+    
+          Current line to top (CTRL-Home)
+    
+                Brings the line the cursor is on to the top of the screen.
+    DDSIDE                                                           Page: 5
+
+
+          Help (F1)
+    
+                Actives the help viewer.
+    
+          Position information (F2)
+    
+                Displays the current cursor  position,  including  the  line
+             number, actual and character offsets from the  start  of  line,
+             and offset from start of file.
+    
+          End of line display (F3)
+    
+                Toggles ON/OFF the display of NEWLINE characters at the  end
+             of each line of text.
+    
+          Tag line(s) (F4)
+    
+                Tags one or more lines for a  later  operation.  The  tagged
+             lines are displayed in special video if the  terminal  supports
+             it. Once one line is tagged, pressing this key on another  line
+             causes all lines between them to be tagged. Pressing  it  again
+             on any line of the tagged range removes the tags.
+    
+          Delete line inclusive (F5)
+    
+                Deletes from the cursor position to  the  end  of  the  line
+             (inclusive).
+    
+          Delete line exclusive (F6)
+    
+                Deletes from the cursor position to  the  end  of  the  line
+             (exclusive).
+    
+          Insert deleted lines (F7)
+    
+                Inserts the deleted  line  text  (From  Function  key  8  or
+             Function key 9) at the current cursor position.
+    
+          Function menu (F8)
+    
+                Brings up the function menu  to  access  other  (non-editor)
+             functions of the Integrated Development Environment.
+    
+          Enter command (F10 or Keypad+)
+    
+                Prompts for a line mode command See the section on line mode
+             operation. Press F10 (or Keypad+) again to execute the command.
+    
+          Repeat command (F9 or Keypad-)
+    
+                Re-executes the last line mode command entered. This is most
+             useful for repeating '?' search commands.
+    DDSIDE                                                           Page: 6
+
+
+       3.4 Line mode commands
+    
+             When the "Enter command" key  is  pressed,  EDIT  prompts  with
+          "Command:", and accepts a line mode command.
+    
+          3.4.1 Line ranges
+    
+                Most commands accept a "line-range"  which  is  an  optional
+             specification controlling the range  of  lines  for  which  the
+             command  has  effect.  Unless  otherwise  stated,  the  default
+             line-range assumed for each command is the "current" line  (*),
+             which is the line on which the cursor is positioned.
+    
+                The following are the valid line range formats:
+    
+                   *        - The "current" line
+                   /        - The entire file
+                   =        - The tagged lines
+                   0        - The end of the file
+                   <n>      - Line number <n>, (<n> >= 1)
+                   <r>,<r>  - Range between beginning of two other ranges.
+    
+                The '+' and '-' characters may be used to add or subtract  a
+             constant value from a line range.
+    
+                    eg: '0-12' <- 12 lines from end of file
+    
+                If '+' or '-' is used but no range is specified,  an  offset
+             from the current line is assumed.
+    
+                  eg: '+12' <- 12 lines from the current line.
+    
+                The  line  range  specification   is   entered   immediately
+             preceeding the command name.
+    
+                         ie: '<r><command> <operands>'
+    DDSIDE                                                           Page: 7
+
+
+          3.4.2 Command descriptions
+    
+             C - Copy text
+    
+                   The 'C'opy command performs a copy of the active range of
+                lines, placeing the copy directly ahead of the current line.
+    
+                Examples:
+    
+                    C               - Duplicate current line
+                    1,10C           - Copy lines 1 to 10 inclusive
+                    =C              - Copy tagged lines
+                    /C              - Duplicate entire file (must be at end)
+    
+             D - Delete text
+    
+                   The 'D'elete command deletes the active range of lines.
+    
+                Examples:
+    
+                    D               - Delete current line
+                    -5,+5D          - Delete 11 lines -5 to +5 from current
+                    /D              - Delete entire file
+    
+             F - File information
+    
+                   This command displays information about  the  file  being
+                edited, includes the filename, the size of the file in lines
+                and characters, and the size and position of  the  specified
+                line range.
+    
+                Examples:
+    
+                    F               - Display file & current line information
+                    =F              - Display file & tagged lines information
+    
+             M - Move text
+    
+                   The 'M'ove command moves the active range of lines to the
+                location directly ahead of the current line.
+    
+                Examples:
+    
+                    =M              - Move tagged lines
+                    +1M             - Interchange active & next line
+    
+             R <filename> - Read file
+    
+                   The 'R'ead command  reads  the  entire  contents  of  the
+                specified file, and inserts it directly ahead of the  active
+                range.
+    
+                Examples:
+    
+                    Rabc            - Insert file 'abc' at current
+                    /Rabc           - Insert file 'abc' at start
+                    0Rabc           - Append file 'abc' at end
+    DDSIDE                                                           Page: 8
+
+
+             S<dc><search><dc><replace> - Substitute
+    
+                   The 'S'ubstitute command searches  the  active  range  of
+                lines, and replaces all occurrances of the  string  <search>
+                with the string <replace>. The <dc> delimiter character  may
+                be any character not contained within the <search> string.
+    
+                Examples:
+    
+                    S'abc'def       - Change 'abc' to 'def' in current
+                    /S'abc'def      - Change 'abc' to 'def' in entire file
+                    =S'abc'def      - Change 'abc' to 'def' in tagged lines
+    
+             T - Tag lines
+    
+                   The  'T'ag  command  tags  the  active  range  of  lines,
+                allowing them to be referred  to  by  '='  in  a  subsequent
+                command range.
+    
+                Examples:
+    
+                    T               - Tag current line
+                    1,10T           - Tag lines 1 to 10
+                    *,+5T           - Tag six lines starting at current
+    
+             W [filename] - Write to file
+    
+                   The 'W' command writes the active range of lines  to  the
+                named file, or to the original file edited  if  no  name  is
+                specified. Use of this command also resets the FILE  CHANGED
+                flag, allowing exit via 'q'.
+    
+                   The default line range assumed for 'W'rite is the  entire
+                file.
+    
+                Examples:
+    
+                    W               - Write entire file
+                    *W              - Write current line
+                    Wabc            - Write entire file to 'abc'
+                    =Wabc           - Write tagged lines to 'abc'
+    
+             ?<text> - Search for text
+    
+                   The '?' command  moves  the  active  line  to  the  first
+                occurance of the specified string within the active range.
+    
+                   The default range assumed for '?' is one  character  past
+                the current cursor position (in visual mode)  or  the  first
+                character of the active line (In line by line mode), through
+                to the end of the file.
+    
+                Examples:
+    
+                    ?string         - Find next occurance of "string"
+                    /?string        - Find first occurance of "string"
+    DDSIDE                                                           Page: 9
+
+
+             <no command> - Goto line
+    
+                   If a line range is given without  a  command,  EDIT  will
+                reposition the "current"  line  to  the  beginning  of  that
+                range.
+    
+                Examples:
+    
+                    100             - Move to line 100
+                    /               - Move to start of file
+                    0               - Move to end of file
+                    =               - Move to tagged line(s)
+    DDSIDE                                                           Page: 10
+
+
+    4. FUNCTION MENU
+    
+          When the "Function menu" key is activated from the editor, a  menu
+       of DDSIDE functions appears at the top of the  screen.  Any  function
+       can be selected by entering the first letter of its name:
+    
+       4.1 Compile
+    
+             This brings up a sub-menu of compiler functions.  Position  the
+          cursor bar over the desired function and press ENTER. Press ESC to
+          exit the menu without a selection.
+    
+          4.1.1 Options
+    
+                Allows you to select various options for the steps performed
+             during compilation. The actual options available are defined in
+             the configuration file, and depend on the set  of  tools  being
+             used.
+    
+          4.1.2 Steps
+    
+                Allows you to select  which  compilation  steps  are  to  be
+             performed.
+    
+          4.1.3 Compile
+    
+                Executes each of the selected compilation steps in turn. The
+             editor file is saved prior to executing the first step, and its
+             filename is used as the input file to the first step.  As  each
+             step executes, its console  output  is  logged  to  the  browse
+             window, and the error log file.
+    
+                If any of the programs executed by Compile fail to  complete
+             properly (Returned a non-zero exit code), DDSIDE  will  show  a
+             message indicating which step failed, and  the  DOS  exit  code
+             returned. Common return code values under MSDOS are:
+    
+                2   - Command not found (Check MCDIR and command line)
+                3   - Path not found    (Check MCDIR and command line)
+                254 - Program found errors during processing
+                255 - Program was invoked with incorrect arguments
+    DDSIDE                                                           Page: 11
+
+
+       4.2 Target
+    
+             Prompts with a menu of target system options:
+    
+          4.2.1 Connect
+    
+                Provides a TTY connection to the target system  via  the  PC
+             serial port,  enabling  you  to  communicate  with  a  resident
+             monitor. The following function keys are provided:
+    
+               F1       - Display help screen(s)
+               F2       - Send ESCAPE character to target
+               F3       - Upload ASCII file
+               F4       - Capture output to ASCII file
+               F5       - Hotkey to activate BROWSER
+               F6       - Hotkey to activate LOG
+               F7       - Copy screen contents to error log
+               ESC      - Exit CONNECT
+    
+          4.2.2 Simulate
+    
+                Activates the external simulator, passing it the last output
+             filename.
+    
+          4.2.3 Debug
+    
+                Activates the external debugger, passing it the last  output
+             filename.
+    
+       4.3 Options
+    
+             Presents a menu of various DDSIDE options which can be changed:
+    
+          4.3.1 Resize windows
+    
+                Selecting this options allows you to change the size of  the
+             EDIT and BROWSE windows. Use the Up/Down  errors  to  move  the
+             window boundary, and press ESCAPE when you are finished.
+    
+          4.3.2 Tab width
+    
+                Controls the tab spacing in the editor and browser  windows.
+             (Tab spacing in the browser may be changed independantly and on
+             a file by file basis by using F7 when the browser is active).
+    
+          4.3.3 Filename
+    
+                This option allows you to change the name of the file  which
+             is active in the editor. You must use a valid DOS filename.
+    DDSIDE                                                           Page: 12
+
+
+          4.3.4 Temp. file prefix
+    
+                This option allows you to edit the prefix  string  which  is
+             pre-pended to temporary files.
+    
+          4.3.5 Compile from temp
+    
+                This is a YES/NO switch, which controls how DDSIDE saves the
+             editor file before compiling. If set to NO, the file  is  saved
+             under its original filename, and the original disk contents are
+             lost. If set to YES, the file is saved in a temporary file, and
+             the original file (on disk) remains unchanged.
+    
+          4.3.6 Keep temp. files
+    
+                When set to NO, DDSIDE will delete each temporary file after
+             the step in which it is used completes successfully. If set  to
+             YES, temporary files are NOT deleted.
+    
+          4.3.7 Pause after steps
+    
+                This option is useful for  debugging  the  configuration  of
+             compile steps and options. When set to YES, the actual  command
+             for each step  is  shown  in  the  title  window  as  the  step
+             executes, and DDSIDE stops and waits for a key  when  the  step
+             completes. You may press ESCAPE to halt  the  compile,  or  any
+             other key to proceed to the next step.
+    
+                When set to NO, the step name is shown in the title  window,
+             and each successful step proceeds to the next without stopping.
+    
+          4.3.8 Target port
+    
+                Selects the PC serial port (COM1-COM4) which  will  be  used
+             for   communication   with   the   target   system   when   the
+             'Target/Connect' option is chosen from the function menu.
+    
+          4.3.9 Target speed
+    
+                Selects  the  serial  speed  (baudrate)  that  is  used   to
+             communicate with the target system  when  the  'Target/Connect'
+             option is chosen from the function menu.
+    
+          4.3.10 Upload delay
+    
+                Selects a delay between characters in files uploaded to  the
+             target system. The value is dependant on CPU  speed.  Here  are
+             some sample times (in ms) from a delay value of 1000:
+                486DX/33=2   386DX/40=5   386SX/16=20
+                  286/10=23     XT/10=50   XT/4.77=114
+    
+          4.3.11 Upload linefeeds
+    
+                When set to YES, lines uploaded to the  target  system  will
+             have both a CARRIAGE-RETURN and a LINE-FEED  transmitted  after
+             them. When set to NO, only the CARRIAGE-RETURN is transmitted.
+    DDSIDE                                                           Page: 13
+
+
+       4.4 File
+    
+             Activates a menu of file function:
+    
+          4.4.1 Load
+    
+                Prompts for a new editor file  to  load.  Any  file  already
+             loaded into the editor will be replaced by the new.
+    
+                When prompted for a file, you can enter wildcard  characters
+             ('*' & '?'), in which case DDSIDE will prompt with  a  menu  of
+             all matching files.
+    
+                If the editor contains a file with unsaved changes, you will
+             prompted with an offer to save it before loading the new file.
+    
+                NOTE: An explicit 'Save' option is not provided in the  file
+             menu, since this  function  is  covered  by  the  editor's  'W'
+             command.
+    
+          4.4.2 Configuration
+    
+                Prompt for  a  new  configuration  file.  All  configuration
+             options will be replaced with values read  from  the  specified
+             file.
+    
+                DDSIDE  searches  for  configuration  files  first  in   the
+             "current" directory, and then in the MICRO-C home directory.
+    
+                If wildcard characters are used in the filename to obtain  a
+             menu of files, and .IDE files exist in the  current  directory,
+             DDSIDE will actually provide TWO menu's. The first  menu  lists
+             the configuration files  in  the  current  directory,  you  may
+             select one, or press  ESCAPE  to  skip  to  the  next  menu  of
+             configuration files located in the home directory.
+    
+          4.4.3 DOS shell
+    
+                Activates the DOS command interpreter (usually  COMMAND.COM)
+             without exiting DDSIDE. Use the command 'EXIT' to return.
+    
+          4.4.4 Quit
+    
+                Exits DDSIDE, and returns you to the DOS prompt.
+    
+                If the editor contains a file with unsaved changes, you will
+             prompted with an offer to save it before exiting.
+    DDSIDE                                                           Page: 14
+
+
+       4.5 Kalc
+    
+             Activates a simple 16  bit  decimal/Hex  desk  calculator.  The
+          following function keys are available:
+    
+                0-9     Decimal input digits
+                A-F     Hexidecimal input digits
+                +       Addition
+                -       Subtraction
+                *       Multiply
+                /       Divide
+                %       Modulus
+                &       Bitwise AND
+                |       Bitwise OR
+                ^       Bitwise EXCLUSIVE OR
+                <       Shift left
+                >       Shift right
+                =       Display result
+                'c      Enter a single ASCII character value
+                "cc     Enter a double ASCII character value
+                K       Clear display
+                R       Read value from memory
+                S       Store value in memory
+                BKSP    Clear last digit
+                SPACE   Toggle HEX/DECIMAL entry and display
+                ESC     Exit, no text entry
+                ENTER   Exit, enter last value into editor text.
+    
+       4.6 Ascii
+    
+             Activates an IBM-PC/ASCII character set display. The  following
+          function keys are available:
+    
+                Up      - Backup display one value
+                Down    - Advance display one value
+                PgUp    - Backup display one page
+                PgDn    - Advance display one page
+                Home    - Move to start of table
+                <char>  - Position table to ASCII character
+                ESC     - Exit
+    DDSIDE                                                           Page: 15
+
+
+       4.7 Browse
+    
+             Activates the browser (BROWSE), which allows you  to  view  the
+          contents of ASCII files in the browse  window  (lower  portion  of
+          screen).
+    
+             Up to 10 files may be active in at any one time.  As  you  move
+          between  active  files,  BROWSE  remembers  your  position,  place
+          markers, tab size, search string and other settings for each file.
+    
+             Each file can have up to 10  place  markers,  allowing  you  to
+          quickly reference multiple locations with each file.
+    
+          4.7.1 Function keys
+    
+                When BROWSE is  active,  the  following  function  keys  are
+             available:
+    
+           Up       - Backup display on line
+           Down     - Advance display one line
+           Left     - Shift display one column to the Left
+           Right    - Shift display one column to the right
+           PgUp     - Backup display one screen page
+           PgDn     - Advance display one screen page
+           Home     - Shift display 20 columns to the left
+           End      - Shift display 20 columns to the right
+           CTL-Home - Position display to column one
+           CTL-PgUp - Position display to beginning of file
+           CTL-PgDn - Position display to end of file
+           F1       - Display help screen(s)
+           F2       - Prompt for line# and go to line
+           F3       - Prompt for string and search (from current line)
+           F4       - Repeat last search (from current line + 1)
+           F5       - Position to tagged line number
+           F6       - Set a tag at current line number
+           F7       - Prompt for new TAB spacing
+           F9       - Open another file
+           F10      - "Pick" list of last 10 files opened
+           ESC      - Exit BROWSE
+    
+    4.7.2 Usage notes
+    
+        Most functions may be aborted by the ESCAPE key.
+    
+        If for any reason BROWSE cannot find the file that you were last
+    viewing when it is activated, you will be prompted to enter a new one.
+    
+        If you modify a file that you are viewing, you should re-select it
+    from the "pick list", so that DDSIDE will re-index it, and insure that the
+    line numbers are correct.
+    DDSIDE                                                           Page: 16
+
+
+    4.8 Log
+    
+        Activates the error log viewer (LOG), to review the console output
+    of the last compile step executed. This is most useful for viewing error
+    messages, while correcting them in the source file. Up to 50 lines of
+    output may be recorder in the output log.
+    
+    4.8.1 Function keys
+    
+        When LOG is active, the following function keys are available:
+    
+           Up       - Backup display on line
+           Down     - Advance display one line
+           Left     - Shift display one column to the Left
+           Right    - Shift display one column to the right
+           PgUp     - Backup display one screen page
+           PgDn     - Advance display one screen page
+           Home     - Position display to column one
+           CTL-PgUp - Position display to beginning of output
+           CTL-PgDn - Position display to end of output
+           ESC      - Exit LOG
+    DDSIDE                                                           Page: 17
+
+
+    5. CONFIGURATION FILE
+    
+          Operating parameters and configuration information for DDSIDE  are
+       read from a  configuration  file.  Different  configurations  can  be
+       loaded at any time from the 'F'ile menu. The current  directory  will
+       be searched first, and then the MICRO-C home directory.
+    
+          The ".IDE" configuration files contain only ASCII text, and may be
+       edited  with  any  text  editor  (including  DDSIDE).   For   example
+       configuration files, refer to the included "*.IDE" files.
+    
+       NOTE: If multiple  configuration  files  are  available  when  DDSIDE
+       starts up, it will prompt with a menu allowing you to select the  one
+       that it loads. When making changes to the  configuration  files,  you
+       may wish to make a copy of the original file, allowing you to  select
+       either configuration. Once you are sure that the new configuration is
+       working correctly, you can then remove the old configuration file.
+    
+       The configuration commands read from the file are:
+    
+       COLOR <fgnd|bgnd> ...
+    
+          Assigns the video color scheme, with a pair  of  colors  for  each
+       window type. The window types are assigned in this order:
+    
+            Editor text window
+            Browser text window / status bar
+            Edit status bar
+            Error status barr
+            Function menus/status bar
+            EOF markers / tty status bar
+            Help text window
+            Help selections
+    
+          The following colors may be assigned:
+    
+            BK - Black  BL - Blue      GR - Green   CY - Cyan
+            RD - Read   MG - Magenta   BR - Browm   WH - White
+        *   GY - Gray   LB - LtBlue    LG - LtGreen LC - LtCyan
+        *   LR - LtRed  LM - LtMagenta YL - Yellow  BW - Bright-White
+    
+        *   Note, Colors GY and above should not be used for
+            BACKGROUND colors (This will cause flashing).
+    
+       DEBUG <command>
+    
+          Defines  the  command  used  to  run  the  external  debugger  (if
+       available). The output filename will  be  appended  to  the  command,
+       which is then passed on to the DOS command interpreter for execution.
+    
+       FILE <filename>
+    
+          This sets the  initial  filename  which  is  assumed  if  none  is
+       specified on the command line. If the  filename  contains  wildcards,
+       you will be prompted with a menu of matching files at  startup.  This
+       default filename is also assumed when the 'L'oad option  is  selected
+       from the 'F'ile menu.
+    DDSIDE                                                           Page: 18
+
+
+       KEY <key>|<function> ...
+    
+          Assigns editor functions to keyboard keys. The following PC key(s)
+       may be assigned:
+    
+            LA  - Left arrow                RA  - Right arrow
+            UA  - Up arrow                  DA  - Down Arrow
+            PU  - Page Up                   PD  - Page down
+            HOM - Home                      END - End
+            KP+ - Keypad '+'                KP- - Keypad '-'
+            INS - Insert                    DEL - Delete
+            BS  - Backspace                 ESC - Escape
+            F1 to F10       - Function keys 1 to 10
+            !A to !Z        - ALT keys ALT-A to ALT-Z
+            ^A to ^Z        - Control keys ^A to ^Z
+            ^LA - Control Left arrow        ^RA - Control-Right arrow
+            ^PU - Control-Page Up           ^PD - Control-Page down
+            ^HO - Control-Home              ^EN - Control-End
+    
+          The following functions can be assigned:
+    
+            FPG - Forward page              BPG - Back page
+            FLI - Forward line              BLI - Back line
+            FCH - Forward char              BCH - Back char
+            FWR - Forward word              BWR - Back word
+            SOF - Start of file             EOF - End of file
+            SOL - Start of line             EOL - End of line
+            TOP - Current line to top       POS - Position information
+            INS - Insert toggle             ELD - End of line display
+            DEL - Delete character          BSD - Backspace & delete
+            DLI - Delete line inclusive     DLE - Delete line exclusive
+            IDL - Insert deleted line       TAG - Tag line(s)
+            FUN - Function menu             CMD - Enter command
+            REP - Repeat last command       HLP - Help display
+            XXX - Key unassigned
+            $<string>       - Macro string      (See note)
+    
+           - Assignments can be spread over several KEY statements.
+           - Multiple keys can be assigned the same function.
+           - The default editor key assignments  are  as  described  in  the
+             editor portion of this manual.
+    
+       Macro strings:
+    
+          When a macro string is assigned to a key, the macro string will be
+       entered (as if typed) whenever that key is pressed.
+    
+          Special keys can be entered with '^', '!' and '~'. Eg:
+    
+            ^J  - Control-J (Enter)
+            !A  - ALT-A
+            ~F7 - Function key F7
+    
+          Macro strings cannot  be  nested.  If  one  macro  string  invokes
+       another, the first will terminate.
+    DDSIDE                                                           Page: 19
+
+
+       OPTION
+    
+          The 'OPTION' statement defines user selectable options which apply
+       to the compile steps. The setting of each option may be inserted into
+       the compile step  command  parameters  under  "STEP"  programming.  A
+       maximum of 10 options (0-9) are permitted:
+    
+            switch      1/0     Name|On[|Off]       - On/Off switch
+            pick        num     Name|Selection[...] - Pick list
+            signed      num     Name                - Signed value
+            unsigned    num     Name                - Unsigned value
+            text        len     Name[|Init string]  - Text input
+            end                                     - End of options
+    
+            - '1/0' defines default ON/OFF settings for 'switch'
+            - 'num' defines default 0-(n-1) selection for 'pick'
+            - 'num' defines default value for 'signed/unsigned/text'
+            - 'len' defines maximum string length for 'text'
+            - To allow hidden '$' items in pick lists, menu display
+              of pick items stops before a '$'.
+    
+       REM <remainder of line>
+    
+          This is a remark, the entire line is ignored.
+    
+       SETUP <string>
+    
+          This is an optional  setup  string  for  the  compile  steps  (See
+       'STEP'). When defined, the <string> operand is processed,  as  it  it
+       were a STEP command string, however nothing is done with the  result.
+       It's purpose is  to  provide  initialization  for  any  '$'  commands
+       embedded in options which have side-effects.
+    
+       SIMULATE <command>
+    
+          Defines the  command  used  to  run  the  external  simulator  (if
+       available). The output filename will  be  appended  to  the  command,
+       which is then passed on to the DOS command interpreter for execution.
+    DDSIDE                                                           Page: 20
+
+
+       STEP [-][!]Name|EXT|Command
+    
+          Defines the step used to compile a  program.  'Name'  defines  the
+       name of the step  shown  in  menus  and  titles.  'EXT'  defines  the
+       filename extension that is assigned to the output file for that step,
+       and 'Command' defines the actual command line which  is  executed  to
+       perform the step.
+    
+          If the step 'Name' is preceeded by '-', the step is DISABLED,  and
+       must be selected in the 'Compile/Steps' menu before it will  be  used
+       in the compile process. If preceeded by '!', the  step  will  NOT  be
+       displayed in the 'Compile/Steps' menu. NOTE: that steps not shown  in
+       the menu can still  be  enabled  and  disabled  by  '$Y#'  and  '$N#'
+       operators (see below).
+    
+          The 'command' line must contain a complete path and filename to an
+       executable file ('BATCH' files can be processed by running the system
+       command interpreter). The following special "escape" sequences can be
+       used in the command line:
+    
+            $# (0-9)    - Option (0-9) contents
+            $A          - Contents of user variable#1
+            $B          - Contents of user variable#2
+            $C          - Contents of user variable#3
+            $D          - Contents of user variable#4
+            $'evar'E    - Contents of environment variable
+            $F          - Editor filename   ($f = Without extension)
+            $H          - MICRO-C home directory
+            $I          - Input file        ($i = Without extension)
+            $O          - Output file       ($o = Without extension)
+            $T          - Temporary file prefix
+            $'string'#  - Include string only if step #(0-9) enabled
+            $$          - Insert a single '$'
+        The following sequences do not actually substitute data into
+        the command, but cause some other action to occur:
+        *   $'string'A  - Set user variable#1 to 'string'
+        *   $'string'B  - Set user variable#2 to 'string'
+        *   $'string'C  - Set user variable#3 to 'string'
+        *   $'string'D  - Set user variable#4 to 'string'
+        *   $Y#         - Force step #(0-9) to be enabled
+        *   $N#         - Force step #(0-9) to be disabled
+        **  $V          - Obtain output from video
+    
+        *   These sequences are most often used in 'switch' or 'pick'
+            options, which are initialized in the 'SETUP' string to
+            control the following steps.
+        **  The command will be run on a blank screen, and output read
+            from the screen after the command terminates. Otherwise, DOS
+            output will be intercepted "on the fly".
+    DDSIDE                                                           Page: 21
+
+
+       TAB <tab stop interval>
+    
+          This options assigns the interval (in character spaces)  at  which
+       tab "stops" appear in the editor and browser screens.
+    
+       TARGET <port> <speed> <delay> <linefeed>
+    
+          Selects the default target system serial interface options:
+    
+            <port>      = COM port (1-4)
+            <speed>     = Serial speed (BAUDRATE)
+            <delay>     = Delay between characters uploaded. The value
+                          is dependant on CPU speed. Here are some sample
+                          times (in ms) from a delay value of 1000:
+                            486DX/33=2   386DX/40=5   386SX/16=20
+                              286/10=23     XT/10=50   XT/4.77=114
+            <linefeed>  = 1/0 to ENABLE/DISABLE linefeed's in uploads
+    
+       TEMP <compile> <keep> [prefix]
+    
+          Defines how temporary files are handled. <compile> and <keep>  are
+       1/0 (ON/OFF) flags which set the  initial  "Compile  from  temp"  and
+       "Keep temp. files" options. If [prefix] is specified, it will set the
+       prefix which is prepended to temporary files ("Temp.  file  prefix").
+       If [prefix] is not supplied, DDSIDE will  attempt  to  initialze  the
+       prefix from the 'MCTMP' environment variable.
+
+
+
+                                     DDSIDE
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. STARTING DDSIDE                                                     1
+
+
+     3. SCREEN EDITOR                                                       2
+
+        3.1 Entering text                                                   2
+        3.2 Positioning the cursor                                          2
+        3.3 Function Keys                                                   3
+        3.4 Line mode commands                                              6
+
+     4. FUNCTION MENU                                                      10
+
+        4.1 Compile                                                        10
+        4.2 Target                                                         11
+        4.3 Options                                                        11
+        4.4 File                                                           13
+        4.5 Kalc                                                           14
+        4.6 Ascii                                                          14
+        4.7 Browse                                                         15
+        4.8 Log                                                            16
+
+     5. CONFIGURATION FILE                                                 17
+

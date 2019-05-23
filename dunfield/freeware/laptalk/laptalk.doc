@@ -1,0 +1,1053 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                 L A P T A L K
+    
+                                       A
+                                      Tiny
+                               Telecommunications
+                                    Program
+                                      for
+                                Laptop Computers
+    
+                                  Release: 1.1
+    
+                               Revised: 30-Aug-93
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1991-1993 Dave Dunfield
+                              All rights reserved.
+    LAPTALK Users Guide                                              Page: 1
+
+
+    1. INTRODUCTION
+    
+          I first conceived of LAPTALK when I did a great deal of  traveling
+       with a small 8088 dual-floppy (no hard disk) laptop computer. Being a
+       shareware author, I try to log into local BBS's wherever I travel, to
+       upload the latest versions of my software.
+    
+          Some of my archives are quite large, requiring up to 1/2  hour  to
+       transfer (at 2400 bps). Using the floppies  was  unacceptable,  since
+       the drives just sat  there  starting  and  stopping....  The  obvious
+       solution  was  to  define  a  RAMdisk,  allowing  smooth,  quiet  and
+       non-destructive operation.
+    
+          Then I ran into a small problem.... The  telecomm  packages  which
+       contained the features I used were all very large, typically  200-300
+       Kbytes in size. This not only used up a good portion of the 640K  ram
+       on my laptop (thereby reducing the size of my RAMdisk), but  it  took
+       lot of space on the 720K floppy drive,  and  took  FOREVER  to  load.
+       There just had to be a better solution...
+    
+          I decided to write my own very small "no frills" terminal program,
+       which would still have the features I needed, which were:
+    
+          1) Reasonable subset of ANSI (VT100) terminal emulation
+          2) Built in capture and upload of ASCII files.
+          3) Ability to link to external transfer protocols
+          4) Powerful "command" language to automate uploads etc.
+          5) A simple "host" capability for remote access.
+    
+          The results  of  my  effort  was  LAPTALK,  a  ".COM"  file  which
+       addresses the above requirements, and weighs in at just over 20K.
+    
+          The complete source code to LAPTALK is distributed with my MICRO-C
+       compiler as an example program. See the enclosed CATALOG file.
+    LAPTALK Users Guide                                              Page: 2
+
+
+    2. USING LAPTALK
+    
+          When you first run LAPTALK, it  will  attempt  to  open  the  file
+       LAPTALK.CFG in your current directory. If found,  it  will  read  its
+       configuration from it.  If  the  configuration  file  is  not  found,
+       LAPTALK will display a warning message, and assume various defaults.
+    
+          Once started, LAPTALK will present you with a  terminal  emulation
+       screen. The top 24 lines are the actual data  window,  and  the  25th
+       line is a status line. You may now type on the keyboard to send  data
+       to the serial port, and see any incoming data in the terminal window.
+    
+       2.1 Command Line Options
+    
+             The format of the LAPTALK command line is:
+    
+                      LAPTALK [-i c=file] [script command]
+    
+             The '-i' switch tells  LAPTALK  to  NOT  enter  an  interactive
+          session. This is most useful when used with a command line  script
+          file, so that control will  return  to  DOS  when  the  script  is
+          finished.
+    
+             The 'c=<file>' parameter allows  you  to  specify  a  different
+          configuration file which is to be  used  instead  of  the  default
+          "LAPTALK.CFG".
+    
+             If [script command] is given, LAPTALK will  execute  the  named
+          script and pass  it  any  additional  arguments  BEFORE  the  main
+          interactive mode is entered.
+    
+       2.2 LAPTALK Functions
+    
+             To access LAPTALK's functions, press CTRL-HOME or CTRL-END. You
+          will be presented with this menu:
+    
+                                +--------------+
+                                |Function menu |
+                                |Download file |
+                                |Upload file   |
+                                |Kill capture  |
+                                |Perform script|
+                                |Hangup modem  |
+                                |Clear screen  |
+                                |Configuration |
+                                |Shell to DOS  |
+                                |Exit to DOS   |
+                                +--------------+
+    
+             You may activate a function by moving  the  highlighted  cursor
+          bar to it (with the UP and DOWN arrow keys) and pressing ENTER. To
+          quickly move the cursor bar to a particular entry, type the  first
+          letter of the entry.
+    LAPTALK Users Guide                                              Page: 3
+
+
+       2.3 Function menu
+    
+             This function presents you with a list of "functions" that have
+          been configured. Each function  represents  a  "script"  (command)
+          file, complete with arguments, that will run when that function is
+          selected.
+    
+             This is a convienent way to set up automatic dialing lists etc.
+    
+       2.4 Download file
+    
+             This function will prompt with a menu of  available  protocols,
+          and then for the name of  the  file  to  be  transferred.  If  you
+          specify a filename which contains wildcard character ('*' or '?'),
+          LAPTALK will show you a list of matching files, and allow  you  to
+          pick one.
+    
+             Once the filename is selected, LAPTALK will invoke the selected
+          protocol, and attempt to download the file from the remote  system
+          to your PC.
+    
+       2.5 Upload file
+    
+             This function is similar to "Download file",  except  that  the
+          file is transferred from your PC to the remote system.
+    
+       2.6 Kill capture
+    
+             This function  is  used  following  a  download  using  "ASCII"
+          protocol, to stop LAPTALK from capturing the terminal  session  to
+          the file. When an ASCII download is in effect, you  will  see  the
+          string "cap" in the status line  at  the  bottom  of  the  screen.
+          Selecting this function will stop the  data  capture,  and  remove
+          that indication from the status line.
+    
+       2.7 Perform script
+    
+             This function prompts for  a  script  filename  and  arguments.
+          Unless you specify otherwise, the file is assumed to be located in
+          the LAPTALK  home  directory,  and  it  is  assumed  to  have  the
+          extension ".SCR". LAPTALK will process  the  file  as  a  "script"
+          program.
+    
+             This method of running a script program  is  useful  for  those
+          files which you do not use  frequently  enough  to  have  in  your
+          "function  menu".  It  is  also  useful  in  that  you  may  enter
+          parameters to the program when you specify its name.
+    
+             If the filename you supply contains wildcard character ('*'  or
+          '?'), LAPTALK will show you a list of the matching  script  files,
+          and allow you to select one.
+    LAPTALK Users Guide                                              Page: 4
+
+
+       2.8 Hangup modem
+    
+             This command drops the DTR and RTS signals to the modem  for  a
+          brief period of time, causing most modems to go offline  and  hang
+          up any calls which are in  progress.  See  you  modem  manual  for
+          information on how to set up your modem to do this.
+    
+       2.9 Clear screen
+    
+             This functions clears the TTY screen.
+    
+       2.10 Configuration
+    
+             This function invokes the LAPTALK configuration menu,  allowing
+          you to alter the various parameters  controlling  all  aspects  of
+          LAPTALK's operation.
+    
+             See the "configuration" section for more details.
+    
+       2.11 Shell to DOS
+    
+             This function invokes the DOS command processor (as defined  in
+          the environment variable COMSPEC),  to  allow  you  to  enter  and
+          execute DOS commands. LAPTALK  remains  active.  Use  the  command
+          "EXIT" to return to LAPTALK.
+    
+       2.12 Exit to DOS
+    
+             This function terminates LAPTALK, returning to the DOS  command
+          processor.
+    LAPTALK Users Guide                                              Page: 5
+
+
+    3. CONFIGURATION
+    
+          When you select 'Configuration' from LAPTALK's main function menu,
+       you will be presented with this sub-menu:
+    
+                            +---------------------+
+                            |General switches     |
+                            |General parameters   |
+                            |Serial port settings |
+                            |Transfer protocols   |
+                            |Function menu scripts|
+                            |Video attributes     |
+                            |Load configuration   |
+                            |Save configuration   |
+                            +---------------------+
+    
+       3.1 General switches
+    
+             This configuration sub-menu presents you with  a  selection  of
+          ON/OFF switches, which control the  way  LAPTALK  handles  certain
+          events. To toggle a particular switch between 'Y'es (ON) and  'N'o
+          (OFF), simply press the indicated number:
+    
+             1: Sound ALARM in messages
+    
+                When set to 'Y'es (ON), this switch causes LAPTALK to  sound
+             a BEEP whenever an error  (or  informational)  message  box  is
+             presented.
+    
+             2: Echo data send in tty
+    
+                When set to  'Y'es  (ON),  this  switch  causes  LAPTALK  to
+             display on the terminal  screen,  any  data  entered  from  the
+             keyboard, as well as sending it  to  the  remove  device.  This
+             option should be  set  ON  whenever  you  are  connected  to  a
+             computer which DOES NOT echo input data, and OFF  whenever  you
+             are using a system that DOES echo its input.
+    
+                Incorrect setting of this option will cause the effect  that
+             either you cannot see what you are typing, OR you will get  two
+             characters displayed for every one that you type.
+    
+             3: Echo data sent in scripts
+    
+                When set to  'Y'es  (ON),  this  switch  causes  LAPTALK  to
+             display on the terminal screen, any data that is transmitted by
+             scripts files (as well as send it to the remote device).
+    
+                The correct setting of this switch will depend on the nature
+             of the script file, and the remote system.
+    LAPTALK Users Guide                                              Page: 6
+
+
+             4: Send LF on ASCII uploads
+    
+                When set to 'Y'es (ON), this switch causes LAPTALK to output
+             both a CARRIAGE RETURN and a LINE FEED at the end of each  line
+             of text which is transmitted during an ASCII upload.  When  set
+             to 'N'o (OFF), only a CARRIAGE RETURN.
+    
+                When uploading to a computer expecting keyboard input,  this
+             switch is usually set OFF, because you do not normally  include
+             LINE FEED on keyboard input. When uploading  to  a  printer  or
+             terminal, setting this switch ON will prevent the  output  from
+             continuously overwriting itself one line.
+    
+             5: Send space in NULL lines
+    
+                When set to 'Y'es (ON), this switch causes LAPTALK to expand
+             any lines of ZERO LENGTH which  are  being  transmitted  during
+             ASCII uploads to contain a single space.
+    
+                The text entry interface of many  online  systems  interpret
+             NULL lines as "end of entry". A null line in an  uploaded  file
+             will cause these system to stop accepting text (and usually get
+             very confused by the remainder of the uploaded  file).  Setting
+             this switch ON will prevent this from occuring.
+    
+             6: Drop DTR+RTS on exit
+    
+                When set to  'Y'es  (ON),  this  switch  causes  LAPTALK  to
+             de-assert the DTR and RTS modem control signals of the PC  COMM
+             port whenever you select "Exit to DOS" from the main menu. This
+             will usually hangup a modem, or terminate you login session  on
+             a multitasking system. The exact  effect  will  depend  on  the
+             device to which you are connected.
+    
+                When this  switch  set  OFF,  LAPTALK  leaves  DTR  and  RTS
+             asserted on the PC COMM port, insuring that device to which you
+             are connected is unaware that you have terminated the  program.
+             You may then re-enter LAPTALK and resume your communication  at
+             some later time.
+    
+       3.2 General parameters
+    
+             This configuration sub-menu presents you with  a  selection  of
+          parameters which control various aspects of LAPTALK's operation:
+    
+             Home directory
+    
+                The directory name entered at this prompt determines the DOS
+             directory  where  LAPTALK  will  search   for   SCRIPT   FILES,
+             CONFIGURATION FILES, and FILE  TRANSFER  PROTOCOL  MODULES.  If
+             left blank, LAPTALK will search the current directory.
+    LAPTALK Users Guide                                              Page: 7
+
+
+             Tab spacing
+    
+                This parameter defines the spacing of TAB STOPS in the  main
+             terminal screen. When a  TAB  character  is  received,  LAPTALK
+             advances te cursor to the next tab stop.
+    
+             Modem hangup delay
+    
+                This parameter defines  the  number  of  seconds  for  which
+             LAPTALK will drop the DTR and  RTS  modem  control  signals  in
+             order to hang up the modem. LAPTALK will hang up the  modem  in
+             rsponse to your selection of the "Hnagup modem" option  of  the
+             main function menu, or the occurance of a "hangup" command in a
+             script file.
+    
+             String TX character delay
+    
+                This parameter defines the length of time which LAPTALK will
+             wait between characters in a string being  transmitted.  String
+             transmissions occur as a result of several SCRIPT commands,  as
+             well as the ANSI function keys in tty mode.
+    
+                The length if time  indicated  by  each  unit  of  value  is
+             dependant on the CPU  speed  of  your  PC.  You  will  have  to
+             experiment to obtain appropriate values for your application.
+    
+             ASCII Upload char delay
+    
+                This parameter defines the length of time which LAPTALK will
+             wait between characters transmitted during ASCII uploads.
+    
+                The length if time  indicated  by  each  unit  of  value  is
+             dependant on the CPU  speed  of  your  PC.  You  will  have  to
+             experiment to obtain appropriate values for your application.
+    
+             ASCII Upload line delay
+    
+                This parameter defines the length of time which LAPTALK will
+             wait between lines transmitted during ASCII uploads.
+    
+                The length if time  indicated  by  each  unit  of  value  is
+             dependant on the CPU  speed  of  your  PC.  You  will  have  to
+             experiment to obtain appropriate values for your application.
+    LAPTALK Users Guide                                              Page: 8
+
+
+             ASCII Upload sync. char
+    
+                This parameter defines an ASCII character  value  for  which
+             LAPTALK will wait, after sending a line during ASCII uploads. A
+             value of zero (0) is a special  case,  and  causes  LAPTALK  to
+             ignore the sync character, proceeding immediately (after  ASCII
+             Upload line delay) with tramsission of the next line.
+    
+                LAPTALK will only match characters which are received  AFTER
+             the line has been transmitted. This prevents any occurances  of
+             the defined character which  are  imbedded  in  the  line  from
+             triggering the next transmission.
+    
+                LAPTALK will always wait for the  minimum  time  defined  by
+             "ASCII  Upload  line  delay"   before   proceeding   with   the
+             transmission,  regardless  of  when  the  sync.  character   is
+             received. It will also wait for one interval of time defined by
+             "ASCII Upload char delay" before proceeding  with  transmission
+             if the sync. character is received after the "line  delay"  has
+             expired.
+    
+                In the event that a communication error or some other  event
+             prevents LAPTALK from  seeing  the  sync.  character,  you  can
+             manually proceed to the next line by pressing the SPACE bar.
+    
+       3.3 Serial port settings
+    
+             This configuration sub-menu allows you to select the COMM port,
+          Baudrate, Parity, Number of Data bits, Number of  Stop  bits,  and
+          Enable/Disable XON/XOFF flow control.
+    
+       3.4 Transfer protocols
+    
+             This configuration sub-menu permits you to define up  to  eight
+          file transfer protocols,  which  can  be  invoked  from  the  main
+          function menu,
+    
+             For details on configuring the protocols, refer  to  the  "FILE
+          TRANSFER PROTOCOLS" section of this manual.
+    LAPTALK Users Guide                                              Page: 9
+
+
+       3.5 Function menu scripts
+    
+             This configuration sub-menu permits you to define up  to  eight
+          script files (complete with arguments) which may be  invoked  from
+          the "Function menu" selection  of  the  main  LAPTALK  menu.  This
+          provides "fast access" to your favorite scripts.
+    
+             Each entry has the following format:
+    
+                     [name;][script file name] [arguments]
+    
+             [name;] is the  name  that  will  appear  in  the  script  file
+          selection window. It is delimited from the filename by a semicolon
+          (';'). If no name is given,  LAPTALK  displays  the  name  of  the
+          script file.
+    
+             [script file name] is the full name of the script file which is
+          to run when this entry is  selected.  If  not  specified,  LAPTALK
+          assumes the extension ".SCR". Unless the name includes a directory
+          path, LAPTALK assumes that the file will be found in  the  LAPTALK
+          home directory.
+    
+             [arguments] are any command  line  arguments  which  should  be
+          passed to the script file.
+    
+             Here are a few example entries which implement a simple  "phone
+          list" using the "dial.scr" script supplied with LAPTALK:
+    
+                BBS;dial 555-1234
+                WORK;dial 555-5678
+                JOHN;dial 555-9012
+    
+             NOTE: See 'PHONE.SCR' for another way to set up a phone list.
+    LAPTALK Users Guide                                              Page: 10
+
+
+       3.6 Video attributes
+    
+             This  configuration  option  allows  you  to  set   the   video
+          attributes (colors)  of  the  various  windows  and  screens  that
+          LAPTALK presents.
+    
+             The following entries may be selected:
+                Main TTY screen
+                Video attribute (1-7)   *
+                Status line
+                Error message box's
+                String input fields     **
+                Main menu's
+                Sub-menu's
+    
+        * - Video attributes 1-7 are selected with the ANSI escape sequence
+            "ESC[#n", where '#' is the number from 1-7. If '#' is specified
+            as '0', the "Main TTY screen" attribute is restored.
+    
+        **- Also includes FILE SELECTION WINDOWS.
+    
+             When you select this option, you will  be  presented  with  the
+          "Main TTY screen" attributes. You may use the PgDn and  PgUp  keys
+          to cycle between the selections listed above.
+    
+             The Right and Left arrow keys may be used to cycle between  the
+          available FOREGROUND video options.
+    
+             The Up and Down arrow keys may be used  to  cycle  between  the
+          available BACKGROUND video options.
+    
+             Press ESCAPE when you have finished. NOTE: If you have  altered
+          the "Main TTY screen" or the "Status line" entries, the TTY screen
+          will be cleared to new attributes.
+    
+       3.7 Load configuration
+    
+             This option prompts you for a filename,  and  then  loads  that
+          file as a new LAPTALK configuration. The  LAPTALK  home  directory
+          and the extension ".CFG" are  assumed  if  not  specified  in  the
+          filename. Wildcard characters ('*' and '?') may be used, in  which
+          case you will be presented with a menu of the  matching  files  to
+          pick from.
+    
+       3.8 Save configuration
+    
+             This options prompts you for a filename,  and  then  saves  the
+          current LAPTALK configuration into that  file.  The  LAPTALK  home
+          directory and the extension ".CFG" are assumed if not specified in
+          the filename. Wildcard characters ('*' and '?') may  be  used,  in
+          which case you will be presented with a menu of matching files  to
+          pick from.
+    LAPTALK Users Guide                                              Page: 11
+
+
+    4. FILE TRANSFER PROTOCOLS
+    
+          LAPTALK allows up to 8 file  transfer  protocols  to  be  defined,
+       which are implemented as external programs. Only the  ASCII  transfer
+       protocol is implemented internally.
+    
+       4.1 Configuration
+    
+             You set up  the  file  transfer  protocols  via  the  "Transfer
+          Protocols" option under the configuration menu.  You  may  make  8
+          entries, one for each protocol.
+    
+             The format of the protocol definition entry is as follows:
+    
+                   [name;][executable file name] [arguments]
+    
+             [name;] is the name that  appears  in  the  protocol  selection
+          window, of the file upload/download  functions.  It  is  delimited
+          from the filename by a semicolon  (';').  If  no  name  is  given,
+          LAPTALK displays the name of the executable file.
+    
+             [executable file name] is the full name of the program which is
+          to run when the protocol is selected.  It  must  be  a  ".COM"  or
+          ".EXE" file (LAPTALK assumes ".COM" is no type is  given).  Unless
+          the name includes a directory path, LAPTALK assumes that the  file
+          will be found in the LAPTALK home directory.
+    
+             [arguments] are any command  line  arguments  which  should  be
+          passed to the program. The following "special  sequences"  may  be
+          used in the arguments field:
+    
+            \A          - Use ASCII transfer instead of COM/EXE file.
+            \B          - Insert BAUD rate ('110'-'38400').
+            \C          - Insert COMM port ('1'-'4').
+            \D<string>\ - Insert <string> for DOWNLOADS only.
+            \F          - Obtain and insert a filename.
+            \G          - Like '\F' but ignored for downloads.
+            \H          - Insert LAPTALK home directory.
+            \N          - Insert number of DATA BITS (5-8).
+            \P          - Insert PARITY (Odd, Even, Mark, Space or None).
+            \S          - Insert number of STOP BITS (1-2).
+            \U<string>\ - Insert <string> for UPLOADS only.
+            \W          - Wait for ENTER after transfer.
+            \X          - Like '\F' but passes wildcards through.
+            \Y          - Like '\X' but ignored for downloads.
+            \Z          - ZAP (save, clear and restore) screen.
+            \\          - Insert a single '\'.
+    LAPTALK Users Guide                                              Page: 12
+
+
+       4.2 The XMODEM module
+    
+             The  LAPTALK  package  includes  XMODEM.COM,  a  program  which
+          implements basic XMODEM  file  transfers.  It  has  the  following
+          command line syntax:
+    
+           XMODEM <filename> [-C -D -P R=size P=port F=value S=speed]
+    
+             The meanings of the command line options are:
+    
+                -C      - Skip CRC negotiation & proceed with CHECKSUM
+                -D      - Perform DOWNLOAD instead of UPLOAD
+                -P      - Force pause ("Press any key") when finished
+                R=size  - Specify record size
+                P=port  - Specify COMM port (1, 2, 3 or 4)
+                F=value - Fill unused bytes of last upload record
+                          with this value.
+                S=speed - Communicate at this baud rate
+    
+             Here are some LAPTALK protocol entries for use with XMODEM.COM:
+    
+                        Xmodem \F s=\B\D -d\
+                        Xmodem/1K;xmodem \F s=\B r=1024\D -d\
+    
+       4.3 Examples
+    
+             The internal ASCII transfer can be activiated with  a  transfer
+          protocol entry such as:
+    
+                        ASCII \F\A
+    
+             Here are XMODEM, YMODEM and ZMODEM  transfer  protocol  entries
+          which make use of a popular shareware communications module called
+          DSZ:
+    
+                        XMODEM;DSZ port \C \Drx\\Usx\ \F\Z
+                        YMODEM;DSZ port \C \Drb\\Usb\ \F\Z
+                        ZMODEM;DSZ port \C \Drz\\Usz\ \G\Z
+    
+          DSZ is available from:
+    
+                              Omen Technology INC
+                                 P.O. Box 4681
+                            Portland, OR 97208-4681
+                               FAX: 503-621-3735
+    LAPTALK Users Guide                                              Page: 13
+
+
+    5. SCRIPT INTERPRETER
+    
+          LAPTALK includes a powerful "script" interpreter, which allows you
+       to set up automatic sequences of events to be performed as  a  single
+       operation.
+    
+          The script interpreter can be considered as a simple  "programming
+       language", complete with commands, expressions and variables.
+    
+       5.1 Insert Codes
+    
+             Any any point in a script  file,  you  can  use  any  of  these
+          "Insert Codes", to cause the script interpreter to insert a  ASCII
+          string representing some value  into  the  command  line  at  that
+          point:
+    
+            ^c      - Insert control code of 'c'. (Ie: '^C' = 0x03)
+            \b      - Insert a BACKSPACE character. (0x08)
+            \d      - Insert a DELETE character.    (0x7F)
+            \e      - Insert a ESCAPE character.    (0x1B)
+            \h      - Insert LAPTALK home directory.
+            \r      - Insert a RETURN character.    (0x0D)
+            \n      - Insert a NEWLINE sequence.    (0X0D, 0x0A)
+            \s      - Insert the MODEM SIGNALS as a decimal value,
+                      made up of these components (OR'd together):
+                        1   - CTS has changed state.
+                        2   - DSR has changed state.
+                        4   - Ringing has just ended.
+                        8   - CD has changed state.
+                        16  - CTS state (1 = asserted)
+                        32  - DSR state (1 = asserted)
+                        64  - RI  state (1 = asserted)
+                        128 - CD  state (1 = asserted)
+                    * You can test the individual signals by ANDing ('&')
+                      this value with a mask.
+            \#n     - Insert character with decimal value n.
+            \0-9    - Insert the corresponding argument (0-9) from the script
+                      command line. Argument 0 is the name of the script.
+            \A-Z    - Insert the contents of the corresponding variable.
+            \\      - Insert a single '\'.
+            \^      - Insert a single '^'.
+    LAPTALK Users Guide                                              Page: 14
+
+
+       5.2 Script File Commands
+    
+             Some of commands  described  in  this  section  accept  various
+          arguments which they use to perform their actions. Arguments shown
+          in angle braces ('<>') are REQUIRED.  Arguments  shown  in  square
+          braces ('[]') are OPTIONAL.
+    
+             The various arguments accepted by the script commands are:
+    
+            text        - The rest of the command line, which is treated as a
+                          text string.
+    
+            variable    - A script variable name ('A'-'Z'). Note that for
+                          commands which specifically require a variable name,
+                          you DO NOT include a preceeding '\' (otherwise the
+                          CONTENTS of the variable would be passed).
+    
+            script      - The name of a script file.
+    
+            arguments   - Any arguments to a script file.
+    
+            protocol    - A file transfer protocol name. This is the name
+                          defined under the "Transfer Protocols" option of
+                          the configuration menu, which appears in the
+                          protocol selection list for uploads and downloads.
+    
+            filename    - The name of a file to upload or download.
+    
+            value       - An expression resulting in a numeric value. This
+                          may consist of numbers (-32768 to 32767) and any
+                          of the following operators:
+                                +   - Addition          -   - Subtraction
+                                *   - Multiplication    /   - Division
+                                %   - Modulus           &   - Bitwise AND
+                                |   - Bitwise OR        ^   - EXCLUSIVE OR
+                                <<  - Shift Left        >>  - Shift Right
+                                ==  - Test for EQUALITY (0=False, 1=True)
+                                !=  - Test for INEQUALITY
+                                >   - Test for GREATER THAN
+                                <   - Test for LESS THAN
+                                >=  - Test for GREATER THAN or EQUAL
+                                <=  - Test for LESS THAN or EQUAL
+                          When multiple operators are present, they are
+                          processed from LEFT to RIGHT, without precedence.
+                          Round brackets '()' may be used for force the
+                          grouping of operators into sub-expressions.
+    
+            string      - A text string enclosed within delimiters.
+                          It does not matter what characters are used for the
+                          delimiters, as long as they are identical, and do not
+                          occur within the string.
+    
+            command     - Any script file command
+    
+            label       - A line label. Any line can be labeled by placing a
+                          colon (':') at the beginning of the line, followed
+                          immediately by a label name.
+    LAPTALK Users Guide                                              Page: 15
+
+
+          5.2.1 abort <text>
+    
+                Displays <text> as an error message, and then terminates all
+             scripts (including any which  called  the  one  containing  the
+             "abort" command).
+    
+          5.2.2 assign <variable> <text>
+    
+                Places  <text>  into  the  indicated  variable  (A-Z).  Each
+             variable can hold up to 50 characters.
+    
+          5.2.3 call <script> [arguments]
+    
+                Suspends processing of the current script file,  and  begins
+             executing the named one. The new script file will have its  own
+             environment (arguments, variables etc.) and will not affect the
+             environment of the  calling  script.  When  the  called  script
+             terminates, the original script will resume execution.
+    
+          5.2.4 chain <script> [arguments]
+    
+                Terminates execution  of  the  current  script,  and  begins
+             executing the named one. This function is  similar  to  "call",
+             except that the original script will not resume  when  the  new
+             one terminates.
+    
+          5.2.5 clear
+    
+                This command clears the main terminal screen.
+    
+          5.2.6 close
+    
+                This command is used to  stop  capturing  data  to  a  file,
+             following an ASCII download.
+    
+          5.2.7 config [config filename]
+    
+                Loads all LAPTALK options  and  parameters  from  the  named
+             configuration file.
+    
+          5.2.8 dos [text]
+    
+                The remainer of the  command  line  is  passed  to  the  DOS
+             command processor to be executed as a system command.
+    
+          5.2.9 download <protocol> [filename]
+    
+                This  command  will  download  the  named  file  using   the
+             specified protocol (From your protocol setup menu).
+    
+                If <filename> is not supplied, you will be prompted for it.
+    LAPTALK Users Guide                                              Page: 16
+
+
+          5.2.10 echo <text>
+    
+                The remainder of  the  command  line  is  displayed  on  the
+             console terminal screen,  without  a  following  line-feed  and
+             carriage-return. See also 'print'.
+    
+          5.2.11 error <text>
+    
+                Similar to "abort", except that the message is displayed  in
+             a window, and you must press ENTER to remove it.
+    
+          5.2.12 equate <variable> <value>
+    
+                Similar to  "assign",  except  that  the  remainder  of  the
+             command line is evaluated as  a  numeric  expression,  and  the
+             result is assigned to the variable as an ASCII number.
+    
+          5.2.13 exittodos
+    
+                Causes the entire LAPTALK program to terminate.  Control  is
+             returned to the DOS prompt.
+    
+          5.2.14 flush [text]
+    
+                Removes  all  previously  received  data  from  the  capture
+             buffer. If [text] is supplied, that text is then  written  into
+             the capture buffer.
+    
+          5.2.15 goto [+]<label>
+    
+                Searches the script file  for  the  location  of  the  named
+             label, and proceeds to execute commands from there.
+    
+                If '+' is specified, the search will begin  at  the  current
+             line, instead of the beginning of the file. In  large  scripts,
+             this will speed up forward references to labels.
+    
+          5.2.16 hangup
+    
+                This command drops the DTR and RTS signals to the modem  for
+             a period of time in order to force it offline.
+    
+          5.2.17 if <string> : <command>
+    
+                Executes the named command only if <string> can  be  located
+             in the capture buffer.
+    
+          5.2.18 ifnot <string> : <command>
+    
+                Executes the named command  only  if  <string>  can  NOT  be
+             located in the capture buffer.
+    LAPTALK Users Guide                                              Page: 17
+
+
+          5.2.19 ifeq <string> <string> : command
+    
+                Executes the named command only of the  two  <string>'s  are
+             identical.
+    
+          5.2.20 ifne <string> <string> : command
+    
+                Executes the named command only if the  two  <string>'s  are
+             NOT identical.
+    
+          5.2.21 if# <value> : command
+    
+                Executes the named command only if  the  numeric  result  of
+             evaluating <value> is not zero.
+    
+          5.2.22 input <variable> [text]
+    
+                Issues a prompt containing [text], and then reads  a  string
+             from the console which is assigned to the named <variable>.
+    
+          5.2.23 invisible
+    
+                Causes all data subsequently received from the  serial  port
+             to NOT be displayed on the terminal screen. See also "visible".
+    
+          5.2.24 menu <variable> <text>
+    
+                Presents a menu, with each word from <text> as a  selection.
+             The <variable> is set to 0 if the first entry  is  selected,  1
+             for the second, 2 for the third, etc. If the menu is aborted by
+             pressing ESCAPE, the variable is set to -1.
+    
+          5.2.25 print [text]
+    
+                The remainder of  the  command  line  is  displayed  on  the
+             console  terminal  screen,  followed   by   a   line-feed   and
+             carriage-return. See also 'echo'.
+    
+          5.2.26 read <variable> <text>
+    
+                Similar to "input", except that the prompt  is  issued,  and
+             the string is read from the serial port.
+    
+          5.2.27 rem [text]
+    
+                This command is used to insert remarks into the script file.
+             The remainder of the command line is simply ignored.
+    
+          5.2.28 scan <string> <time> [: command]
+    
+                Waits for either the specified <string> to be received  from
+             the serial port, or until <time> seconds  have  elapsed.  If  a
+             command is given, it will be executed if  the  string  was  NOT
+             seen before the timer expired.
+    LAPTALK Users Guide                                              Page: 18
+
+
+          5.2.29 send <text>
+    
+                The remainder of the command  line  is  transmitted  to  the
+             serial port.
+    
+          5.2.30 skip <value>
+    
+                Skips ahead by the specified number of lines,  and  proceeds
+             to process the script file from  there.  In  other  words,  the
+             specified number of lines  following  the  one  containing  the
+             "skip" command will not be processed.
+    
+                This is a convienent way to perform  multi-line  conditional
+             statements.
+    
+          5.2.31 stop
+    
+                Terminates processing of the current script  file.  If  this
+             file was called by another script file, that file will resume.
+    
+          5.2.32 terminal
+    
+                This command invokes the ANSI  terminal,  which  will  allow
+             interactive communication with the remote port  until  CTRL-END
+             if entered, following which the script file will resume.
+    
+          5.2.33 upload <protocol> [filename]
+    
+                This command will upload the named file using the  specified
+             protocol (From your protocol setup menu).
+    
+                If <filename> is not supplied, you will be prompted for it.
+    
+          5.2.34 visible
+    
+                Causes all data subsequently received from the  serial  port
+             to be displayed on the terminal screen. See also "invisible".
+    
+          5.2.35 wait <time>
+    
+                Waits until no data has been received from the  serial  port
+             for the indicated number of seconds.
+    LAPTALK Users Guide                                              Page: 19
+
+
+       5.3 Fast Access Scripts
+    
+             You may set up a "Function menu", with up to  8  "fast  access"
+          scripts (complete with arguments) that can be invoked from  a  pop
+          up menu. This is done with  the  "Function  Menu  Scripts"  option
+          under the "Configuration" menu.
+    
+             The format of each function menu entry is:
+    
+                     [name;][script file name] [arguments]
+    
+             [name;] is the name that appears in the script  file  selection
+          window of the "Function menu" function. It is delimited  from  the
+          script file name by a semicolon (';').
+    
+             [script file name] is the full name of the script file which is
+          to be processed.  Unless  the  name  includes  a  directory  path,
+          LAPTALK assumes that the file will be found in  the  LAPTALK  home
+          directory. If not explicitly given, LAPTALK assumes the  extension
+          ".SCR".
+    
+             [arguments] are any command  line  arguments  which  should  be
+          passed to the script.
+    LAPTALK Users Guide                                              Page: 20
+
+
+    6. TERMINAL CONTROL CODES
+    
+          LAPTALK recognizes the  following  subset  of  the  ANSI  terminal
+       control codes:
+    
+            ^G          - Sound ALARM
+            ^H          - Backspace
+            ^I          - Horizontal TAB
+            ^J          - Line feed
+            ^M          - Carriage return
+            <ESC>[H     - Home cursor
+            <ESC>[f     - Alternate home cursor
+            <ESC>[#;#H  - Position cursor to Y,X
+            <ESC>[#;#f  - Alternate position cursor
+            <ESC>[J     - Clear to end of screen
+            <ESC>[0J    - Alternate clear to end of screen
+            <ESC>[2J    - Clear entire screen
+            <ESC>[K     - Clear to end of line
+            <ESC>[0K    - Alternate clear to end of line
+            <ESC>[2K    - Clear entire line
+            <ESC>[#m    - Select video attributes (1-7 or 0=Normal)
+    
+        The following special codes are transmitted for keys:
+    
+            <ESC>[A     - Up arrow
+            <ESC>[B     - Down arrow
+            <ESC>[C     - Right arrow
+            <ESC>[D     - Left arrow
+            <ESC>OP     - PgUp
+            <ESC>OS     - PgDn
+            <ESC>OP     - Home
+            <ESC>OQ     - End
+            <ESC>OM     - Keypad '+'
+            <ESC>Om     - Keypad '-'
+            <ESC>Op     - Insert
+            <ESC>Oq     - F1
+            <ESC>Or     - F2
+            <ESC>Os     - F3
+            <ESC>Ot     - F4
+            <ESC>Ou     - F5
+            <ESC>Ov     - F6
+            <ESC>Ow     - F7
+            <ESC>Ox     - F8
+            <ESC>Oy     - F9
+            <ESC>Oz     - F10
+            ^H          - Backspace
+            ^I          - TAB
+            ^M          - ENTER
+            Hex: 7F     - Delete
+
+
+
+                              LAPTALK Users Guide
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. USING LAPTALK                                                       2
+
+        2.1 Command Line Options                                            2
+        2.2 LAPTALK Functions                                               2
+        2.3 Function menu                                                   3
+        2.4 Download file                                                   3
+        2.5 Upload file                                                     3
+        2.6 Kill capture                                                    3
+        2.7 Perform script                                                  3
+        2.8 Hangup modem                                                    4
+        2.9 Clear screen                                                    4
+        2.10 Configuration                                                  4
+        2.11 Shell to DOS                                                   4
+        2.12 Exit to DOS                                                    4
+
+     3. CONFIGURATION                                                       5
+
+        3.1 General switches                                                5
+        3.2 General parameters                                              6
+        3.3 Serial port settings                                            8
+        3.4 Transfer protocols                                              8
+        3.5 Function menu scripts                                           9
+        3.6 Video attributes                                               10
+        3.7 Load configuration                                             10
+        3.8 Save configuration                                             10
+
+     4. FILE TRANSFER PROTOCOLS                                            11
+
+        4.1 Configuration                                                  11
+        4.2 The XMODEM module                                              12
+        4.3 Examples                                                       12
+
+     5. SCRIPT INTERPRETER                                                 13
+
+        5.1 Insert Codes                                                   13
+        5.2 Script File Commands                                           14
+        5.3 Fast Access Scripts                                            19
+
+     6. TERMINAL CONTROL CODES                                             20
+

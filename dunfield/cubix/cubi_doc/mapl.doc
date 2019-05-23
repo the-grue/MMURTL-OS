@@ -1,0 +1,1040 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                      MAPL
+    
+                                   Micro-APL
+                                    for the
+                                      6809
+    
+                               Revised: 30-Jul-90
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1983,1990 Dave Dunfield
+                              All rights Reserved
+    MAPL USERS GUIDE                                                 Page: 1
+
+
+    1. INTRODUCTION
+    
+          MAPL is an interactive computer language, based  on  the  language
+       APL, and is designed to allow the programmer to define a  library  of
+       programs, which can be easily used as single operations within  other
+       programs.
+    
+          In  order  to  provide  keyboard  symbols  for  the  many  special
+       operators which are available, lower case characters are used in many
+       cases as the special symbols. In order to make  it  simpler  for  the
+       user, Lower case is converted to upper case, and upper case input  is
+       converted to lower case, allowing the special operators to be entered
+       using the SHIFT key.
+    
+    2. CALCULATOR MODE
+    
+          MAPL works by evaluating expressions, and producing results.  When
+       MAPL is not running a program, it is in CALCULATOR MODE, which allows
+       you to  type  in  expressions,  and  to  see  the  results.  When  in
+       calculator mode, MAPL will space in five spaces from the left margin,
+       and wait for a line of input. If  it  is  an  expression,  MAPL  will
+       evaluate it, and display the result. NOTE: MAPL does not display  the
+       result if it is  assigned  to  a  variable  in  the  last  (leftmost)
+       operator of the expression.
+    
+          MAPL evaluates all expressions from right to left. For example, if
+       you type 5*3+1 when MAPL is prompting in calculator  mode,  You  will
+       get the result 20. MAPL first adds 1 to  3,  producing  4,  and  then
+       multiplies that result by 5, giving  20.  Precedence  can  be  forced
+       using brackets, for example, typing (5*3)+1 would give the answer 16.
+    
+          There are  two  types  of  values  which  may  be  entered  in  an
+       expression, 16 bit integers, and characters. Integer  values  can  be
+       entered using the decimal digits (0-9), the underscore  character  is
+       used to indicate negative numbers. Character values are entered using
+       the single quote character, "'". The single quote  character  can  be
+       included in the character string by using two adjacent quotes in  the
+       entered string, EG: 'DAVE''S PLACE'. Character data is represented as
+       a character array, with a length equal to the number of characters in
+       the entered string. Integer  values  are  represented  as  a  numeric
+       array, with  a  length  equal  to  the  number  of  elements  entered
+       (Separated by spaces). EG: 1 2 _3 4 5
+    
+    3. OPERATORS
+    
+          Operators are indicated by special characters, either by the ASCII
+       graphic characters,such as '+' or by  LOWER  CASE  alpha  characters.
+       Operators  are  the  basic  built  in  functions,  which  enable  the
+       programmer to manipulate and store data. Operators  may  be  MONADIC,
+       requiring one argument value which is located immediatly to the right
+       of the operator, or DYADIC, requiring two argument values, which  are
+       located both to the left and right of the operator symbol.
+    MAPL USERS GUIDE                                                 Page: 2
+
+
+          When DYADIC (two operand) operations are performed on any  values,
+       the two sides must be the  same  length  (number  of  elements).  The
+       operation is performed on each corresponding pair  of  elements  from
+       the two arrays. For example: 1 2 3 + 4 5 6 produces the result 5 7  9
+       (1+4, 2+5, 3+6). If the two values are not the same length, then  one
+       of the two values must be of length one (1). If  this  is  the  case,
+       then its value is automaticaly extended to match  the  other  operand
+       value. For example: 2 + 4 5 6 is equivalent to 2 2 2 +  4  5  6,  and
+       yields the answer 6 7 8.
+    
+    4. USER VARIABLES
+    
+          User variables are denoted by a name consisting of the  characters
+       from (@, A-Z), which may be up to 31 characters long.
+    
+          The value produced by an expression can be assigned  to  variable,
+       using the '=' assignment operator. For example ABC = 4 5 6 +  1  2  3
+       would assign the result (5 7 9) to the variable ABC. When assigned  a
+       value in this manner,  the  variable  assumes  the  type,  size,  and
+       content of the expression to the right of the '=' operator.
+    
+    5. SYSTEM VARIABLES
+    
+          System variables consist of a single character, and are denoted by
+       a trailing DOLLAR SIGN character. EG: 'O$'. System variables are used
+       in expressions exactly the same way as user variables  are,  but  the
+       data saved/read from the variable is not stored in  memory  as  data,
+       but is used to set/interrogate system parameters, or to interface  to
+       entities external to the function definition or the MAPL system.
+    
+          The following system  variables  are  implemented,  the  variables
+       flagged with '*' can only be read, and may not be assigned a value.
+    
+         B$ - Buffer size. This variable contains the amount of space  which
+              is reserved by MAPL  when  evaluating  an  expression.  It  is
+              initially set to 1024 in a clear  workspace.  This  is  enough
+              space to deal character strings of 1021 characters, or numeric
+              arrays of 510 elements. If assigned a  value,  sets  the  work
+              buffer size. The amount of space required for  character  data
+              is 3 + the number of characters in the data. For integer data,
+              it is 3 + twice the number of  elements  in  the  array.  This
+              system variable affects the allocation  and  release  of  work
+              buffers as expressions are nested, and should not be set  from
+              anything but a simple highest level expression.
+    
+         C$ - Character string. This variable  returns  a  character  string
+              which is 256 characters in length, and contains the characters
+              with the byte value from 0 to 255. When assigned a  value,  it
+              acts as a local dump, discarding the assigned value.
+    
+         F$ - Formatted terminal I/O. This variable  waits  for  a  line  of
+              input from the terminal, and returns it as a character string.
+              No prompt is displayed. If it is assigned a value,  the  value
+              is displayed on the  terminal  WITHOUT  a  line-feed  carriage
+              return at the end.
+    
+       * K$ - Key Input, Reads a single keystroke from the keyboard.
+    MAPL USERS GUIDE                                                 Page: 3
+
+
+         L$ - Line Number. This variable returns  the  number  of  the  line
+              which is being interpreted in the function definition which is
+              being executed. When assigned a value, causes a  jump  to  the
+              indicated line AFTER the current expression has completed.  If
+              the assigned line number is greater then the number  of  lines
+              in the function, causes the  function  to  terminate.  If  the
+              assigned line number is zero, causes NO jump to be taken, even
+              if L$ has been assigned previously in the expression.  If  the
+              assigned value is  zero  in  length,  has  no  effect  of  the
+              previous state of L$.
+    
+         O$ - Origin value. This variable contains the system origin  value.
+              The origin value is the  value  at  which  indexes  start.  It
+              controls the starting element number for indexed array access,
+              and also the output offsets for some system variables such  as
+              '?', and 'i'. It is  normally  set  to  one  (1)  in  a  clear
+              workspace.
+    
+       * P$ - Parameter value.  This  variable  returns  the  value  of  the
+              argument value to the currently executing function definition.
+              If the function was not given an argument, then P$ will return
+              a zero length numeric array.
+    
+       * R$ - Remainder. This system  variable  will  return  the  remainder
+              which was generated in the last division operation.
+    
+         S$ - Seed. This variable reads/sets the random  seed  used  by  the
+              ROLL ('?') operator.
+    
+         T$ - Terminal I/O. When this variable is read, MAPL prompts with  a
+              '?' at the  terminal,  and  waits  for  an  expression  to  be
+              entered. The expression is then evaluated, and the  result  is
+              returned. When T$ is assigned a value, the value is  displayed
+              on the terminal, followed  by  a  line-feed,  carriage  return
+              pair.
+    
+       * W$ - Returns the amount of memory which is  free  (unused)  in  the
+              current workspace.
+    MAPL USERS GUIDE                                                 Page: 4
+
+
+    6. USER DEFINED FUNCTIONS
+    
+          User definitions or programs are collections of expressions  which
+       are assigned a  name.  The  definition  can  be  executed  simply  by
+       refering to it's name within  another  expression.  Definition  names
+       names may consist of the characters from (@, A-Z), and may be  up  to
+       31 characters  in  length.  When  used  within  an  expression,  User
+       definitions behave like monadic operators, accepting one  value,  and
+       returning one value, It is not required that a value be passed  to  a
+       definition, in which case it will receive a zero length numeric array
+       as it's passed parameter.
+    
+       6.1 EDITING FUNCTIONS
+    
+             User defined functions are created  and  edited  with  the  '$'
+          character. The user types '$<name>' where name is the name of  the
+          function he wants to edit. If it does not exist,  it  is  created,
+          otherwise it is edited. When the function is  edited,  the  editor
+          prompts with '[<n>]', where <n> is the number of  the  first  free
+          (unused) line in the function.
+    
+             While editing a function, the following commands are available:
+    
+       <text>  - Replaces the text on the current line with <text>, and
+                 advances to the next line.
+       [<n>]   - Move to line <n>.
+       [<n>$]  - Move to and display line <n>.
+       [$<n>]  - Display all lines from <n> to end of function.
+       [$]     - Display entire function.
+       [I<n>]  - Insert lines ahead of line <n>, Prompt changes to '(n)',
+                 enter a null line to leave insert mode.
+       [D<n>]  - Delete line <n>.
+       $       - Close function definition.
+       $$      - Close function definition and lock function, locked
+                 functions cannot be edited, or displayed.
+    
+             Editing line 0 can be used to change the name of the  function,
+          If this is done, the old copy of the function will remain, and can
+          be removed via the ')ERASE' command.
+    
+             If line 0 is changed so as to give in invalid function name,  a
+          DEFN ERROR will occur when an attempt is made to exit the  editor.
+          In this case, the editor  will  not  terminate,  but  will  remain
+          active, at line [0] allowing the function name to be changed.
+    MAPL USERS GUIDE                                                 Page: 5
+
+
+             Lables can be given to function lines, and consist of  a  valid
+          variable name, starting in column  1,  and  followed  by  a  colon
+          (':'). Lines containing  labels  are  outdented  one  column  when
+          displayed by the editor. Lables are symbol table entries, and  are
+          LOCAL to a function, existing only while the function is  actually
+          executing.
+    
+             Variables can  be  made  LOCAL  to  a  function  definition  by
+          including the names in the header line (line  0),  separated  from
+          the function name by semicolons. When a function is  invoked,  any
+          LOCAL variables will replace any external variables  of  the  same
+          name, for the duration of execution  of  the  function.  When  the
+          function  exits,  the  local  variables  are  destroyed,  and  the
+          external variables are restored.
+    
+             When a user defined function is  executed,  the  value  of  its
+          parameter can be accessed via the system variable 'P$'. The  value
+          returned by the function will be the value of the last  expression
+          evaluated within the function. Expressions within functions  which
+          do not assign the result to a variable will be printed,  the  same
+          way as in calculator mode. A useful trick, is to assign the  final
+          value to the system "DUMP" variable 'C$', to prevent it from being
+          displayed before it is returned.
+    MAPL USERS GUIDE                                                 Page: 6
+
+
+    7. MAPL OPERATORS
+    
+       7.1 Monadic Operators
+    
+             The following operators require a single argument, and  produce
+          a single result. All arguments are placed to the  immediate  right
+          of the operator symbol.
+    
+    Operator   Operator                   Description of operator.
+      Name      Symbol
+    ---------+---------+--------------------------------------------------------
+    Classify |    c    |  Produces a single element value, which is a zero(0) if
+             |         | the argument value contained character information,  or
+             |         | a one(1) if the argument value was numeric in content.
+    ---------+---------+--------------------------------------------------------
+     Execute |    e    |  Accepts only character arguments,  and  evaluates  the
+             |         | argument string as an expression, returning the result.
+             |         | A zero length argument, causes no operation, and a zero
+             |         | length numeric array is returned.
+    ---------+---------+--------------------------------------------------------
+     Index   |    i    |  Accepts only a numeric argument of length one(1),  and
+     Vector  |         | produces an assending array, starting with the value of
+             |         | the system origin variable 'O$',and containing a number
+             |         | of elements equal to the value of the argument. A value
+             |         | of zero as an argument will generate a numeric array of
+             |         | zero elements.
+    ---------+---------+--------------------------------------------------------
+     Reverse |    r    |  Produces an array of the same langth as the  argument,
+             |         | containing the same elements, but in the reverse order.
+    ---------+---------+--------------------------------------------------------
+      Roll   |    ?    |  Produces an array of the same length as the  argument,
+             |         | containing random numbers between the value of the 'O$'
+             |         | system origin variable, and the value contained in the
+             |         | corresponding element of the argument.
+    ---------+---------+--------------------------------------------------------
+     String  |    s    |   Produces a character array, containing the  character
+             |         | representation of the numeric argument.  If  more  than
+             |         | one element is present in the argument, each element is
+             |         | converted to a character string and  separated  by  one
+             |         | space in the output. A zero  length  numeric  argument,
+             |         | Produces a zero length character result.
+    ---------+---------+--------------------------------------------------------
+      Shape  |    p    |  Produces a single integer value which is the number of
+             |         | elements in the argument value.
+    ---------+---------+--------------------------------------------------------
+      Sort   |    ^    |  Produces an array of the same length as the  argument,
+             |         | containing index values required to place the  argument
+             |         | value in non-decending order. Ie: the first element  of
+             |         | the  result  contains  the  position  of  the  smallest
+             |         | element in the argument, and so forth. Each index value
+             |         | for each element in the argument will occur  only  once
+             |         | in the resultant index array.
+    ---------+---------+--------------------------------------------------------
+     Branch  |    b    |  Causes a jump to the  line  number  indicated  by  the
+             |         | operand value, AFTER this expression is executed.
+    ---------+---------+--------------------------------------------------------
+    MAPL USERS GUIDE                                                 Page: 7
+
+
+       7.2 Dyadic Operators
+    
+             The following operators require two arguments, which occur both
+          to the right and the left of the operator.
+             In most cases, the arguments must be the  same  length,  except
+          for the case where one operator is of length one(1), and the other
+          is not. In this case, the argument of length one is  automatically
+          expanded to the length  of  the  the  other  argument,  with  each
+          element of the new expanded  array  equal  to  the  value  of  the
+          origional element in the array.
+    
+    Operator   Operator                   Description of operator.
+      Name      Symbol
+    ---------+---------+--------------------------------------------------------
+      Add    |    +    |  Accepts only numeric arrays, producing an array of the
+             |         | same length as the arguments, containing the sum of the
+             |         | elements in the argument arrays.
+    ---------+---------+--------------------------------------------------------
+    Subtract |    -    |  Accepts only numeric arrays, producing an array of the
+             |         | same length as the arguments, containing the difference
+             |         | of the corresponding elements in the arguments.
+    ---------+---------+--------------------------------------------------------
+    Multiply |    x    |  Multiplys the corresponding elements of  the  argument
+             |         | arrays to produce a resultant array of the same length.
+             |         | Accepts numeric arrays only.
+    ---------+---------+--------------------------------------------------------
+    Division |    %    |  Divides the corresponding  elements  of  the  argument
+             |         | arrays, to produce a resultant array of the same length
+             |         | The remainder after  the  division  of  the  first  two
+             |         | elements is assigned to the system variable  'R$'.  The
+             |         | divisor is the array FOLLOWING the operator.
+             |         | Accepts numeric arrays only.
+    ---------+---------+--------------------------------------------------------
+     Modulus |    m    |  Performs a division of the elements  of  the  argument
+             |         | arrays, and produces an array of the same length, which
+             |         | contains the remainder after each division. The divisor
+             |         | is the array PRECEDING the operator.
+             |         | Accepts numeric arrays only.
+    ---------+---------+-------------------------------------------------------
+     Logical |    &    |  Performs a bitwise logical AND of the argument values,
+       And   |         | producing a result of the same length.
+    ---------+---------+-------------------------------------------------------
+     Logical |    !    |  Performs a bitwise logical OR  of the argument values,
+       Or    |         | producing a result of the same length.
+    ---------+---------+-------------------------------------------------------
+    Exclusive|    |    |  Performs a bitwise exclusive  or  of  the  arguments,
+       Or    |         | producing a result of the same length.
+    ---------+---------+-------------------------------------------------------
+    Greatest |    g    |  Accepts numeric arguments only, produces an array  of
+             |         | the same  length  as  the  arguments,  containing  the
+             |         | larger of each corresponding set of elements.
+    ---------+---------+-------------------------------------------------------
+      Least  |    l    |  Accepts numeric arguments only, produces an array  of
+             |         | the same  length  as  the  arguments,  containing  the
+             |         | smaller of each corresponding set of elements.
+    ---------+---------+-------------------------------------------------------
+    MAPL USERS GUIDE                                                 Page: 8
+
+
+    Operator   Operator                   Description of operator.
+      Name      Symbol
+    ---------+---------+-------------------------------------------------------
+    Equality |   ==    |  Produces an array of the same length as the arguments,
+             |         | containing one(0) or zero(0) values indicating if  the
+             |         | corresponding elements of the arguments are equal.
+    ---------+---------+-------------------------------------------------------
+    Not Equal|   -=    |  Produces an array of the same length as the arguments,
+             |         | containing one(0) or zero(0) values indicating if  the
+             |         | corresponding elements of the arguments are NOT equal.
+    ---------+---------+-------------------------------------------------------
+     Greater |    >    |  Accepts numeric arrays only, and produces a result of
+      Than   |         | the same length as the arguments which contains one(1)
+             |         | or zero(0)  values  indicating  if  the  corresponding
+             |         | elements of the preceeding arguments are greater  than
+             |         | the corresponding elements of the following argument.
+    ---------+---------+-------------------------------------------------------
+      Less   |    <    |  Accepts numeric arrays only, and produces a result of
+      Than   |         | the same length as the arguments which contains one(1)
+             |         | or zero(0)  values  indicating  if  the  corresponding
+             |         | elements of the preceeding arguments are less than the
+             |         | corresponding elements of the following argument.
+    ---------+---------+-------------------------------------------------------
+     Greater |   >=    |  Accepts numeric arrays only, and produces a result of
+      Equals |         | the same length as the arguments which contains one(1)
+             |         | or zero(0)  values  indicating  if  the  corresponding
+             |         | elements of the preceeding arguments are  greater than
+             |         | or equal to the corresponding element of the following
+             |         | argument.
+    ---------+---------+-------------------------------------------------------
+      Less   |   <=    |  Accepts numeric arrays only, and produces a result of
+      Equals |         | the same length as the arguments which contains one(1)
+             |         | or zero(0)  values  indicating  if  the  corresponding
+             |         | elements of the preceeding arguments are less than  or
+             |         | equal to the corresponding elements of  the  following
+             |         | argument.
+    ---------+---------+-------------------------------------------------------
+    Extract  |    /    |  The preceeding argument to this function must  be  of
+             |         | numeric content. The result produced will  be  of  the
+             |         | same type as the following argument, and will  consist
+             |         | all of the elements from the following argument  which
+             |         | have a corresponding NON-ZERO value in the  preceeding
+             |         | argument. The number of elements in the result will be
+             |         | equal to the number of non-zero elements in the  first
+             |         | argument. If the preceeding argument is of length one,
+             |         | it will be expanded to the same length as the  follow-
+             |         | ing argument, and will cause the result to  be  either
+             |         | the entire following argument, or a zero length array,
+             |         | depending on it's value.
+    ---------+---------+-------------------------------------------------------
+    MAPL USERS GUIDE                                                 Page: 9
+
+
+    Operator   Operator                   Description of operator.
+      Name      Symbol
+    ---------+---------+-------------------------------------------------------
+      Join   |    ;    |  Produces a single result, consisting of  all  of  the
+             |         | elements from the first argument, followed by  all  of
+             |         | elements from the second argument. The  two  arguments
+             |         | must be of the same type.
+    ---------+---------+-------------------------------------------------------
+      Take   |    t    |  The first argument to this operator must be a numeric
+             |         | value of length one(1).  The  result  produced  is  an
+             |         | array of length  <n>,  consisting  of  the  first  <n>
+             |         | elements of the second argument,where <n> is the value
+             |         | of the first argument. If  <n>  is  greater  than  the
+             |         | number of elements in the second argument, the  result
+             |         | is padded with spaces for character values, and zero's
+             |         | for numeric values.
+    ---------+---------+-------------------------------------------------------
+      Drop   |    d    |  Similar to 'TAKE' above, but  returns  the  remaining
+             |         | elements of the second argument, after the  first  <n>
+             |         | elements have been removed. If <n> equals  or  excedes
+             |         | the number of elements in the second argument, then  a
+             |         | zero length array is returned.
+    ---------+---------+-------------------------------------------------------
+      Find   |    f    |  Returns the starting position (in the first argument)
+             |         | of the pattern specified by the  second  argument.  If
+             |         | the pattern is not found, the number returned  is  one
+             |         | higher than the highest element  index  in  the  first
+             |         | argument. The index value returned is adjusted for the
+             |         | the current setting of the system origin variable. O$
+    ---------+---------+-------------------------------------------------------
+    Translate|    n    |  Returns an integer array, with the same length as the
+             |         | right-hand argument, which contains the  index  values
+             |         | into  the  left-hand  argument for  the  corresponding
+             |         | elements from the right-hand argument. If  an  element
+             |         | from the right hand operand does not occur in the left
+             |         | hand argument, then the corresponding index value will 
+             |         | be one greater than the highest valid index value  for 
+             |         | the left-hand argument. Due to the way translate looks
+             |         | through the left argument, it will always  return  the
+             |         | highest index value for elements which occur more than
+             |         | once in the left-hand argument.                       
+    ---------+---------+-------------------------------------------------------
+      Union  |    u    |  Returns an integer array, with the same length as the
+             |         | left hand argument, which contains either a zero  or a
+             |         | one, indicating if the corresponding element from  the 
+             |         | left-hand argument is contained within the  right-hand 
+             |         | argument.
+    ---------+---------+-------------------------------------------------------
+     Assign  |    =    |  Assigns the value given as the right operand  to  the
+             |         | variable name given as the left operand.
+    ---------+---------+-------------------------------------------------------
+    MAPL USERS GUIDE                                                 Page: 10
+
+
+    Operator   Operator                   Description of operator.
+      Name      Symbol
+    ---------+---------+-------------------------------------------------------
+      Opsys  |    o    |  This operator  provides  an  interface  to  operating
+             |         | system functions. It's usage will vary from system  to
+             |         | system, but the following general syntax rules  apply:
+             |         |  The left-hand operand is always a simple integer,  of
+             |         | length=1, and indicates which operating system service
+             |         | is to be invoked. The right hand operand  can  be  any
+             |         | value and any length, depending on the requirements of
+             |         | the selected  operating  system  function.  The  value
+             |         | returned by the function may also be of any  size  and
+             |         | type. See the appendices for more information on OPSYS.
+    ---------+---------+-------------------------------------------------------
+    MAPL USERS GUIDE                                                 Page: 11
+
+
+       7.3 Other Operators
+    
+             The following operators do not fit into the class of monadic or
+          dyadic operators, and are described here.
+    
+    Operator   Operator                   Description of operator.
+      Name      Symbol
+    ---------+---------+--------------------------------------------------------
+     Travel  |    \    |  This operator takes  another  operator  as  it's  left
+             |         | argument, which can be one of (+,x,&,!,|,g,l).The given
+             |         | operation is performed  against  each  element  of  the
+             |         | numeric array given as the right argument.  The  result
+             |         | produced  is  of  length  one,  and  is  equivalent  to
+             |         | separating each element of the second argument with the
+             |         | specified operator. EG: +\1 2 3 is equivalent to 1+2+3,
+             |         | and would produce the result 6. If a zero length  array
+             |         | is given as the second argument, the result is a number
+             |         | known as the IDENTITY value for that operation, and  is
+             |         | the number which has no effect when used as an argument
+             |         | for that operation. Ie: The identity value for addition
+             |         | is ZERO, and when added to another value, produces  the
+             |         | same value.
+    ---------+---------+--------------------------------------------------------
+      Nest   | ( and ) |  Brackets, allow expressions to be nested and  used  as
+             |         | single values in another expression,  thereby  allowing
+             |         | normal right to left precedence to be altered.
+    ---------+---------+--------------------------------------------------------
+      Index  | [ and ] |  Allow access to elements of an array, as determined by
+             |         | the expression inside the square braces.
+             |         | EG:   (ri5)[1 3]    produces the result 5 3 (if O$=1).
+             |         |       ABC[1 3]=4 7  Assigns the value 4  to  the  first
+             |         |                     element of the variable ABC,and the
+             |         |                     value 7 to the third element.
+    ---------+---------+--------------------------------------------------------
+    MAPL USERS GUIDE                                                 Page: 12
+
+
+    8. SUSPENDED FUNCTIONS
+    
+          If an error  condition  is  encountered  while  executing  a  user
+       defined function, the execution of that function will be  terminated,
+       and  an  error  message  printed,  indicating  the  type   of   error
+       encountered, the name of the function being executed,  and  the  line
+       number on which the error occured. In order to aid in debugging,  the
+       function will actually be SUSPENDED in execution, allowing access  to
+       it's symbols and local variables from calculator mode.
+    
+          When a function is suspended, buffer and stack space allocated  to
+       that function will not be released until a ')REL' or ')RESET' command
+       is issued, which will terminate the function and release  it's  local
+       symbols and buffer space. This is normally done after determining the
+       cause of the error.
+    
+          The equivalent of a ')RESET' command will be performed whenever  a
+       function is edited, or any symbol is erased via the ')ERASE' command.
+    
+          The names of GLOBAL  variables  which  were  superceded  by  local
+       variables in a suspended  function  will  still  be  visible  in  the
+       ')VARS' variable list, even though they will not be accessable  until
+       the suspension of the function containing local variables of the same
+       name is cleared.
+    
+          Line labels belonging to suspended functions  will  exist  in  the
+       symbol table, and can be seen with the ')LBLS' command.
+    MAPL USERS GUIDE                                                 Page: 13
+
+
+    9. SYSTEM COMMANDS
+    
+          The following is a description of the system commands which may be
+       entered while in calculator mode. System comamnds  may  not  be  used
+       from within a user defined  function.  The  parameters  indicated  by
+       square braces are optional.
+    
+       9.1 )CLEAR [<symbol table size>]
+    
+             Clears the workspace, setting it's  name  to  'CLEAR  WS',  and
+          initializes the symbol table, erasing all variables and functions.
+          The system variables are reset to their  default  values.  If  the
+          optional <symbol table size> parameter is given,  then  that  many
+          bytes are reserved in the workspace  for  the  symbol  table.  The
+          default value for the symbol table size is 1000 bytes.
+    
+             Symbol table entries are required for function names,  variable
+          names, and for local variables and lables in executing  functions.
+          Each entry requires a number of  bytes  of  memory  equal  to  the
+          number of characters in the symbol name plus  four.  Symbol  names
+          can be from 1 to 31 characters in length.
+    
+       9.2 )CONTINUE
+    
+             Saves the currently loaded workspace on  the  disk,  under  the
+          workspace name 'CONTINUE', and then terminates the session.
+             If a workspace by the name of 'CONTINUE' exists  when  MAPL  is
+          first executed, It will be automaticaly loaded.
+    
+       9.3 )DROP <wsname>
+    
+             Removes the named saved workspace from the disk.
+    
+       9.4 )ERASE <symbol>
+    
+             Removes the  named  symbol  (function  or  variable)  from  the
+          workspace.
+    
+       9.5 )FNS
+    
+             Displays the names of all  user  defined  functions  which  are
+          present in the currently loaded workspace.
+    
+       9.6 )LBLS
+    
+             Displays the names of all user defined  function  labels  which
+          are currently in the symbol table. Function labels are only placed
+          in the symbol table during execution of that function, and  should
+          not be visible unless the workspace contains suspended functions.
+    
+       9.7 )LIB [<filespec>]
+    
+             Displays the names of workspaces which are saved on  the  disk.
+          If the <filespec> operand is specified, it is used as a  mask  for
+          the directory listing. I.E: If you  enter  ')LIB  B*',  all  saved
+          workspace names which start with a 'B' would be displayed.
+    MAPL USERS GUIDE                                                 Page: 14
+
+
+       9.8 )LOAD <wsname>
+    
+             Loads the named saved workspace from disk,  and  makes  it  the
+          active workspace. When the workspace  is  loaded,  if  the  symbol
+          '@LX' is found in the new workspace, it is evaluated,  and  should
+          return a string value which is then executed (via 'e').
+    
+       9.9 )OFF
+    
+             Terminates the session, returning to the operating system.
+    
+       9.10 )REL
+    
+             Releases the most recently suspended function, reclaiming  it's
+          stack and buffer space, and removes any  local  variables  it  may
+          have had.
+    
+       9.11 )RESET
+    
+             Releases all suspended functions, reclaiming stack  and  buffer
+          space, as well as removing all local  variables  from  the  symbol
+          table.
+    
+       9.12 )SAVE [<wsname>]
+    
+             Saves the currently loaded workspace  on  the  disk  under  the
+          given name. If no name is specified, the workspace is saved  under
+          it's own name.
+    
+       9.13 )SI
+    
+             Displays a list of all functions which  are  suspended  in  the
+          workspace, including the line number on which suspension  occured,
+          and the names of all local variables belonging to the function.
+    
+       9.14 )STAT
+    
+             Displays information  about  the  currently  loaded  workspace,
+          included in this display are symbol table size, number of symbols,
+          amount of free space in symbol table, and the amount of free space
+          in the workspace.
+    
+       9.15 )SYS [<command>]
+    
+             Executes the DOS command <command>. If no command is  supplied,
+          enters the dos, allowing return  to  MAPL  via  the  DOS  'RETURN'
+          command.
+    
+       9.16 )VARS
+    
+             Displays the names of all user variables which are  present  in
+          the active workspace.
+    
+       9.17 )WSID [<name>]
+    
+             Displays the name  of  the  current  workspace.  If  <name>  is
+          supplied, sets the workspace name.
+    MAPL USERS GUIDE                                                 Page: 15
+
+
+    10. COMMENTS
+    
+          Any line which begins with  an  asterix  ('*')  is  treated  as  a
+       comment, and is ignored by the interpreter.
+    
+    11. KEYBOARD INTERRUPTS
+    
+          The CONTROL-C character can be used to interrupt MAPL  in  several
+       ways.
+    
+       1) If a user defined function is executing, typing a  CONTROL-C  will
+          interrupt the execution of that function, causing a suspension.
+    
+       2) If a CONTROL-C is entered while editing  a  function,  the  editor
+          will be aborted, and any changes which were made will be lost.
+    
+       3) If a CONTROL-C is entered in response to a 'T$'  of  'F$'  prompt,
+          the input request will be canceled, and any functions  which  were
+          in a state of execution will be suspended.
+    MAPL USERS GUIDE                                                 Page: 16
+
+
+    12. ERROR MESSAGES
+    
+          The following error message are produced by the interpreter.
+    
+       12.1 DEFN ERROR
+    
+             Results from an attempt to edit a function name  which  is  not
+          editable, either because it is locked, is an invalid name, or that
+          name is already in use for a variable. Also results when exiting a
+          function after the name has been  made  invalid,  or  from  errors
+          during editing.
+    
+       12.2 DOMAIN ERROR
+    
+             Results from an attempt to perform  an  operation  on  a  value
+          which is not in the domain of the function being used, such as  an
+          argument to a function which  is  the  wrong  type  (character  or
+          numeric) for that function, or for the other argument in a  dyadic
+          function.
+             This error also results from any error inside of a locked  user
+          defined function.
+    
+       12.3 INDEX ERROR
+    
+             Results from an attempt to index a value  with  a  index  value
+          which falls outside of the range of valid  index  values  for  the
+          first value.
+    
+       12.4 LENGTH ERROR
+    
+             Results from use of a value which is not of a  length  required
+          for use by a particular function.  Also  results  from  use  of  a
+          dyadic function on values which are of incompatable lengths.
+    
+       12.5 SYNTAX ERROR
+    
+             Results from any statement which does  not  follow  the  syntax
+          rules.
+    
+       12.6 SYSTEM ERROR
+    
+             Results from an internal error  condition,  which  can  not  be
+          accounted for. A series of HEX values will be dumped out following
+          the error, which contains valuable information about  the  current
+          state of the system at the time the error was detected. Write  the
+          values down, and include them with a bug  report  if  the  problem
+          persists.
+    
+       12.7 VALUE ERROR
+    
+             Results from an attempt to use a symbol that has no value.  Any
+          reference to an undefined  symbol  other  an  an  assignment  will
+          result in this error.
+    MAPL USERS GUIDE                                                 Page: 17
+
+
+       12.8 WS FULL
+    
+             Results from any operation which requires more memory  then  is
+          currently free a the time the operation was attempted.
+    
+       12.9 INTERRUPT
+    
+             This message is displayed whenever an interrupt in execution is
+          caused via a control-C character from the terminal.
+    
+       12.10 LIBRARY EMPTY
+    
+             Results froma ')LIB' command, when there are no matching  files
+          on the disk.
+    
+       12.11 NOT WITH SI
+    
+             Results from any command which can not be completed while there
+          is a suspended function in the workspace.
+    
+       12.12 NOT FOUND
+    
+             Results from an attempt to ')ERASE' a symbol which has not been
+          defined.
+    
+       12.13 INCORRECT COMMAND
+    
+             Results from a system command which  is  unrecognized,  or  has
+          been given invalid operands.
+    
+       12.14 WS NOT FOUND
+    
+             Results from an attempt to ')LOAD' or ')DROP'  an  non-existant
+          workspace.
+    MAPL USERS GUIDE                                                 Page: 18
+
+
+    13. APPENDIX 1 - Sample Definitions
+    
+          The following are some sample function defintions.
+    
+        $ROTATE
+    [1]  * ROTATES THE OPERAND VALUE ONE PLACE TO THE LEFT.
+    [2]  C$=1dP$;1tP$
+    [3]  $
+    
+        $ONEBLANK
+    [1]  * CONVERTS ALL MULTIPLE OCCURANCES OF BLANKS TO SINGLE BLANKS.
+    [2]  C$=(0==(P$==' ')&ROTATE' '==P$)/P$
+    [3]  $
+    
+        $PARSE;A
+    [1]  * STRIPS OFF THE FIRST WORD FROM THE GLOBAL VARIABLE 'CMD', REPEATED
+    [2]  * CALLS TO 'PARSE' WILL RETURN THE NEXT WORD.
+    [3]  CMD=(1+pA=(_1+CMDf' ')tCMD)dCMD
+    [4]  C$=A
+    [5]  $
+    
+        $DEAL
+    [1]  * DEALS A DECK OF CARDS, SIZE DETERMINED BY PARAMETER.
+    [2]  C$=^?P$+P$t0
+    [3]  $
+    
+        $SIZE
+    [1]  * RETURNS THE AMOUNT OF MEMORY (BYTES) REQUIRED BY THE PARAMETER.
+    [2]  C$=3+(1+cP$)xpP$
+    [3]  $
+    
+        $CRLF;CMD;OUT
+    [1]  * PRODUCES A STRING, CONTAINING WORDS FROM THE PARAMETER, SEPARATED
+    [2]  * BY CARRIAGE RETURN/LINE-FEED PAIRS (NO SPACES).
+    [3]  OUT=0tCMD=ONEBLANK P$
+    [4] TOP: OUT=OUT;C$[14];C$[11];PARSE
+    [5]  b(pCMD)tTOP
+    [6]  C$=2dOUT
+    [7]  $
+    
+        $CRSTRING;VAR
+    [1]  * THIS FUNCTION SEPARATES WORDS IN A STRING WITH CARRIAGE RETURNS.
+    [2]  VAR[(VAR==' ')/ipVAR=ONEBLANK P$]=C$[14]
+    [3]  C$=VAR
+    [4]  $
+    
+        $HEX
+    [1]  * THIS FUNCTION CONVERTS A STRING HEX NUMBER INTO AN INTEGER VALUE.
+    [2]  C$=+\1 16 256 4096x4tr('0123456789ABCDEF'nP$)-O$
+    [3]  $
+    MAPL USERS GUIDE                                                 Page: 19
+
+
+    14. APPENDIX 2 - Internal Data Storage Format
+    
+          When data is  assigned  to  a  variable,  or  simply  used  in  an
+       expression, it converted to a standard internal data  structure.  The
+       format of this structure is as follows:
+    
+                    [Type field]    (1 Byte)
+                    [Length field]  (2 bytes)
+                    [Data field]    (Variable length)
+    
+          The type field consists  of  a  single  byte,  and  indicates  the
+       classification of the content of the structure.  Currently  the  only
+       values used for the type byte are 0 for character information, and  1
+       for integer information.
+    
+          The Length field contains a 16  bit  number  indicating  how  many
+       elements are in the structure.
+    
+          The data field  contains  the  actual  data  elements,  stored  in
+       REVERSE order. For character data, the elements are  one  byte  each,
+       and for integer data, the elements are two bytes in size.
+    MAPL USERS GUIDE                                                 Page: 20
+
+
+    15. APPENDIX 3 - The OPSYS Function.
+          The  OPSYS  ('o')  function  provides  an  interface  to  specific
+       operating system functions, which may vary depending on the operating
+       system used. Care should be taken when writing definitions which  use
+       this operator, as they may not be transportable to other systems.
+    
+          The  OPSYS  function  supplied  with  CUBIX  has   the   following
+       functions:
+    
+     Function Right Hand  -     Description
+       Code    Operator
+    --------+------------+------------------------------------------------------
+        0   | Character  |  Passes the operand string to the DOS, to be executed
+            |            | as a DOS command. Returns a standard DOS return code.
+    --------+------------+------------------------------------------------------
+        1   | Character  |  Opens the file indicated by the operand for a serial
+            |            | READ operation.  Returns a  file control block  (FCB)
+            |            | which is an integer array of length 261 if successful
+            |            | or a standard dos return code (length 1) if failure.
+    --------+------------+------------------------------------------------------
+        2   | Character  |  Opens the file indicated by the operand for a serial
+            |            | WRITE operation. Returns a  file control block  (FCB)
+            |            | if successful, or a standard return code if failure.
+    --------+------------+------------------------------------------------------
+        3   | Character  |  Tests for existance of a file, returns standard DOS
+            |            | return code value.
+    --------+------------+------------------------------------------------------
+        4   |  Integer   |  Reads data from main memory.  A byte  of  memory  is
+            |            | fetched at the address contained in each  element  of
+            |            | the operand. An integer array is returned.
+    --------+------------+------------------------------------------------------
+        5   |  Integer   |  Writes data to main memory. The first element of the
+            |            | operand is taken as the address, and the value of all
+            |            | following elements are written sequentially as data.
+    --------+------------+------------------------------------------------------
+        6   |  Integer   |  Executes a System Service Request  (SSR).  The  five
+            |            | element operand has the following format:
+            |            |        (SSR  NUMBER), (A&B), (X), (Y), (U)
+            |            |  After executing the  system  request, the  following
+            |            | five element array is returned:
+            |            |        (RETURN CODE), (A&B), (X), (Y), (U)
+    --------+------------+------------------------------------------------------
+       FCB  | Character  |  Writes the operand data to the file indicated by the
+            |            | supplied FCB variable. This function updates the FCB,
+            |            | and therefore it must be given as a simple  variable,
+            |            | not contained in an expression or within brackets.
+    --------+------------+------------------------------------------------------
+       FCB  |      0     |  Reads a line from the open file, and returns a char-
+            |            | acter string if successful, Integer  return  code  if
+            |            | not. See above for restriction of FCB specification.
+    --------+------------+------------------------------------------------------
+       FCB  |      1     |  Closes the file indicated by FCB.  Returns  standard
+            |            | DOS return code. See above for restriction of FCB.
+    --------+------------+------------------------------------------------------
+       FCB  |      2     |  Rewinds the indicated file. Returns DOS return code.
+            |            | See above for restriction of FCB specification.
+    --------+------------+------------------------------------------------------
+
+
+
+                                MAPL USERS GUIDE
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. CALCULATOR MODE                                                     1
+
+
+     3. OPERATORS                                                           1
+
+
+     4. USER VARIABLES                                                      2
+
+
+     5. SYSTEM VARIABLES                                                    2
+
+
+     6. USER DEFINED FUNCTIONS                                              4
+
+        6.1 EDITING FUNCTIONS                                               4
+
+     7. MAPL OPERATORS                                                      6
+
+        7.1 Monadic Operators                                               6
+        7.2 Dyadic Operators                                                7
+        7.3 Other Operators                                                11
+
+     8. SUSPENDED FUNCTIONS                                                12
+
+
+     9. SYSTEM COMMANDS                                                    13
+
+        9.1 )CLEAR [<symbol table size>]                                   13
+        9.2 )CONTINUE                                                      13
+        9.3 )DROP <wsname>                                                 13
+        9.4 )ERASE <symbol>                                                13
+        9.5 )FNS                                                           13
+        9.6 )LBLS                                                          13
+        9.7 )LIB [<filespec>]                                              13
+        9.8 )LOAD <wsname>                                                 14
+        9.9 )OFF                                                           14
+        9.10 )REL                                                          14
+        9.11 )RESET                                                        14
+        9.12 )SAVE [<wsname>]                                              14
+        9.13 )SI                                                           14
+        9.14 )STAT                                                         14
+        9.15 )SYS [<command>]                                              14
+        9.16 )VARS                                                         14
+        9.17 )WSID [<name>]                                                14
+
+    MAPL USERS GUIDE                                       Table of Contents
+
+                                                                         Page
+     10. COMMENTS                                                          15
+
+
+     11. KEYBOARD INTERRUPTS                                               15
+
+
+     12. ERROR MESSAGES                                                    16
+
+        12.1 DEFN ERROR                                                    16
+        12.2 DOMAIN ERROR                                                  16
+        12.3 INDEX ERROR                                                   16
+        12.4 LENGTH ERROR                                                  16
+        12.5 SYNTAX ERROR                                                  16
+        12.6 SYSTEM ERROR                                                  16
+        12.7 VALUE ERROR                                                   16
+        12.8 WS FULL                                                       17
+        12.9 INTERRUPT                                                     17
+        12.10 LIBRARY EMPTY                                                17
+        12.11 NOT WITH SI                                                  17
+        12.12 NOT FOUND                                                    17
+        12.13 INCORRECT COMMAND                                            17
+        12.14 WS NOT FOUND                                                 17
+
+     13. APPENDIX 1 - Sample Definitions                                   18
+
+
+     14. APPENDIX 2 - Internal Data Storage Format                         19
+
+
+     15. APPENDIX 3 - The OPSYS Function.                                  20
+

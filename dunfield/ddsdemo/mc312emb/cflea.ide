@@ -1,0 +1,22 @@
+file *.C
+temp 0 0
+tab 4
+rem Remove the following line if you have a MONOCHROME video system
+color WH|BL WH|MG BL|GR WH|RD BK|WH RD|CY BK|WH BL|WH
+rem Provide "hotkey" access to main menu items from editor
+key !C|$~F8C !T|$~F8T !O|$~F8O !F|$~F8F !K|$~F8K !A|$~F8A !B|$~F8B !L|$~F8L
+target 1 9600 0 1
+simulate emcf.com
+option
+	switch		0	C-source comments |-c
+	switch		0	Fold literals     |-f
+	switch		0	Optimizer debug   |-d
+	switch		0	Full ASM listing  |-f -s L=$f.LST|-t
+	switch		1	Case sensitive ASM|-c
+	switch		0	Intel output      |-i
+	end
+step -Preprocess|CC|	$H\MCP.COM $I $O l=$H -q$' -l'1
+step Compile|ASM|		$H\MCCCF.COM $I $O -q $0 $1$' -l'0
+step -Optimize|ASM|		$H\MCOCF.COM $I $O -q $2
+step Link|ASM|			$H\SLINK.COM $I $O -q l=$H\LIBCF
+step Assemble|HEX|		$H\ASMCF.COM $I $3 $4 $5 C=$O

@@ -1,0 +1,25 @@
+Functions for DOS-less Embedded PC applications.
+
+This archive contains several programs which are useful in developing
+code for PC hardware that runs without an operating system.
+
+MKBOOT is a utility that installs a custom boot loader, allowing you to
+load and execute any file, by booting it directly from floppy disk.
+
+MDCFS is the 'C' source code for a "Minimal Dos Compatible File System",
+these functions allow you to read and write to DOS format disks without
+DOS. Basic open/close/read/write/delete functions are provided.
+
+WINDOW is a set of very small ASM and 'C' functions which implement
+"character based" windows using direct memory writes. Supports multiple
+open windows, save/restore overlaid text, borders, scrolling, line-wrap
+and LOTS more.
+
+COMM is a set of interrupt driven serial I/O functions, which use standard
+PC serial ports.
+
+JOYSTICK is a function which reads the digital and analog inputs of the
+PC's game (joystick) port.
+
+Source files are compatible with the ASM86 assembler, and MICRO-C/86
+compiler from DDS 8086 Developers Kit.

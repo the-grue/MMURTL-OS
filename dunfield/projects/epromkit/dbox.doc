@@ -1,0 +1,553 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                     D-BOX
+    
+                             An RS-232 to CONTROL-L
+                             VCR Control Interface
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1992-1995 Dave Dunfield
+                              All rights reserved.
+    D-BOX VCR CTRL-L Interface                                       Page: 1
+
+
+    1. INTRODUCTION
+    
+          The D-BOX is an interface translator, which allows any VCR  having
+       a CONTROL-L (LANC) port to be  controlled  using  a  standard  RS-232
+       asynchronous  connection.  The  D-BOX  handles  all  details  of  the
+       CONTROL-L protocol, providing the controlling device  with  a  simple
+       and straight forward command set.
+    
+          Up to eight VCR's may be controlled from a single D-BOX.
+    
+          The CONTROL-L (LANC) connector on the VCR will be either a  5  pin
+       mini-DIN connector, or a three conductor mini-mini  stero  jack.  The
+       pinouts for these connectors is a follows:
+    
+        5 pin mini-DIN:
+    
+                   --------
+                 /          \       1 = POWER (+6-9 V.D.C. @ 100ma)
+               /    4   2     \     2 = Option (Unused on consumer VCR)
+              |_      __   1   |    3 = POWER SWITCH
+               _]    [__]      |    4 = SERIAL BUS
+              |                |    5 = GROUND
+               \    5   3     /
+                 \          /       (Front view of connector on VCR)
+                   --------
+    
+    
+        Stereo mini-mini:
+    
+                  _ ___+-------+    1 = SERIAL BUS
+                O|_|___|       |    2 = POWER (+6-9 V.D.C. @ 100ma)
+                ^ ^  ^ +-------+    3 = GROUND
+                1 2  3              (View of interface PLUG)
+    
+          The RS-232 port of the D-BOX operates at 9600 Bps,  8  Data  bits,
+       and 1 stop bit.
+    
+          WARNING: DO NOT CONNECT OR DISCONNECT THE DBOX FROM THE  VCR  WITH
+       THE VCR POWERED ON!
+    D-BOX VCR CTRL-L Interface                                       Page: 2
+
+
+    2. D-BOX COMMANDS
+    
+          The D-BOX will prompt with '>' whenever it is ready to  receive  a
+       command. Commands  consist  of  two  ASCII  characters,  followed  by
+       optional numeric or hexidecimal  parameters.  All  commands  must  be
+       followed by a CARRIAGE RETURN  to  cause  them  to  execute.  An  '='
+       character is transmitted by the D-BOX  to  verify  that  the  command
+       begins execution. After the command completes,  the  VCR  status  and
+       counter information is transmitted.
+    
+          Any command may be prefixed with a single digit (0-7),  to  select
+       the VCR to which that command will apply. Once a VCR is selected, all
+       subsequent commands  (until  another  VCR  selection  is  made)  will
+       reference that same VCR. At power-up, VCR 0 is selected.
+    
+          The following commands are available:
+    
+       2.1 ST - Stop Transport
+    
+             This command causes the  VCR  transport  to  stop  motion,  and
+          returns the VCR to an idle state.
+    
+       2.2 PL - PLayback
+    
+             This command causes the VCR  to  commence  playback.  Operation
+          begins  at  the  point  at  which  the  videotape   is   currently
+          positioned.
+    
+       2.3 PU - PaUse
+    
+             Places the VCR is PAUSE mode, stopping motion of the transport.
+          Has no effect unless the VCR was previously playing or recording.
+    
+       2.4 RE - REcord
+    
+             Causes the VCR to begin  recording.  Operation  begins  at  the
+          point at which the videotape is currently positioned.
+    
+       2.5 DF - Direction Forward
+    
+             Causes the VCR to switch to the forward direction of operation.
+          Effective only in the playback mode of operation.
+    
+       2.6 DR - Direction Reverse
+    
+             Causes the VCR to switch  to  the  reverse  direction  of  tape
+          travel. Effective only in the playback mode of operation.
+    
+       2.7 CF - Cue Forward
+    
+             This command places the VCR in fast  playback  in  the  forward
+          direction.
+    
+       2.8 CR - Cue Reverse
+    
+             The command places the VCR in  fast  playback  in  the  reverse
+          direction.
+    D-BOX VCR CTRL-L Interface                                       Page: 3
+
+
+       2.9 FF - Fast Forward
+    
+             Causes the VCR to commence fast forward winding  of  the  tape.
+          The D-BOX does not wait for fast forwarding to complete. You  must
+          issue a STop command  to  stop  the  transport.  This  command  is
+          useable only when the transport was previously stopped.
+    
+       2.10 FR - Fast Rewind
+    
+             Causes the VCR to commence fast reverse winding  of  the  tape.
+          The D-BOX does not wait for fast rewinding to complete.  You  must
+          issue a STop command to stop the transport (or wait until the tape
+          is completely rewound). This command  is  useable  only  when  the
+          transport was previously stopped.
+    
+       2.11 RZ - Rewind and Zero counter
+    
+             Rewinds the VCR to the start of the tape, and then  resets  the
+          tape counter to ZERO. The D-BOX will wait until the  operation  is
+          complete before returning VCR status, and  prompting  for  another
+          command.
+    
+       2.12 RP - Rewind and Play
+    
+             Rewinds the VCR to the start of the tape,  and  then  commences
+          playback.
+    
+       2.13 S0 - Speed 0 (Still)
+    
+             Causes  the  VCR  to  pause  the  transport.  Effective  during
+          playback only.
+    
+       2.14 S1 - Speed 1 (very slow)
+    
+             Causes the VCR to  playback  at  the  very  slow  rate  (1/10).
+          Effective during playback only.
+    
+       2.15 S2 - Speed 2 (slow)
+    
+             Causes the VCR to playback at the slow  rate  (1/5).  Effective
+          during playback only.
+    
+       2.16 S3 - Speed 3 (normal)
+    
+             Causes the VCR to playback at the normal rate. Effective during
+          playback only.
+    
+       2.17 S4 - Speed 4 (double)
+    
+             Causes the VCR to playback  at  the  double  speed  (x2)  rate.
+          Effective during playback only.
+    
+       2.18 S5 - Speed 5 (high)
+    
+             Causes the VCR to  playback  at  the  high  speed  rate  (cue).
+          Effective during playback only.
+    D-BOX VCR CTRL-L Interface                                       Page: 4
+
+
+       2.19 RC - Reset Counter
+    
+             This command resets the VCR counter to zero.
+    
+       2.20 QU - QUery
+    
+             This command performs no operation on the VCR, is simply causes
+          the VCR status and counter information to be returned.
+    
+       2.21 GO[+|-]nnnnnn - GOto counter position
+    
+             Positions the VCR tape to the indicated counter value. The  '-'
+          negative indicator is valid only when using VCR's with Hour Minite
+          Second counters. You must specify six digits, even if the VCR  has
+          only a four digit counter (use two leading zeros in this case).
+    
+             The GO command will automatically abort if the VCR stops, or if
+          no change is seen in the tape counter value for the amount of time
+          specified in config register 4. You  may  manually  abort  the  GO
+          command be sending an ESCAPE character.
+    
+       2.22 GT[+|-]nnnnnn - Go unTil counter position
+    
+             This command requires that the VCR be performing some operation
+          which causes the tape transport to move (usually PLAY or  RECORD).
+          The D-BOX waits until the specified counter value is reached,  and
+          then reports the VCR status. No other action  is  taken,  the  VCR
+          will continue with its current operation.
+    
+             The GT command will automatically abort if the VCR stops, or if
+          no change is seen in the tape counter value for the amount of time
+          specified in config register 4. You  may  manually  abort  the  GT
+          command be sending an ESCAPE character.
+    
+       2.23 GS[+|-]nnnnnn - Go until position and Stop
+    
+             This command functions the same  as  the  'GT'  command  above,
+          except that a STOP command is issued to  the  transport  when  the
+          specified counter is reached.
+    
+       2.24 GP[+|-]nnnnnn - Go until position and Pause
+    
+             This command functions the same  as  the  'GT'  command  above,
+          except that a PAUSE command is issued to the  transport  when  the
+          specified counter is reached.
+    
+       2.25 ZI - Zoom In
+    
+             This command causes a camera device to begin zooming toward the
+          telephoto position. Zoom will terminate when an  ESCAPE  character
+          is received.
+    
+       2.26 ZO - Zoom Out
+    
+             This cammand causes a camera device to begin zoomout toward the
+          wide-angle position. Zoom will terminate when an ESCAPE  character
+          is received.
+    D-BOX VCR CTRL-L Interface                                       Page: 5
+
+
+       2.27 SS - Start/Stop camera recording
+    
+             This command causes a camera to begin (or end) recording as  if
+          the Start/Stop button had been pressed.
+    
+       2.28 MM - Monitor Mode
+    
+             This command causes the DBOX to continuously monitor all  vcr's
+          selected in config register 8, and output a  new  "status  record"
+          whenever a VCR mode changes. This is useful to detect when an IDLE
+          VCR  is  operated  from  its  front  panel,  or  to  monitor   the
+          termination of several VCR actions at the same time. To  exit  the
+          MM command, send an ESCAPE character.
+    
+             NOTE1: If an error is encountered in polling the VCR's  the  MM
+          command  will  terminate.  It  is  the   responsibility   of   the
+          application software to detect such  occurances,  and  locate  the
+          defective VCR (via 'QU' etc), and either rectify the  problem,  or
+          remove the defective  VCR  from  the  MM  selection  list  (config
+          register 8).
+    
+             NOTE2: If MM does abort on an error, the  failed  VCR  will  be
+          left selected.  On  successful  MM  commands,  the  VCR  that  was
+          selected before the command was executed will be preserved.
+    D-BOX VCR CTRL-L Interface                                       Page: 6
+
+
+       2.29 EXnn - EXecute direct CONTROL-L command
+    
+             Directly executes the specified CONTROL-L command  (hex).  This
+          provides a way to make use of any CONTROL-L  functions  which  are
+          not provided for in the D-BOX firmware. The following commands are
+          defined by SONY:
+    
+        BASIC VCR Functions (consumer models):
+    
+            00 - CH-1/1                     4C - HIGH SPEED
+            02 - CH-2/2                     50 - REVIEW
+            04 - CH-3/3                     52 - CUE
+            06 - CH-4/4                     54 - ANT SW
+            08 - CH-5/5                     5A - ANT VTR
+            0A - CH-6/6                     5C - POWER ON
+            0C - CH-7/7                     5E - POWER OFF
+            0E - CH-8/8                     60 - REVERSE
+            10 - CH-9/9                     62 - FORWARD
+            12 - CH-10/0                    66 - x1 (NORMAL)
+            14 - CH-11/(*)                  74 - REWIND and PLAY
+            16 - CH-12/CH/ENTER/(#)         78 - PAY
+            18 - CH-13/1-                   8C - COUNTER RESET
+            1A - CH-14/2-                   8E - COUNTER MEM ON/OFF
+            1C - CH-15                      90 - INDEX WRITE
+            1E - CH-16                      92 - INDEX ERASE
+            20 - CH-HIGH (+)                9C - ANT TV
+            22 - CH-LOW (-)                 A6 - INDEX
+            28 - x2 or x3                   B2 - TAPE RETURN
+            2A - POWER ON/OFF               B4 - DISPLAY ON/OFF
+            2C - EJECT                      B6 - OPEN/CLOSE
+            2E - MPX MAIN/SUB               D0 - AUDIO INSERT
+            30 - STOP                       D2 - VIDEO INSERT
+            32 - PAUSE                      D4 - ASSEMBLE
+            34 - PLAYBACK                   D6 - MARK
+            36 - REWIND                     D8 - START
+            38 - FAST FORWARD               33 - START/STOP
+            3A - RECORD                     3B - INSERT
+            40 - STILL                      5D - TIMER REC ON
+            44 - SLOW 2 (1/10)              5F - TIMER REC OFF
+            46 - SLOW 3 (1/5)               69 - REC REVIEW
+    
+    2.30 ERnn - Execute Repeat CONTROL-L command
+    
+        This command is similar to EX, except that the command is repeated in
+    every CONTROL-L frame until an ESCAPE character is received from the
+    controling computer. Also, this command uses the CONTROL-L id code from
+    configuration register 1.
+    D-BOX VCR CTRL-L Interface                                       Page: 7
+
+
+    2.31 COr[=nn] - query/set COnfiguration registers
+    
+        This command allows you to query or set several internal configuration
+    registers of the DBOX. Two HEXIDECIMAL digits are required when setting
+    the value:
+    
+            0 - This is the CONTROL-L ID code used when transmitting "normal"
+                commands (All commands other than ZI, ZO and ER). The default
+                value is $11, and indicates a command from a controller to a
+                VTR device.
+    
+            1 - This is the CONTROL-L ID code used when transmitting "repeat"
+                commands (ZI, ZO and ER). The default value is $21, and
+                indicates a command from a controller to a camera device.
+    
+            2 - This register contains the number of counter "ticks" which are
+                allowed for overshoot when fast-forwarding the tape. The "GOto"
+                command drops into PLAY FWD this many ticks before the desired
+                counter value is reached. The default value is $0A (10).
+    
+            3 - This register contains the number of counter "ticks" which are
+                allowed for overshoot when fast-rewinding the tape. The "GOto"
+                command drops into PLAY REV this many ticks before the desired
+                counter value is reached. The default value is $0A (10).
+    
+            4 - This register contains the amount of time allowed for the tape
+                transport to stop during fast winding. The "GOto" command when
+                approaching the desired counter, stops fast winding, waits for
+                this amount  of time,  and then proceeds to  PLAY  (forward or
+                reverse) until it reaches the exact counter value.  Units  are
+                approximatly 1/10 second. Default value is $0A (1 second).
+    
+            5 - This register contains the amount of time  allowed  to  detect
+                movement of the tape counter. Each unit of this counter allows
+                approximately 50 ms.  If the counter does not change for  this
+                amount of time during a GO, GT, GS or GP command,  the command
+                terminates. The default value for this register is $64  (100 x
+                50ms  -  approximately 5 seconds).  $00 is interpreted as $100
+                (256 x 50ms - approximately 13 seconds).
+    
+            6 - This register contains the ESCAPE code  which is used to abort
+                the  GO, GT, GS, GP, ZI, ZO, MM and ER  commands.  The default
+                value is $1B (the ASCII ESCAPE character).
+    D-BOX VCR CTRL-L Interface                                       Page: 8
+
+
+            7 - This register contains "bit mapped" On/Off DBOX control flags.
+                You may set or clear these bits to  control  the operation  of
+                certain DBOX functions. The BIT meanings are:
+                  Bit 0 - Command ECHO (0=No echo, 1=Echo)
+                  Bit 1 - Counter type (0=HH:MM:SS, 1=Four digit)
+                  Bit 2 - Reverse play (0=Supported, 1=Not supported)
+                    Note: When the VCR does not support reverse play, you will
+                        obtain best results if you configure register number 3
+                        so that the VCR overshoots slightly when rewinding.
+                  Bit 3 - Prepends VCR ID to the status messages.
+                  Bit 4 - Enable Auto Monitor Mode
+                    When set, this bit causes the DBOX  to automatically enter
+                    the MM (Monitor Mode) command upon completion of any other
+                    command.
+                  Bits 5 to 7 are not used.
+                Bits 1 and 2 are used only by the 'GO,GT, GS and GP' commands,
+                to determine how to read the counter,  and how to position the
+                tape. If you are using several VCR's  with different settings,
+                you can re-configure these bits when switching VCR's.
+    
+            8 - This register contains "bit mapped"  VCR selections for the MM
+                command. Any VCR (0-7)  which has the corresponding bit turned
+                on in this register will be polled by MM.
+    
+            9 - This register defines an ASCII character code which is  output
+                immediately prior to the VCR "status record". This can be used
+                to allow an application to easily recognize the status record.
+    
+    3. ERROR RESPONSES
+    
+          If an error in encountered in processing a command, the D-BOX will
+       output a '?' character, followed by a single digit as follows:
+    
+            1 - The command was not a valid D-BOX command
+            2 - Operands to a command were invalid
+            3 - The VCR is not responding
+    D-BOX VCR CTRL-L Interface                                       Page: 9
+
+
+    4. VCR STATUS INFORMATION
+    
+          All commands return the VCR status and counter information, in the
+       form:
+    
+                             m1 s1s2s3 (+|-)c1c2c3
+    
+    4.1 VCR mode
+    
+        m1: 01 - EJECTED                        06 - NORMAL PLAYBACK
+            11 - No CASSETTE DEW                26 - x1
+            21 - EJECT CASSETTE UNLOAD          36 - -x1
+            31 - EJECT TAPE UNLOADED            46 - CUE
+            02 - STOP NORMAL                    56 - REVIEW
+            12 - STOP TAPE LOAD                 66 - x2 or x3
+            22 - STOP CASSETTE LOAD             76 - -x2 or -x3
+            32 - STOP BATTERY DOWN              86 - x9 or LOCKED CUE
+            42 - STOP UNLOAD DEW                96 - -x9 or LOCKED REVIEW
+            52 - STOP EMERGENCY                 A6 - FR SEARCH CUE
+            62 - STOP TAPE END                  B6 - FR SEARCH REVIEW
+            72 - STOP TAPE TOP                  07 - PLAYBACK PAUSE
+            92 - STOP COUNTER MEMORY            17 - SWING SEARCH PAUSE
+            03 - FAST FORWARD                   27 - SLOW (1/5)
+            33 - FF AUTO 0 PB                   37 - REVERSE SLOW (1/5)
+            43 - FF MEMORY STOP                 47 - SLOW (1/10)
+            83 - REWIND                         57 - REVERSE SLOW (1/10)
+            A3 - REW TAPE TOP AUTO PB           67 - FRAME
+            B3 - REW AUTO 0 PB                  77 - REVERSE FRAME
+            C3 - REWIND MEMORY STOP             08 - AUDIO L INSERT
+            04 - NORMAL RECORD                  18 - AUDIO L INSERT PAUSE
+            14 - RECORD PAUSE                   28 - AUDIO R INSERT
+            24 - TIMER REC                      38 - AUDIO R INSERT PAUSE
+            34 - TIMER REC PAUSE                48 - AUDIO L VIDEO INSERT
+            44 - AUDIO VIDEO INSERT             58 - AUDIO L VIDEO INSERT PAUSE
+            54 - AUDIO VIDEO INSERT PAUSE       68 - AUDIO R VIDEO INSERT
+            84 - AUDIO INSERT/DUB               78 - AUDIO R VIDEO INSERT PAUSE
+            94 - AUDIO INSERT PAUSE
+    
+    
+    4.2 VCR Status codes
+    
+            S1 : 7 6 5 4 3 2 1 0    All VCR's
+                 x x x x 1 x x x - Counter mem ON
+                 x x x x x 1 x x - Battery pre-end
+                 x x x x x x 1 x - REC PROOF / Tape PRE-END in REC/INSERT
+                 x x x x x x x 1 - Command undefined
+    
+            S2 : 7 6 5 4 3 2 1 0    8mm VCR
+                 ? x x x x x x x - Tape thickness: 0=13um 1=10um
+                 x ? x x x x x x - 0=MP 1=ME
+                 x x ? x x x x x - 0=Recording possible 1=Write protect
+                 x x x ? x x x x - 0=VCR only, 1=CAMERA active
+                 x x x x ? x x x - 0=No PCM 1=PCM existant
+                 x x x x x ? x x - 0=No AFM 1=AFM existant
+                 x x x x x x ? ? - 00=SP, 01=LP
+    D-BOX VCR CTRL-L Interface                                       Page: 10
+
+
+            S3 : 7 6 5 4 3 2 1 0    8mm VCR
+                 x x x x ? x x x - 0=Transport normal, 1=Transition
+    
+            S2 : 7 6 5 4 3 2 1 0    BETA VCR
+                 x x ? x x x x x - 0=Recording possible 1=Write protect
+                 x x x x ? x x x - 0=Transport normal, 1=Transition
+                 x x x x x ? x x - 0=HIFI Off, 1=HIFI On
+                 x x x x x x ? ? - 00=BI, 01=BII, 10-BIII
+    
+    
+    4.3 VCR Counter
+    
+            Hour/Minite/Second: c1=HH, c2=MM, c2=SS
+    
+            Decimal 4 digit counter: c1=00 c2c3=nnnn
+    
+        The counter is preceeded by '+' or '-' to indicate that it is positive
+    or negative. A 4 digit counter will always be positive ('+').
+
+
+
+                           D-BOX VCR CTRL-L Interface
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. D-BOX COMMANDS                                                      2
+
+        2.1 ST - Stop Transport                                             2
+        2.2 PL - PLayback                                                   2
+        2.3 PU - PaUse                                                      2
+        2.4 RE - REcord                                                     2
+        2.5 DF - Direction Forward                                          2
+        2.6 DR - Direction Reverse                                          2
+        2.7 CF - Cue Forward                                                2
+        2.8 CR - Cue Reverse                                                2
+        2.9 FF - Fast Forward                                               3
+        2.10 FR - Fast Rewind                                               3
+        2.11 RZ - Rewind and Zero counter                                   3
+        2.12 RP - Rewind and Play                                           3
+        2.13 S0 - Speed 0 (Still)                                           3
+        2.14 S1 - Speed 1 (very slow)                                       3
+        2.15 S2 - Speed 2 (slow)                                            3
+        2.16 S3 - Speed 3 (normal)                                          3
+        2.17 S4 - Speed 4 (double)                                          3
+        2.18 S5 - Speed 5 (high)                                            3
+        2.19 RC - Reset Counter                                             4
+        2.20 QU - QUery                                                     4
+        2.21 GO[+|-]nnnnnn - GOto counter position                          4
+        2.22 GT[+|-]nnnnnn - Go unTil counter position                      4
+        2.23 GS[+|-]nnnnnn - Go until position and Stop                     4
+        2.24 GP[+|-]nnnnnn - Go until position and Pause                    4
+        2.25 ZI - Zoom In                                                   4
+        2.26 ZO - Zoom Out                                                  4
+        2.27 SS - Start/Stop camera recording                               5
+        2.28 MM - Monitor Mode                                              5
+        2.29 EXnn - EXecute direct CONTROL-L command                        6
+        2.30 ERnn - Execute Repeat CONTROL-L command                        6
+        2.31 COr[=nn] - query/set COnfiguration registers                   7
+
+     3. ERROR RESPONSES                                                     8
+
+
+     4. VCR STATUS INFORMATION                                              9
+
+        4.1 VCR mode                                                        9
+        4.2 VCR Status codes                                                9
+        4.3 VCR Counter                                                    10

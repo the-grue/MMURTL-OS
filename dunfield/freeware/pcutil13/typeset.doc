@@ -1,0 +1,300 @@
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+                                   TYPESET
+                                   Document
+                                  Formatter.
+   
+                                 Users Guide
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+                      Copyright 1983-1994 Dave Dunfield
+                             All rights reserved.
+   TYPESET USERS GUIDE                                              Page: 1
+
+
+   1. INTRODUCTION
+   
+         TYPESET is a simplified document processor for use on  ASCII  text
+      systems.  It  will  perform  automatic   formatting,   justification,
+      underlining, centering, indenting, and has adjustable margins. It  is
+      particularily useful in the PC environment for creating nice  looking
+      ASCII documents for distrubution on disk.
+   
+         TYPESET accepts as parameters, names for files  which  are  to  be
+      formatted. The input files are assumed to have the suffix '.doc', and
+      the output file is created with the suffix '.txt'.
+   
+         TYPESET is used and controlled by commands imbedded in the  source
+      file.
+   
+   2. Using TYPESET
+   
+      2.1 Qualiifers
+   
+            TYPESET accepts the following qualifiers in the TYPESET command
+         invocation.
+   
+         +c - Causes TYPESET to treat all input files as separate documents
+              which are to be processed  and  concatinated  into  a  single
+              file. Each document gets its  own  title  page.  By  default,
+              TYPESET assumes all files are one large document,  with  only
+              one title page.
+   
+         +t - Causes TYPESET to write to the standard output  file  instead
+              of the ".txt" file which is normally used.
+   
+         -v - Prevents TYPESET from  displaying  progress  messages  as  it
+              processes the documents.
+   
+         -w - Prevents TYPESET from displaying  warning  messages  when  it
+              encounters situations which may not format properly.
+   TYPESET USERS GUIDE                                              Page: 2
+
+
+      2.2 Commands
+   
+            Any lines in the input file which have a '.' in  column  number
+         one, are interpreted as TYPESET  commands.  All  TYPESET  commands
+         consist of a '.', followed by a single character command name, and
+         optional operands. Most parameters do NOT  have  to  be  separated
+         from the command by spaces.
+   
+            ".C <text>"
+   
+               The '.C' command, centers the text on the remainder  of  the
+            line, so that it appears in the middle of the page.
+   
+            ".D[+|-]"
+   
+               The '.D' command enables  ('+')  or  disables  ('-')  double
+            spaced output.
+   
+            ".E"
+   
+               The '.E' command forces an EXTRA page  to  be  ejected,  the
+            effect is similar to the page (.P) command, except that the new
+            page has no title, or page number.
+   
+            ".F[+|-]"
+   
+               The '.F'  command,  enables  ('+')  or  disables  ('-')  the
+            automatic formating of the  document  text.  If  formatting  is
+            enabled, TYPESET automatically fills each  line  with  as  much
+            text as it can, without overflowing the  page  width.  If  this
+            option is disabled,  the  input  lines  appear  in  the  output
+            exactly as they occur in  the  input  file  (Except  offset  by
+            MARGIN, and underlined, centered etc).  Formatting  enabled  is
+            the default condition when TYPESET is first invoked.
+   
+            ".I[+|-][<n>][<text>]"
+   
+               The '.I' command, sets the INDENT value. If  <n>  is  given,
+            then all lines output by TYPESET, excluding titles and centered
+            lines, will be indented  by  <n>  spaces.  If  <text>  is  also
+            given,then the new indent value will be in effect for this line
+            only, as the reaminder of the line is printed.  If  the  indent
+            value is preceded by '+' or '-', then the current indent  value
+            is adjusted by that value (positive or negative). If  just  '+'
+            or '-' is given as  the  operand,  then  the  indent  value  is
+            adjusted by the current value of the indent size  (See  '.=I').
+            If no numeric operand is given to '.I', then the indent is  not
+            changed, but a new line is forced, just as if the indent  value
+            had been changed.
+   TYPESET USERS GUIDE                                              Page: 3
+
+
+            ".J[+|-]"
+   
+               The '.J'  command,  enables  ('+')  or  disables  ('-')  the
+            automatic right justification of the formatted  document  text.
+            If justification is enabled, TYPESET will attempt  to  line  up
+            all formatted text at the  right  page  boundary  by  inserting
+            extra spaces between the words toward the end of each line.  If
+            TYPESET is unable to  obtain  enough  spaces  in  this  manner,
+            allowing a maximum of two extra spaces  between  each  word,  a
+            warning message indicating that the justification is incomplete
+            will be printed. By  default,  justification  is  enabled  when
+            TYPESET is first  started  up.  Justification  will  not  occur
+            unless formatting is enabled.
+   
+            ".P"
+   
+               The '.P' command, forces a page eject at this point  in  the
+            output file. A new page is forced, complete with title and page
+            numbers
+   
+            ".S[<n>]"
+   
+               The '.S' command, causes <n> blank lines to be  inserted  in
+            the output file. If the blanks lines would  continue  past  the
+            end of the page, TYPESET does NOT continue the blank  lines  on
+            the next page. If  no  operand  is  given,  TYPESET  assumes  a
+            default value of one blank line.
+   
+            ".T <text>"
+   
+               The '.T' command, sets the TITLE to the  text  contained  in
+            the remainder of the line. The title is printed at the  top  of
+            every page, except the first one (The title page), and defaults
+            to the name of the file if it is not explicitly set with a '.T'
+            command.
+   
+            ".U[+|-]
+   
+               This command enables ('+') or disabled ('-') the underlining
+            of text. Following a '.U+' command, all text will be underlined
+            until a '.U-' command is encountered.
+   
+            "._<string>"
+   
+               This command, causes the remainder of the line to be printed
+            on a separate line by itself, underlined.
+   
+            "..<filename>"
+   
+               This command causes the specified file to be  "included"  in
+            the document input. The file  will  be  processed  and  output,
+            after which processing of the original file will resume.
+   
+            ".* <comment text>"
+   
+               The '.*' command is a comment, the remainder of that line is
+            ignored by TYPESET
+   TYPESET USERS GUIDE                                              Page: 4
+
+
+            ".=<option>[+|-]<n>"
+   
+               The '.=' command, sets some of TYPESETS internal values. The
+            available values are:
+   
+            ".=M[+|-]<n>"
+   
+               This command, sets the left page MARGIN. If  <n>  is  given,
+            then all lines output by TYPESET, including titles and centered
+            lines will be offset by <n> spaces from the  lefthand  edge  of
+            the page. The '+' and '-' operators can be used  to  perform  a
+            relative margin adjustment, and if no values are given,  margin
+            is adjusted (positive or negative) by the currently set  indent
+            size.
+   
+            ".=P[+|-]<n>"
+   
+               Sets the page number which will appear at  the  top  of  the
+            next page. All subsequent page numbers will be sequential  from
+            this value, unless another '.=P' command is issued.
+   
+            ".=I[+|-]<n>"
+   
+               This command sets the indent size. The indent  size  is  the
+            number of spaces which are used to indent lines, and  also  the
+            size of  the  default  relative  spacing  adjustment  for  some
+            commands. Any line which begins with a space or a tab character
+            is automatically indented by a number of spaces  equal  to  the
+            indent size. The default value of the indent size is three.
+   
+            ".=L[+|-]<n>"
+   
+               The '.=L' command, sets the number of lines to be printed on
+            a page. The default value is 60 lines, '+' and '-' can be  used
+            to perform a relative page adjustment.
+   
+            ".=T[+|-]<n>"
+   
+               This  command  sets  the  number  of  section  levels   (See
+            Sectioning), which will be printed in the table of contents  to
+            the supplied value. Setting this value to zero will disable the
+            table of contents, and none will be printed.  By  default,  two
+            levels of sections are displayed in the table of contents.
+   
+            ".=W[+|-]<n>"
+   
+               The '.=W' command, sets the width of the page, in  character
+            positions. The page width is  used  by  TYPESET,  to  determine
+            TITLE length, and the position of centered  lines  (See  '.C').
+            The default value for the page width is 72 characters. The  '+'
+            and '-'  operators  can  be  used  to  perform  relative  width
+            adjustments,  default  relative  adjustment  is  currently  set
+            indent size.
+   TYPESET USERS GUIDE                                              Page: 5
+
+
+            ".=><section number>"
+   
+               Sets the current section  number  (See  Sectioning)  to  the
+            supplied value, '+' and '-' can be used in each  section  field
+            to perform relative section adjustment. Any sections for  which
+            the '.' separator is supplied,  but  no  value  is  given  will
+            remain unchanged.
+                                EG: '.=> ..+1'
+               The above command advances the number of the  third  section
+            level by one. Note that this command sets the section number of
+            the CURRENT section, and the next section number displayed will
+            follow this value according to the rules of section numbering.
+   
+      2.3 Sectioning
+   
+            The character '>', when encountered at the start of a  line  in
+         the input file, indicates to TYPESET that a new section is  to  be
+         defined. The number of '>'s found indicates the section depth. The
+         '>' characters must be followed by the section title.
+   
+            When a new section is started,  TYPESET  automatically  inserts
+         the appropriate section number, and indents the section  according
+         to its depth, and the setting of the indent size  (see  '.=i<n>').
+         Section and subsection numbers are displayed with '.'  separators,
+         and are incremented sequentially for  each  section  at  the  same
+         depth which is encountered.
+   
+            At the end of the document, TYPESET will generate  a  table  of
+         contents, based on the sections and section titles. If no sections
+         are  used  within  a  document,  no  table  of  contents  will  be
+         generated. The margin, indent, title and other parameters used for
+         the table of contents are assumed at the END of the  document,  so
+         if any of these parameters are to be changed before the  table  of
+         contents is printed, they must be specified  at  the  END  of  the
+         input file.
+
+
+
+                             TYPESET USERS GUIDE
+
+                              TABLE OF CONTENTS
+
+
+                                                                        Page
+
+    1. INTRODUCTION                                                        1
+
+
+    2. Using TYPESET                                                       1
+
+       2.1 Qualiifers                                                      1
+       2.2 Commands                                                        2
+       2.3 Sectioning                                                      5

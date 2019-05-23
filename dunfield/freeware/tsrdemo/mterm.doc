@@ -1,0 +1,239 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                MICRO-Terminal:
+    
+                                A tiny Terminal
+                                program for the
+    
+                                     IBM/PC
+    
+                                  with XMODEM
+    
+    
+    
+    
+    
+                                  Release 1.2
+    
+                               Revised 11-Nov-90
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1989,1990 Dave Dunfield
+                              All rights reserved
+    MICRO-Terminal                                                   Page: 1
+
+
+    1. INTRODUCTION
+    
+          MICRO-Terminal is a tiny terminal program, which supports a subset
+       of the ANSI control codes (Also known as VT100  control  codes),  and
+       basic  XMODEM  binary  file  transfer.  The  MTERM.COM  program  file
+       occupies only 10K of disk space, which makes it an ideal program  for
+       use on a laptop or other floppy disk based system.
+    
+          It is also very useful  for  communciations  debugging,  since  it
+       loads fast, is easy to setup, supports all asynchronous data formats,
+       and has a TSR (POP-UP) mode which enables it to be kept in memory and
+       activated with a simplle keypress combination.
+    
+          NOTE: MICRO-Terminal is a SUBSET of the  ANSI  specification,  and
+       will not pass all of the "VT100 - Checkup" tests.
+    
+    2. Using MICRO-Terminal
+    
+       2.1 Normal mode
+    
+             The MICRO-Terminal program may be used in two ways,  the  first
+          is as a "normal" DOS program. To activate MICRO-Terminal  in  this
+          way, enter the command:
+    
+                                     MTERM
+    
+             This will load MICRO-Terminal, and present you  with  the  main
+          function menu, allowing you to  access  its  freatures.  When  you
+          select the "Exit to DOS" option, MICRO-Terminal will terminate  in
+          the "normal" fashion, and return you to the DOS command prompt.
+    
+       2.2 POP-UP mode
+    
+             The second way to use  MICRO-Terminal  is  as  a  TSR  (POP-UP)
+          program. To use this feature, you  must  specify  HOTKEYS  on  the
+          command line. Available HOTKEYS are:
+    
+                L - Left SHIFT
+                R - Right SHIFT
+                A - ALT
+                C - CONTROL
+                S - SysRq (Caution: some systems may not like this one)
+    
+             For example:
+    
+                                    MTERM LR
+    
+             This  will  load  MICRO-Terminal  into  memory,  but  will  not
+          activate it. You will immediately be returned to the  DOS  command
+          prompt. Once MICRO-Terminal has been installed in  this  way,  you
+          can "POP" into it simply by pressing the LEFT and RIGHT SHIFT keys
+          at the same time. This allows MICRO-Terminal to be  accessed  from
+          ANYWHERE (even if you  are  running  another  program).  When  you
+          select the "Exit to DOS" function from the main menu, you will  be
+          returned to whatever application  program  was  running  when  you
+          "POPPED" in.
+    MICRO-Terminal                                                   Page: 2
+
+
+       2.3 The main menu
+    
+             When you enter MICRO-Terminal, it first  presents  you  with  a
+          main menu, which allows you to access its  features,  through  the
+          following selections:
+    
+          2.3.1 Terminal Emulation
+    
+                This selection causes MICRO-Terminal to begin emulating  the
+             ANSI terminal, allowing you to send and  receive  data  to  and
+             from the  COMM  port.  Press  CTRL-Home  or  CTRL-End  to  exit
+             Terminal Emulation.
+    
+          2.3.2 XMODEM Download
+    
+                When you select this option, you  will  be  prompted  for  a
+             filename. Once the filename  is  entered,  MICRO-Terminal  will
+             begin receiving data into that file from the  COMM  port  using
+             the XMODEM protocol. A status window is displayed  showing  the
+             filename being written, the number of XMODEM  128  byte  blocks
+             received, and any  error  conditions  which  occur  during  the
+             download.
+    
+                You may press the <ESCAPE> key at  any  time  to  abort  the
+             download, and return to the main menu. NOTE: It make take a few
+             seconds from when you press <ESCAPE> until the download aborts.
+    
+          2.3.3 XMODEM Upload
+    
+                When you select this option, you  will  be  prompted  for  a
+             filename. Once the filename  is  entered,  MICRO-Terminal  will
+             begin transmitting the contents of that file to the  COMM  port
+             using the XMODEM protocol. A status window is displayed showing
+             the filename being transmitted, the number of XMODEM  128  byte
+             blocks sent, and any error conditions which  occur  during  the
+             upload.
+    
+                You may press the <ESCAPE> key at  any  time  to  abort  the
+             upload, and return to the main menu. NOTE: It make take  a  few
+             seconds from when you press <ESCAPE> until the upload aborts.
+    
+          2.3.4 Serial port config
+    
+                This selection presents you with a sub-menu which allows you
+             to configure the COMM port,  baudrate,  number  of  data  bits,
+             parity type, number of stop bits and XON/XOFF flow  control  to
+             be used for the terminal session.
+    
+          2.3.5 Exit to DOS
+    
+                This selection terminates  the  main  menu,  and  exits  the
+             MICRO-Terminal program.
+    MICRO-Terminal                                                   Page: 3
+
+
+    3. Keypad keys
+    
+          MICRO-Terminal maps the ANSI auxiliary keypad codes into  the  IBM
+       PC keyboard using the following table:
+    
+                ANSI Key        IBM/PC Key      Code Transmitted
+                ------------------------------------------------
+                    0              F10              <ESC>Op
+                    1               F1              <ESC>Oq
+                    2               F2              <ESC>Or
+                    3               F3              <ESC>Os
+                    4               F4              <ESC>Ot
+                    5               F5              <ESC>Ou
+                    6               F6              <ESC>Ov
+                    7               F7              <ESC>Ow
+                    8               F8              <ESC>Ox
+                    9               F9              <ESC>Oy
+                    -           Keypad '-'          <ESC>Om
+                    ,           CTRL-PgUp           <ESC>Ol
+                    .           CTRL-PgDn           <ESC>On
+                  ENTER         Keypad '+'          <ESC>OM
+                   PF1             Home             <ESC>OP
+                   PF2             End              <ESC>OQ
+                   PF3             PgUp             <ESC>OR
+                   PF4             PgDn             <ESC>OS
+    
+    4. Control codes
+    
+          MICRO-Terminal  recognizes  the  following  subset  of  the   ANSI
+       terminal command codes:
+    
+    
+                Position cursor:        <ESC>[n;nH
+                                        <ESC>[n;nf
+                Clear to end of screen: <ESC>[J
+                    "   "   "   "       <ESC>[0J
+                Clear entire screen:    <ESC>[2J
+                Clear to end of line:   <ESC>[K
+                    "   "   "   "       <ESC>[0K
+                Clear entire line:      <ESC>[2K
+                Select normal video:    <ESC>[0m
+              * Select underline:       <ESC>[4m
+                Select reverse video:   <ESC>[7m
+    
+            * This works on monochrome displays only.
+
+
+
+                                 MICRO-Terminal
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. Using MICRO-Terminal                                                1
+
+        2.1 Normal mode                                                     1
+        2.2 POP-UP mode                                                     1
+        2.3 The main menu                                                   2
+
+     3. Keypad keys                                                         3
+
+
+     4. Control codes                                                       3
+

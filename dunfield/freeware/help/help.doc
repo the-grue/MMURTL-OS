@@ -1,0 +1,220 @@
+HELP is a command line help utility, which is considerably more
+powerful than the 'help' command supplied with DOS (version 5).
+
+Its main features are:
+
+ - Completely hierarchical structure of topics and sub-topics.
+ - Interactive or command line operation.
+ - Supports multiple help "libraries", allowing you to maintain
+   and access help text for different applications separately.
+ - Files are indexed for ultra-fast operation.
+ - Help text can be compressed to reduce disk storage.
+ - Includes "Help File Compiler", for creating your own help libraries.
+
+HELP may be freely distributed without payment or royalty.
+
+The help library files used by HELP contain an indexed dictionary of all
+topics, which contains pointers to help text contained in the remainder of
+the file. This allows ultra-fast access to topics and sub-topics, however
+it causes the file to be unreadable as a standard ASCII file, and therefore
+not directly editable.
+
+Library files for HELP are prepared in "source" form, and then compiled
+into the above format using the "Help File Compiler" utility (HFC.COM)
+which is included in this package. The compiler also has the option to
+compress the text as it is compiled.
+
+If a library is not specified in the help command line (type 'help ?' for
+details), HELP assumes the library 'GENERAL'(.HLP) is to be used.
+
+Before HELP looks for a library file, it first checks for the environment
+variable 'HELP'. If this variable is defined, HELP assumes that it contains
+the directory path to the help library files. If the variable is not defined,
+HELP looks in the directory from which it was loaded. For DOS versions prior
+to 3.0, you should always define the HELP environment variable, otherwise
+HELP may not be able to locate its library.
+
+If a library file cannot be found, or help is invoked with the '?' or '/?'
+parameter, it displays a short usage summary, and the names of all libraries
+which are available.
+
+
+Source File Format:
+------------------
+Each topic or sub-topic is identified by a line beginning with one or more
+'>' characters. The number of '>'s that occur identify the topic level. Each
+topic is considered to contain all other topics and sub-topics that follow,
+until another topic of equal or lower level is encountered.
+
+IMMEDIATELY following the '>'s, is the name of the topic, which will
+be presented as "Additional information available" to the next higher
+topic level.
+
+Following the name, (delimited by a space or tab), the remainder of the
+line is used as a "title". The entire line is displayed when traversing
+downward into a sub-topic. Each title is indented by one space when
+proceeding to the current sub-topic level.
+
+Following the topic line, is the text of the help topic. It continues
+until another line beginning with '>' is encountered, or the end of
+file occurs.
+
+The text at the beginning of the file (before the first '>'), is
+considered topic level 0, and is displayed upon entry to the help
+library.
+
+For a complete example, see the source file SAMPLE.SRC. You may
+compile this into a library (.HLP) file, with the command:
+
+         HFC sample.src sample.hlp
+
+You may then execute HELP, and see what the result looks like, with
+the command:
+
+         HELP/SAMPLE
+
+When HELP prompts you for a topic or subtopic, you may enter:
+
+   1 - A name from the displayed list, to display that topic or sub-topic.
+       HELP will also accept a partial name, and displays the first entry
+       that begins with the characters you enter.
+
+   2 - A blank line to backup to the previous help level. If a blank
+       line is entered at the main "Topic?" prompt, HELP terminates.
+
+   3 - A '?' to re-display the current topic or sub-topic.
+
+A larger example of a DOS help file is also included, try compiling
+it with:
+
+         HFC DOS.SRC GENERAL.HLP
+
+Since GENERAL is the default help library, you can access this help
+simply with:
+
+         HELP
+
+Note: The DOS help source shows how easily you can create a help library
+from another source of ASCII text. Most of the command descriptions were
+generated with "command/? >>file", and then edited slightly to add the
+topic headers etc.
+
+
+Compression:
+-----------
+If you add the '-compress' option to the end of the HFC command line, the
+text will be compressed as it is added to the help library. The operation
+of HFC with compression is *VERY* slow, however you only have to do it once.
+The operation of HELP is not slowed when the file is compressed (in fact
+is is slightly speeded up).
+
+Since the help file is not accessed in a sequential fashion, and the
+individual topic contents are often small, a dynamic dictionary type of
+compression such as "LZW" is not suitable. The help file compiler uses
+two simple but reasonably effective compression methods:
+
+1 - Run length encoding
+
+Sequences of three or more identical characters are automatically
+compressed into two code sequences. Up to 45 identical characters
+may represented by a single two code sequence. If more than 45
+charactes are found, HFC will process then as two or more separate
+run length codes.
+
+2 - Static dictionary encoding
+
+HFC and HELP each contain an identical dictionary of common character
+sequences likely to occur in help text. Whenever HFC encounters a sequence
+which occurs in the dictionary, it encodes a single byte code that identifies
+the dictionary location to HELP, which upon encountering the value, will
+insert the apropriate entry in the output text.
+
+If you specify the '-report' option to HFC, it will report on the
+frequency of each dictionary entry, and the total number of bytes saved
+by using that entry. Although this was implemented mainly as a way for me
+to check the efficency of the dictionary, it is also  a good way to find
+out exactly what entries are in the dictionary.
+
+    eg: HFC sample.src sample.hlp -c -r
+
+Note: If you use '-report' without '-compress', HFC reports that all
+entries are unused.
+
+
+Limitations:
+-----------
+The architecture of an individual HELP library is limited to a maximum of 255
+total topics and subtopics, and a maximum of 64K total help text (not counting
+topic names and titles, which are stored separately). When using compression,
+the amount of text increases, as only the compressed data has to fit in 64K.
+To assist you in keeping an eye on this, the Help File Compiler (HFC.COM)
+reports the amount of actual text data written to the output file.
+
+Since HELP supports multiple libraries, you can have virtually unlimited
+help information, however you have to partition it into 64K chunks.
+
+Help topic names should be 14 characters or less. (15 is allowed, however
+they will run together in the screen display).
+
+Help topics may be nested to a maximum of 25 levels deep.
+
+
+Installation:
+------------
+Since DOS 5 includes a HELP command, there is a potential conflict in
+the command names. There are several ways to resolve this:
+
+1) Replace DOS's HELP.EXE with HELP.COM. Since I have provided a DOS help
+   file, the old HELP command is not really necessary.
+
+2) Rename DOS's HELP.EXE to DOSHELP.EXE or something similar.
+
+3) Rename HELP.COM.
+
+4) Insure the directory containing HELP.COM occurs first in your path.
+   You can still execute the DOS help command by using the entire path
+   eg: \dos\help
+
+5) If using HELP with a single application, place HELP.COM in the same
+   directory as that application. When in the directory, HELP.COM will
+   be available, otherwise DOS's HELP.EXE will be used.
+
+
+Distribution:
+------------
+One of the best ways in which to "help" users, is to have a consistant
+method by which they can optain information about the applications that
+they use.
+
+For this reason, I offering HELP completely free of charge, and am placing
+no restrictions whatsoever on the redistribution of the HELP.COM and/or
+HFC.COM included in this archive. I encourage software developers to use
+HELP to provide online information about their products.
+
+I do claim copyright to the code, only for the purpose of restricting
+modification. You may not re-distribute patched or otherwise modified
+versions of the program without my written permission. One of the nice
+things about HELP is that the user can collect several libraries from
+various sources, and access them through a common interface.
+
+I would appreciate it if anyone using HELP in a commercial application
+would give me credit somewhere in their documentation.
+
+I would also like to ask that anyone writing additional help libraries of
+general interest would send them to me so that I can include them in this
+archive.
+
+
+      Dave Dunfield
+      Dunfield Development Systems
+      P.O. Box 31044
+      Nepean, Ontario Canada
+      K2B 8S8
+      Tel: (613) 256-5820 [1300-1700 EST Mon-Fri]
+      FAX: (613) 256-5821 [24 hour]
+      BBS: (613) 256-5820 [24 hour, Dial '2' at voice prompt]
+
+
+HELP and HFC were written in 'C', using the PC version of my MICRO-C compiler.
+For more information on MICRO-C and my other products, see the CATALOG file in
+this archive.

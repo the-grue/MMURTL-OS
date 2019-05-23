@@ -1,0 +1,49 @@
+rem A simple "host" which provides basic remote file access.
+rem Optional password may be passed as an argument.
+
+config host
+:entry ifeq '\1' '' : goto +start
+equate C 3
+:trypass read A \nPassword?
+ifeq '\A' '\1' : goto +start
+send Incorrect password!
+equate C \C-1
+if# \C : goto trypass
+send \nToo many attempts\n
+print Password failure!
+:goodbye send Goodbye!\n
+hangup
+goto entry
+:start print Begin session!
+upload ASCII host.msg
+:main read A Command (d=Download, u=Upload, f=files, g=goodbye)?
+ifeq '\A' 'f' : goto +files
+ifeq '\A' 'd' : goto +transfer
+ifeq '\A' 'u' : goto +transfer
+ifeq '\A' 'g' : goto goodbye
+send Incorrect command... Use 'd', 'u' or 'g'\n
+goto main
+:transfer assign P
+read B Protocol (a=ASCII, x=Xmodem, y=Ymodem/1K)?
+ifeq '\B' '' : goto main
+ifeq '\B' 'a' : assign P ASCII
+ifeq '\B' 'x' : assign P XMODEM
+ifeq '\B' 'y' : assign P XMODEM/1K
+ifeq '\P' '' : goto transfer
+read F Filename?
+ifeq '\F' '' : goto main
+ifeq '\A' 'u' : goto +upload
+print \P Download of \F requested
+send Transmitting \F using \P\n
+upload \P \F
+goto main
+:upload print \P upload of \F requested
+send Ready to receive \F using \P\n
+download \P \F
+goto main
+rem If you don't have an 'D' RAMdisk for temporary files,
+rem adjust the following few lines to accomodate your setup.
+:files dos dir >D:FILES.LAP
+upload ASCII D:FILES.LAP
+dos del D:FILES.LAP
+goto main

@@ -1,0 +1,48 @@
+A very simple 16-bit TSR (POP-UP) calculator, featuring automatic entry
+of last result into DOS applications. This feature works only on AT or
+higher class machines.
+
+Use 'calc' with no operands for NON-TSR operation.
+
+If HOTKEYS are specified on the command line, CALC will install
+itself as a TSR (Ram-Resident) program, which can be invoked at
+any time by pressing the HOTKEYS. Available HOTKEYS are:
+        L - Left SHIFT
+        R - Right SHIFT
+        A - ALT
+        C - CONTROL
+        S - SysRq (Caution: some systems may not like this one)
+
+    eg: CALC LR (Install with LEFT+RIGHT SHIFT for hotkeys)
+
+Keys used:
+    +       Addition
+    -       Subtraction
+    *       Multiply
+    /       Divide
+    %       Modulus
+    &       Bitwise AND
+    |       Bitwise OR
+    ^       Bitwise EXCLUSIVE OR
+    <       Shift left
+    >       Shift right
+
+    =       Display result
+
+    0-9     Decimal input digits
+    A-F     Hexidecimal input digits
+    'c      Enter a single ASCII character value
+    "cc     Enter a dual ASCII character value
+
+    K       Clear display
+    BKSP    Clear last digit
+
+    SPACE   Toggle HEX/DECIMAL
+
+    ESC     Exit, no entry
+    ENTER   Exit, enter value to DOS application (works only on AT or higher)
+
+    UP      Move display up
+    DOWN    Move display down
+    RIGHT   Move display right
+    LEFT    Move display left

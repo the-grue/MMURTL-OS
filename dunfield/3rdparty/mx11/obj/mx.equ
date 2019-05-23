@@ -1,0 +1,94 @@
+*************************************************************************
+*                                                                       *
+* 12/5/93 MX-11 Multitasking Executive for MICRO-C/11                   *
+*                                                                       *
+* Equates and structure definitions                                     *
+*                                                                       *
+* Kevin J White, kevin@novell.com                                       *
+*                                                                       *
+* Copyright 1993 Kevin White.  All rights reserved.                     *
+*                                                                       *              *
+*************************************************************************
+* Configuration Constants
+TCBSIZE  equ     26
+MCBSIZE  equ     9
+*********************************************************************
+* Misc Constants
+NULL     equ     0      
+TRUE     equ     1
+FALSE    equ     0
+nullstk  equ     64            nulltask stack space
+STKMRGN  equ     13            space for interrupt + parm and temp
+MXSTKSIG equ     $A5           bottom of stack signature
+*********************************************************************
+* Timer constants
+OC1I     equ     $80           value to enable OC1 interrupt
+OC1F     equ     $80           value to reset timer interrupt
+TM1CNT   equ     50000         compare value for real time clock (40Hz)
+TOCK     equ     2             number of ticks per tock
+*********************************************************************
+*
+*       TCB Data Structure
+*
+tlink    equ     0             link to next TCB
+tstat    equ     2             Task status
+tpri     equ     3             Task priority
+tsp      equ     4             Current Stackpointer
+tstart   equ     6             Starting address
+tspinit  equ     8             Initial stackpointer
+tqhead   equ     10            Head of message queue
+tqtail   equ     12            Tail of message queue
+tsema    equ     14            Address of current semaphore
+tsemalnk equ     16            Link to next TCB in semaphore chain
+tname    equ     18            pointer to name of task
+tspend   equ     20            bottom of stack space
+tspmin   equ     22            lowest stack encountered
+ttimer   equ     24            Pointer to timer
+*        
+*       Status Values
+*        
+tready   equ     0             Task ready to run or running
+tio      equ     1             task waiting for I/O
+twait    equ     2             task waiting on semaphore
+twtim    equ     3             waiting on semaphore with timeout
+trcv     equ     4             task waiting to receive message
+tsnd     equ     5             Task waiting to send message
+tsleep   equ     6             Task waiting on timer
+tblock   equ     7             Task blocked
+tdormant equ     8             Task dormant but ok to run
+*
+*       Timer Structure
+*
+tmlink   equ     0             timer link
+tmmode   equ     2             Timer mode
+tmval    equ     3             timer value in ticks
+tmTCB    equ     5             timer task TCB
+tmmsg    equ     7             message to send on expiration 
+*
+tmsleep  equ     0             Timer sleep mode (wakes task on expiration)
+tmalarm  equ     1             Timer alarm mode (sends message on expiration)
+tmsema   equ     $FF           Semaphore timeout
+*
+*       Message Structure
+*
+mlink    equ     0             message link
+mtask    equ     2             sending task
+message  equ     4             actual message or pointer
+
+*       Poll List Structure
+plink    equ     0
+ptask    equ     2               TCB of task to poll
+pmesg    equ     4               event to send
+*
+*        Semaphore structure
+*
+semhead  equ     0             Link to first TCB waiting on semaphore
+semtail  equ     2             Link to last TCB waiting on semaphore
+semsema  equ     4             two byte semaphore
+*********************************************************************
+* Error Codes
+SCIerr   equ     1
+semerr   equ     2
+semerr1  equ     3
+swcherr  equ     4
+

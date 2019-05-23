@@ -1,0 +1,46 @@
+
+
+
+
+
+
+                             Summary of MX-11 functions.
+                             ---------------------------
+
+          Initialization functions
+          ------------------------
+          defpoll(taskh,pollq,msg)           add task to poll list.
+          deftask(&task, stack_size, name)   initialize task.
+          mxinit(stack_size,num_tcb,num_mcb) initialize MX-11.
+
+          Timer functions
+          ---------------
+          gettime()                     get hardware timer.
+          getTOD(time)                  get time of day.
+          setTOD(time)                  get time of day.
+          sleep(timeout)                pause task for timeout.
+
+          Message Functions
+          -----------------
+          chkmsg()                      check if message available.
+          flushmsg()                    flush all messages for task.
+          getmsg()                      get next message from queue.
+          sendmsg(taskh,msg)            send message to task.
+          sendmsgd(timeout,msg)         send message to self after delay.
+
+          Semaphore functions
+          -------------------
+          sclose(&sema)                 close semaphore.
+          sopen(initial_value)          get handle to semaphore.
+          ssignal(&sema)                signal semaphore.
+          swaittim(&sema,timeout)       wait on semaphore.
+
+          Serial port functions
+          ---------------------
+          Cgetc()                       get character from serial port.
+          Copen(inbufsize,outbufsize)   initialize serial I/O.
+          Cprintf(format_string,args..) printf to serial port.
+          Cputc(c)                      print character to serial port.
+          Cputstr(string)               print string to serial port.
+          Ctestc()                      test for character at serial port.
+

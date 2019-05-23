@@ -1,0 +1,643 @@
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ================================================================
+        EEEEEEE  MM   MM  IIIIIII  L       Y     Y         CCCC   FFFFFF 
+        E        M M M M     I     L        Y   Y         C    C  F
+        E        M  M  M     I     L         Y Y          C       F
+        EEEE     M     M     I     L          Y     ---   C       FFFF
+        E        M     M     I     L          Y           C       F
+        E        M     M     I     L          Y           C    C  F
+        EEEEEEE  M     M  IIIIIII  LLLLLLL    Y            CCCC   F
+        ================================================================
+    
+    
+    
+    
+    
+                                       A
+                               PC Based Simulator
+                                    for the
+                            C-FLEA Virtual Processor
+    
+    
+    
+    
+    
+                                  Release 1.0
+    
+                               Revised 09-Feb-94
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1991-1995 Dave Dunfield
+                              All rights reserved
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 1
+
+
+    1. INTRODUCTION
+    
+          EMILY-CF is a software simulator for the C-FLEA Virtual Processor.
+       It provides a powerful debugging environment, offering many features:
+    
+       - Supports full 64K of MEMORY. Any portion of memory can be used  for
+         CODE or DATA.
+    
+       - Hardware emulation mode communciates  with  a  target  system,  and
+         allows you to include the physical I/O lines, timers etc.  in  your
+         simulation.
+    
+       - Single step, Multi Step, Animate and Full Speed execution modes.
+    
+       - Simultanious on-screen displays of program disassembly, memory  CPU
+         registers and simulation messages.
+    
+       - Full screen editors for CPU registers, I/O registers, a two  memory
+         editors (CODE and DATA). All of the above may be viewed/altered  at
+         any time during the debugging session.
+    
+       - Multiple breakpoints are transparent to the user program.
+    
+    
+       1.1 System Requirements
+    
+             EMILY-CF will run on any IBM PC/AT/PS2 compatible system with a
+          MDA/CGA/EGA or VGA display, and at least 128K of free system RAM.
+    
+          - If physical serial I/O is used, a  COMM  port  is  required.  If
+            hardware emulation is also used, TWO COMM ports are required.
+    
+          - Some CGA displays may exibit "snow" or flicker during high speed
+            screen updates. This effect will not occur with MDA, EGA or  VGA
+            displays.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 2
+
+
+    2. STARTING UP EMILY-CF
+    
+          If you are using the optional hardware emulation mode, insure that
+       the resident control software (supplied) is inserted into the  target
+       system, and that the PC running EMILY-CF is connected to  the  target
+       systems serial port  via  COM2.  Power  on  the  test  system  before
+       starting EMILY. The resident control software  must  be  active  when
+       EMILY "looks" for it.
+    
+          EMILY-CF is invoked by typing EMCF at the DOS  command  line.  You
+       will be greeted with a "welcome" screen which displays a reminder  of
+       the command line syntax and the copyright message. This  screen  will
+       remain on the display for about 5 seconds (10  seconds  in  the  DEMO
+       versin). Pressing any key while this screen is  visible  will  bypass
+       this delay, and proceed directly to the main control panel.
+    
+          If EMILY-CF is given a file name on the command line, she loads it
+       in the same manner as if the 'L'oad command had been used from within
+       the main control panel.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 3
+
+
+          EMILY-CF also accepts several option switches on the command line:
+    
+            /Hardware[:n] - Enables the hardware emulation feature to cause
+                            EMILY to interact with the target  system  when
+                            performing I/O accesses.  This  option  may  be
+                            followed by a  ':'  and  a  numeric value which
+                            defines the BAUD RATE to be used to communicate
+                            with the target system. Default is 9600.
+    
+            /Mono *       - Inhibits the  color display, even  if  a  color
+                            adapter is present. This option may  be  useful
+                            if your monitor/adapter combination provides an
+                            unpleasent or unusable display for EMILY.
+    
+            /Ports:n      - Specify number of parallel I/O ports to provide
+                            on the simulated processor.   If not specified,
+                            a default of 4 ports are provided.
+    
+            /Swapcom      - Exchanges the operation of the two serial ports
+                            on the PC.  When this option is used, COM2 will
+                            be used for serial I/O redirection.
+    
+        * Note: If some of the EMILY windows appear  to  be  an  un-readable
+                washed-out yellow color, try adjusting the color contrast on
+                your monitor. Those windows should be an easy to read brown.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 4
+
+
+    3. USING EMILY-CF
+    
+       3.1 The Main Control Panel
+    
+             Once EMILY-CF is up and running, you will be presented with the
+          "Main Control Panel", which consists of four "windows" displaying:
+    
+            - A disassembly of program memory       (Upper LEFT)
+            - The contents of CPU registers         (Upper CENTER)
+            - The contents of MEMORY                (Upper RIGHT)
+            - Informational messages from EMILY     (Lower portion)
+    
+             All of EMILY'S functions are  accessed  by  command  characters
+          entered from this screen:
+    
+          3.1.1 A - Animate execution
+    
+                This function begins execution of the user program (from the
+             address in the PC register). As each instruction  is  executed,
+             EMILY will display the  instruction  being  executed,  the  CPU
+             registers, and the contents of internal RAM in the  appropriate
+             windows.
+    
+                When you enter the 'A' command, EMILY will  prompt  you  for
+             the number of instructions to animate. Pressing return (without
+             entering  a  number)  will  cause  the  animation  to   proceed
+             non-stop. Pressing <escape> will return you to the Main Control
+             Panel.
+    
+             The animation will terminate when:
+    
+                - The requested number of instructions have been stepped.
+                - A breakpoint is encountered.
+                - An illegal opcode is encountered.
+                - The <escape> key is pressed on the PC console.
+    
+          3.1.2 B - set Breakpoint
+    
+                This command sets a breakpoint such that  program  execution
+             under the 'A'nimate, or  'G'o,  commands  will  stop  when  the
+             breakpoint address is encountered.
+    
+                Up to 10 breakpoints may be in effect at the same time.
+    
+                You will be prompted for  the  address  (in  HEX).  Pressing
+             return (without entering an address) will cause the  breakpoint
+             to be  set  at  the  current  program  counter  (PC)  location.
+             Pressing <escape> will return you to the main control panel.
+    
+                EMILY stores the breakpoint addresses internally in a simple
+             zero terminated list. This allows  her  to  avoid  searching  a
+             fixed size table, and helps  speed  up  the  operation  of  the
+             program, especially when there are few breakpoints.  This  does
+             however cause the restriction that you cannot set a  breakpoint
+             at address zero ($0000).
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 5
+
+
+          3.1.3 C - Change register
+    
+                You will be prompted for the CPU register to change. Enter a
+             character from the following list, ESCAPE to abort, or F1 for a
+             reminder:
+    
+                A   - A accumulator
+                I   - INDEX register
+                S   - Stack pointer
+                P   - Program counter
+                1-9 - Parallel I/O port 1-9
+    
+                After you have selected the register, you will  be  prompted
+             for the new contents (in HEX).
+    
+          3.1.4 D - edit Data memory
+    
+                This command allows you to edit memory using  EMILY's  built
+             in memory editor. There is  no  functional  difference  between
+             this and the 'P'rogram memory editor. Having two editors allows
+             you to work with and edit two areas of memory without having to
+             keep  re-entering  the  addresses.  See  the  "Memory   Editor"
+             section.
+    
+          3.1.5 G - Go: execute program
+    
+                This  function  begins  high-speed  execution  of  the  user
+             program (from the address in the PC register).
+    
+                When you enter the 'G' command, EMILY will  prompt  you  for
+             the number of instructions to execute. Pressing return (without
+             entering a number) will cause the program to proceed  non-stop.
+             Pressing <escape> will return you to the Main Control Panel.
+    
+             Program execution will terminate when:
+    
+                - The requested number of instructions have been executed.
+                - A breakpoint is encountered.
+                - An illegal opcode is encountered.
+                - The <escape> key is pressed on the PC console. *
+    
+             * NOTE: If you are using 'Local' serial I/O mode, ESCAPE offers
+             you a menu of execution I/O functions. See the F3  command  for
+             more information.
+    
+          3.1.6 J - Jump to PC
+    
+                This command re-positions the disassembly display window (if
+             necessary) to display the instruction addressed by the  current
+             CPU Program Counter (PC).
+    
+          3.1.7 K - Kill all breakpoints
+    
+                Removes ALL breakpoints after prompting for permission to do
+             so.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 6
+
+
+          3.1.8 L - Load program image
+    
+                Prompts for the name of a file, and loads  it  into  PROGRAM
+             memory. The file must  be  in  either  INTEL  or  MOTOROLA  hex
+             download format.
+    
+          3.1.9 N - Next disassembly window
+    
+                Advances the disassembler to display the  following  screen.
+             Subsequent 'N' commands  will  proceed  to  disassemble  higher
+             memory addresses.
+    
+          3.1.10 P - edit Program memory
+    
+                This command allows you to edit PROGRAM memory using EMILY's
+             built in memory editor. This editor operates identically to the
+             'D'ata memory editor. See the "Memory Editor" section.
+    
+          3.1.11 R - Remove a breakpoint
+    
+                Prompts for the address, and if a breakpoint is set at  that
+             address, it is removed. Pressing return  (without  entering  an
+             address) will remove the  breakpoint  at  the  current  program
+             counter (PC) location.
+    
+          3.1.12 T - Traceback viewer
+    
+                In all execution modes, EMILY keeps track of the  last  4095
+             instructions executed. By entering the  traceback  viewer,  you
+             can examine this recording, and determine program  activity  up
+             to 4095 instructions preceeding the one on which execution last
+             stopped.
+    
+                The following command keys are available in the viewer:
+    
+                Up   - Backup the display 1 instruction.
+                Down - Advance the display 1 instruction.
+                PgUp - Backup the display 50 instructions.
+                PgDn - Advance the display 50 instructions.
+                Home - Position to the beginning of recording.
+                End  - Position to the end of recording.
+                F1   - Display a help summary.
+                F2   - Prompt for position & move.
+                F3   - Search backward (in time) for address. *
+                F4   - Search forward  (in time) for address. *
+                Esc  - Exit the Traceback viewer.
+    
+            * If you do not enter an address, EMILY searches for the previous
+              or next instance of the instruction at your current position.
+    
+                Only the instruction executed  is  saved  in  the  traceback
+             viewer, the contents of registers, RAM etc. are not recorded.
+    
+                The instruction at position 0 in the traceback buffer is the
+             one to which the current  PC  points,  and  has  not  yet  been
+             executed.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 7
+
+
+          3.1.13 F1 - Help display
+    
+                Pressing this key displays a summary of the  EMILY  commands
+             which are available from the Main Control Panel.
+    
+          3.1.14 F2 - Set Disassembler Address
+    
+                Prompts for  an  address  (in  HEX),  and  re-positions  the
+             disassembler window to display instructions beginning  at  that
+             address.
+    
+          3.1.15 F3 - Setup Serial Port
+    
+                Opens a window displaying the (B)audrate,  (P)arity,  (D)ata
+             bits and (S)top bits which are  currently  configured  for  the
+             PC's COM1 serial port.
+    
+                Press B, P, D or S to cycle to the next corresponding entry.
+    
+                When Baudrate is selected as 'Local', EMILY  will  re-direct
+             the  programs  serial  accesses  to  the  message  window.  Any
+             characters which are written  to  the  serial  device  will  be
+             output in the message window, and any character which are typed
+             at the keyboard will appear as incomming serial data. When this
+             mode is active, Pressing ESCAPE in the 'G'o command brings up a
+             menu of execution options:
+    
+                End simulation  - Stops the 'G'o command.
+                Send ESCAPE     - Send ESCAPE through as a charcter.
+                Zoom window     - Switch to full screen I/O window.
+    
+                If 'Local' is not selected, EMILY  re-directs  the  programs
+             serial accesses to the PC's  COM1  serial  port,  however,  for
+             maximum  flexibility,  the  actual  data  format  used  may  be
+             configured by this menu.
+    
+                EMILY allows you to "fine tune" a baud rate,  by  using  the
+             Up/Down keys. Note that the  available  baud  rate  values  are
+             determined by the PC COMM  port  hardware,  and  may  not  fall
+             exactly on the value you wish to use.
+    
+                Asynchronous communication is specified to work properly  as
+             long as the device is operating within 5% of the intended  baud
+             rate.
+    
+                For example:
+    
+                        Desired baud rate       : 1500
+                        Allowable range (+/- 5%): 1425-1575
+                        Closest PC baud rate    : 1496
+    
+                In the above example, the baud rate produced is within  0.3%
+             of  the  desired  value,   and   is   therefore   well   within
+             specifications.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 8
+
+
+          3.1.16 F10 - Shell to DOS
+    
+                Activating this function suspends the simulator, clears  the
+             screen, and invokes the operating system prompt.  Entering  the
+             'EXIT' command returns to the simuation.
+    
+          3.1.17 <space> - Single step one instruction
+    
+                Every time you press the <space> bar, EMILY will execute one
+             instruction, and update the on-screen displays.
+    
+          3.1.18 PgDn - Advance RAM display page
+    
+                Pressing this key advances the memory display window by  one
+             page (64 bytes).
+    
+          3.1.19 PgUp - Backup RAM display page
+    
+                Pressing this key backs up the memory display window by  one
+             page (64 bytes).
+    
+          3.1.20 Down - Advance RAM display line
+    
+                Pressing the "down arrow" key advances  the  memory  display
+             window by one line (4 bytes).
+    
+          3.1.21 Up - Backup RAM display line
+    
+                Pressing the "up arrow" key  backs  up  the  memory  display
+             window by one line (4 bytes).
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 9
+
+
+       3.2 The Memory Editor
+    
+             When you activate the  'D',  or  'P'  commands  from  the  main
+          control panel, EMILY will invoke its internal "Memory  Editor"  to
+          access the desired memory area. When you are within  this  editor,
+          the following commands are available:
+    
+          3.2.1 F1 - Help display
+    
+                Pressing this key displays a summary of the  EMILY  commands
+             which are available from within the Memory Editor.
+    
+          3.2.2 F2 - Set Edit Address
+    
+                Prompts for an address (in HEX), and re-positions the editor
+             display and cursor to edit at that address.
+    
+          3.2.3 F3 - Toggle Edit Mode
+    
+                EMILY allows two edit modes, HEX  and  ASCII.  When  in  HEX
+             mode, your cursor will be positioned in the hexidecimal display
+             portion of the memory  memory  dump,  allowing  you  to  change
+             memory by entering a new value as two  hexidecimal  characters.
+             When in ASCII mode, your cursor will  be  positioned  over  the
+             ASCII portion of the dump, and  you  can  replace  memory  with
+             ASCII text typed at the keyboard.
+    
+                Pressing F3 will toggle between HEX and ASCII mode,  causing
+             your cursor to switch between the corresponding portion of  the
+             memory display.
+    
+          3.2.4 F4 - Block fill memory
+    
+                This  function  prompts  with  "Starting  address",  "Ending
+             address",  and  "Fill  value".  Memory  between  the  specified
+             addresses will be set to the given value.
+    
+          3.2.5 Up - Move up 1 line
+    
+                Pressing the UP ARROW causes the cursor to move  upwards  on
+             the screen by one line. This reduces the memory edit address by
+             16 bytes.
+    
+          3.2.6 Down - Move down 1 line
+    
+                Pressing the DOWN ARROW causes the cursor to move  downwards
+             on the screen by one  line.  This  increases  the  memory  edit
+             address by 16 bytes.
+    
+          3.2.7 Left - Move left 1 byte
+    
+                Pressing the LEFT ARROW causes the cursor  to  move  to  the
+             left by one byte position. This reduces the memory edit address
+             by 1 byte.
+    
+                If the cursor is already at the left hand  margin,  it  will
+             wrap around to the rightmost position of the previous line.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 10
+
+
+          3.2.8 Right - Move right 1 byte
+    
+                Pressing the RIGHT ARROW causes the cursor to  move  to  the
+             right by one byte position. This in increases the  memory  edit
+             address by 1 byte.
+    
+                If the cursor is already at the right hand margin,  it  will
+             wrap around to the leftmost position of the following line.
+    
+          3.2.9 PgUp - Move back 1 page
+    
+                Pressing the PGUP key causes the editor  to  move  back  one
+             display page. This reduces  the  memory  edit  address  by  256
+             bytes.
+    
+          3.2.10 PgDn - Move forward 1 page
+    
+                Pressing the PGDN causes the  editor  to  move  forward  one
+             display page. This increases the memory  edit  address  by  256
+             bytes.
+    
+          3.2.11 Home - Move to start of line
+    
+                Pressing the HOME key causes  the  cursor  to  move  to  the
+             leftmost position of the line it is currently on. If the cursor
+             was already in the  leftmost  position,  it  is  moved  to  the
+             leftmost position of the preceeding line.
+    
+          3.2.12 End - Move to end of line
+    
+                Pressing the END key  causes  the  cursor  to  move  to  the
+             rightmost position of the line  it  is  currently  on.  If  the
+             cursor was already in the rightmost position, it  is  moved  to
+             the rightmost position of the following line.
+    
+          3.2.13 Ctrl-PgUp - Move to start of memory
+    
+                Pressing the CTRL and  PGUP  keys  re-positions  the  editor
+             display and cursor to address $0000 at the start of the  memory
+             block.
+    
+          3.2.14 Ctrl-PgDn - Move to end of memory
+    
+                Pressing the CTRL and  PGDN  keys  re=positions  the  editor
+             display and cursor to the  highest  address  available  in  the
+             memory block.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 11
+
+
+       3.3 Hardware Emulation
+    
+             EMILY-CF supports a hardware  emulation  mode,  which  provides
+          access to the physical I/O ports, timers etc. from a target system
+          in your simulation.
+    
+             Before using EMILY-CF in this mode, you must download  and  run
+          the companion  Resident  Control  Program  on  the  target  C-FLEA
+          virtual processor, before running EMILY.
+    
+             There is an approximatly 50 MS delay  when  accessing  the  I/O
+          ports and other physical hardware. This occurs due to  the  serial
+          activity required to communicate the data to and from  the  target
+          system.  For  most  applications,  this   delay   is   acceptable,
+          particularly in  the  stop/start  environment  of  simulation  and
+          debugging.
+    
+             When using this  (Hardware  Emulation)  feature,  the  Resident
+          Control Software should be running in  the  target  system  BEFORE
+          executing EMILY. Be sure to specify '/H:<speed>' parameter on  the
+          command line when starting EMILY.
+    
+             When requesting information from the target system, EMILY has a
+          short timeout, after which a return value of zero is  assumed.  If
+          EMILY seems to "hang" briefly betweeen one  command  and  another,
+          and/or all of your port displays suddenly get reset to  zero,  you
+          have likely lost (or never  established)  communication  with  the
+          target system.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 12
+
+
+       3.4 Messages
+    
+             During the course of operation, EMILY may display the following
+          messages in the message window located in the lower portion of the
+          screen:
+    
+          3.4.1 All Used!
+    
+                You have tried to enter a  breakpoint,  when  all  available
+             breakpoints are in use. EMILY allows up to 10 code  breakpoints
+             to be active at any one time.
+    
+          3.4.2 Animating at XXXX
+    
+                Indicates that EMILY has  commenced  animated  execution  of
+             your program, beginning at the address 'XXXX'.
+    
+          3.4.3 Already set!
+    
+                Issued to indicate that the address at which you have  tried
+             to set a breakpoint is already active as a breakpoint.
+    
+                This message will also  result  of  you  attempt  to  set  a
+             breakpoint at address zero ($0000).
+    
+          3.4.4 Breakpoints: [XXXX ...]
+    
+                This message shows the currently set  breakpoint  addresses,
+             and is issued whenever any  command  involving  breakpoints  is
+             performed.
+    
+          3.4.5 Executing at XXXX
+    
+                Indicates that EMILY has commenced full  speed  exection  of
+             your program, beginning at the address 'XXXX'.
+    
+          3.4.6 FILENAME: Bad checksum
+    
+                EMILY  has  encountered  a  record  containing  a  incorrect
+             checksum value while attempting to 'L'oad the named file.
+    EMILY-CF: A PC based C-FLEA simulator                            Page: 13
+
+
+          3.4.7 FILENAME: Invalid HEX record
+    
+                EMILY  has  encountered  an  improperly  formatted  download
+             record while attempting to 'L'oad the named file.
+    
+          3.4.8 FILENAME: N bytes loaded
+    
+                The  indicated  number  of  bytes  have  been   successfully
+             'L'oaded from the named file.
+    
+          3.4.9 FILENAME: Unable to access
+    
+                EMILY was unable to open and read the named file.
+    
+          3.4.10 Stopped at XXXX
+    
+                Indicates that EMILY has stopped execution of you program at
+             the indicated address. This message is appended to the  initial
+             message indicating that execution had commenced.
+    
+          3.4.11 XXXX: Not found
+    
+                This message is issued while in the 'T'raceback  viewer,  to
+             indicate that an address 'XXXX' you have searched for does  not
+             occur between your current position, and the start/end  of  the
+             traceback buffer.
+
+
+
+                     EMILY-CF: A PC based C-FLEA simulator
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+        1.1 System Requirements                                             1
+
+     2. STARTING UP EMILY-CF                                                2
+
+
+     3. USING EMILY-CF                                                      4
+
+        3.1 The Main Control Panel                                          4
+        3.2 The Memory Editor                                               9
+        3.3 Hardware Emulation                                             11
+        3.4 Messages                                                       12

@@ -1,0 +1,585 @@
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+                                    D L M
+   
+                              An IBM P.C. Based
+                             RS-232 Asynchronous
+                              Data Line Monitor
+   
+   
+   
+   
+   
+                                 Release 1.4
+   
+                              Revised 04-Jan-94
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+                      Copyright 1989-1995 Dave Dunfield
+                             All rights reserved
+   Data Line Monitor                                                Page: 1
+
+
+   1. INTRODUCTION
+   
+         Have you ever been in the situation  where  you  have  two  serial
+      devices (such as a PC and a printer),  which  SHOULD  work  but  just
+      don't seem to communicate? Or perhaps you are trying to debug  a  new
+      communications  protocol,  and  when  you  start  the  file  transfer
+      evrything just LOCKS UP!!!
+   
+         In such situations, wouldn't it be nice to be able to SEE  exactly
+      what is happening over the RS-232 cable? To SEE when characters  were
+      received in relation to characters going out?  To  SEE  flow  control
+      characters and their effect? To SEE the modem carrier drop?
+   
+         Wouldn't it be nice to do  all  this  WITHOUT  spending  $5,000  -
+      $10,000 on a commercial data scope?
+   
+         If your requirements are simple monitoring of ASYNCHRONOUS  RS-232
+      serial communications, DLM (Data Line Monitor) is for you!!!
+   
+         The DLM "package" (software and documentation) is copyrighted, and
+      may not be re-distributed for profit  or  other  commercial  purposes
+      without my written permission. If you find DLM useful, please help me
+      continue to support and enhance it by sending  a  "registration"  fee
+      (specified in the included CATALOG file) to this address:
+   
+                          Dunfield Development Systems
+                          P.O. Box 31044
+                          Nepean, Ontario (Canada)
+                          K2B 8S8
+   
+         Please make your  cheque  or  money  order  payable  to  "Dunfield
+      Development Systems". If you choose not to  order  the  complete  DLM
+      package, please discontinue using DLM within thirty days.
+   
+         Registered users will receive (in addition to the latest  copy  of
+      DLM), supplementary utilities, including  an  "error  generator"  for
+      inserting errors  in  data  transmission  lines,  a  VT-100  terminal
+      checkout program, a "pop-up" (TSR) ANSI terminal, and more.
+   
+         DLM is provided on an "as is" basis, with no warranty of any kind.
+      In no event shall the author be liable for any damages  arising  from
+      its use or distribution.
+   Data Line Monitor                                                Page: 2
+
+
+      1.1 What is DLM?
+   
+            DLM is an easy to use DATA LINE MONITOR for use on the IBM P.C.
+         It displays DTE and DCE data in a  split  line  format  (DTE  over
+         DCE), and records up to 32767  events  (characters  and/or  signal
+         transitions) in a circular buffer for later review (If the  buffer
+         overflows, the LAST 32767 events are available).
+   
+            Recorded data may be saved to disk, allowing a  problem  to  be
+         captured in the field, and the results viewed at another time  and
+         place. Since the data is stored as a standard DOS file, it may  be
+         transmitted over a modem  and  viewed  (using  DLM)  at  a  remote
+         location. This allows an engineer at the main  office  to  provide
+         better (and faster) support to a technician in the field, since he
+         can also SEE the problem.
+   
+            It supports ASYNCHRONOUS operation at  110,  300,  1200,  2400,
+         4800, 9600 and 19200 BPS; 5,6,7 and 8 data bits; Even, Odd,  Mark,
+         Space and No parity; and 1 or 2 stop bits. The  DTE  configuration
+         may be set  independantly  of  the  DCE  configuration  for  split
+         speed/format operation.
+   
+            The configuration may also be saved to disk,  allowing  you  to
+         have several "canned" setups for common situations.
+   
+            In addition to the data line monitor, DLM incorporates a SIGNAL
+         MONITOR (LIGHT BOX) for  real  time  monitoring  of  the  hardware
+         signals.
+   
+      1.2 Hardware Required
+   
+            All that is required to use DLM is an IBM P.C. (or  compatible)
+         which has two serial (COMM) ports. A  special  "Y"  adapter  cable
+         (described later) must be constructed to allow monitoring of  both
+         DTE and DCE data.
+   Data Line Monitor                                                Page: 3
+
+
+   2. HARDWARE SETUP
+   
+         Before you use DLM, you must construct a special "Y" adapter cable
+      which allows it to monitor "both sides" (DTE and  DCE)  of  a  single
+      communications line using the IBM P.C. serial ports (COM1 and COM2).
+   
+      2.1 IBM P.C. serial ports
+   
+            The serial ports of the IBM P.C. are RS-232 DTE  configuration,
+         and will be in either a 25 or 9 pin configuration. The ports  have
+         the following pinout:
+   
+           Signal name                Origin   25-Pin(PC)  9-Pin(AT)
+           ---------------------------------------------------------
+           Transmit Data       (TXD)   DTE         2           3
+           Receive Data        (RXD)   DCE         3           2
+           Request To Send     (RTS)   DTE         4           7
+           Clear To Send       (CTS)   DCE         5           8
+           Data Set Ready      (DSR)   DCE         6           6
+           Signal Ground       (GND)   ---         7           5
+           Data Carrier Detect (DCD)   DCE*        8           1
+           Data Terminal Ready (DTR)   DTE        20           4
+           Ring Indicator      (RI )   DCE        22           9
+   
+       *   In order to be able to record this signal in data capture
+           mode, DLM records it as if it were originated by the DTE.
+   
+            Note that since the PC serial port is  a  DTE,  it  drives  the
+         signals with DTE origin, and monitors the signals with DCE origin.
+         Therefore, all connections to the line being monitored will be  to
+         the DCE signals of the COMM port.
+   Data Line Monitor                                                Page: 4
+
+
+      2.2 Passive Monitor Cable
+   
+            DLM monitors DTE data on COM1, and DCE data on COM2. Therefore,
+         you must connect the input (DCE) lines from COM1 to the DTE origin
+         signals on the monitored line, and the input (DCE) lines from COM2
+         to the DCE origin signals.
+   
+            To do this, you must  construct  a  "Y"  adapter  cable,  which
+         contains a set of "straight through" connectors which are inserted
+         in the RS-232 line being monitored, and also connects the DTE  and
+         DCE signals to the appropriate input (DCE) pins on COM1 and  COM2.
+         Be sure to mark which COMM port each of the  two  "PC"  connectors
+         connects to. If you get  them  backwards,  the  DTE/DCE  data  and
+         signals will appear reversed.
+   
+            "Straight  through"                          "IBM PC"
+          Line Monitor Connector                   COMM port connectors
+   
+   
+               DB-25    Male                    /----- COM1 (Monitor DTE)
+               | | | | | | |                   /
+               +-+-+-+-+-+-+==================<
+               | | | | | | |                   \
+               DB-25  Female                    \----- COM2 (Monitor DCE)
+   
+   
+       The signals must be connected as follows:
+   
+           Line   Pin          Port    25-Pin(PC)  9-Pin(AT)
+           -------------------------------------------------
+           TXD     2   ----    COM1        3           2
+           RXD     3   ----    COM2        3           2
+           RTS     4   ----    COM1        5           8
+           CTS     5   ----    COM2        5           8
+           DSR     6   ----    COM2        6           6
+           GND     7   ----  COM1+COM2     7           5
+           DCD     8   ----    COM1       22           9
+           DTR    20   ----    COM1        6           6
+           RI     22   ----    COM2       22           9
+           Aux 1*  -   ----    COM1        8           1
+           Aux 2*  -   ----    COM2        8           1
+   
+       *   These signals will be shown in "signal monitor" function,
+           but will not be recorded in "data capture" function.
+           You may use them to monitor any signals you like.
+   Data Line Monitor                                                Page: 5
+
+
+   3. USING DLM
+   
+         To set up DLM, connect the  "straight  through"  end  of  the  "Y"
+      adapter cable to the line to be monitored, and the "PC" connectors to
+      the appropriate COMM ports on the IBM P.C.
+   
+         Execute DLM from the DOS command line, and  you  will  be  greeted
+      with The following menu:
+   
+                   +-------------------------+
+                   | Begin data capture      |
+                   | Review captured data    |
+                   | Clear capture buffer    |
+                   | RS-232 Signal monitor   |
+                   | Serial port parameters  |
+                   | Disk transfer functions |
+                   | Exit to DOS             |
+                   +-------------------------+
+   
+         Each of the above menu items is described below:
+   
+      3.1 Begin data capture
+   
+            This option causes DLM to begin monitoring the data  line.  Any
+         data or signal transitions detected  are  displayed  in  a  "split
+         line" screen format (in real time), as well  as  recorded  in  the
+         circular capture buffer.
+   
+            Each set of lines on the screen (DTE/DCE  data)  has  a  dashed
+         "separating" line, DTE data will appear ABOVE the  line,  and  DCE
+         data will appear BELOW the line. A  cursor  is  displayed  ON  the
+         dashed  line  to  indicate  where  the  next  data  item  will  be
+         displayed.
+   
+            Signal transitions and line errors are displayed as an  "arrow"
+         which points UP if the event was from the DTE,  and  DOWN  if  the
+         event was from the DCE. One exception to this is  the  DCD  signal
+         which occurs from the DCE, but is recorded by DLM as  if  it  were
+         from the DTE. This is because each "direction" (DTE/DCE) may  only
+         have three (3) signals recorded in the  capture  buffer.  The  DCE
+         signals are DSR, CTS and RI; The DTE signals are DTR, RTS and DCD.
+         The exact signal or error occuring may  be  displayed  in  "Review
+         captured data".
+   
+            Press ESCAPE at any time to exit this function, and  return  to
+         the main menu.
+   Data Line Monitor                                                Page: 6
+
+
+      3.2 Review captured data
+   
+            In this function, the same "split  line"  screen  as  above  is
+         displayed, however it shows data previously captured.
+   
+            The ARROW keys may be  used  to  move  the  cursor  around  the
+         display. The PGUP and PGDN keys may be used to advance and  backup
+         by entire screens. The HOME key returns you to  the  beginning  of
+         the buffer.
+   
+            When the cursor is positioned over an entry, it will contain  a
+         "arrow" ('^' or 'v') which indicates the origin (DTE  or  DCE)  of
+         that entry (In most cases it will be obvious since  data  will  be
+         shown above or below the line).
+   
+            The hex value of any data will be shown near the center of  the
+         status line at the top of the screen.
+   
+            To the immediate right the four "data" flags will be shown:
+   
+               F   - Framing error
+               P   - Parity error
+               O   - Overrun error
+               D   - Data is present
+   
+            To the right of that, three signals will be shown:
+   
+                  DTE             DCE
+               ---------       ---------
+               X   - DCD       X   - RI
+               T   - DTR       S   - DSR
+               R   - RTS       C   - CTS
+   
+            At the extreme right side of the status line will be shown  two
+         numbers. The first is the current position in the capture  buffer,
+         and the second is the total  number  of  entries  in  the  capture
+         buffer.
+   
+            Press ESCAPE at any time to exit this function, and  return  to
+         the main menu.
+   
+      3.3 Clear capture buffer
+   
+            This function  removes  any  data  which  has  been  previously
+         recorded from the "capture" buffer. It is  useful  to  remove  old
+         data before starting a new monitoring session, otherwise  any  new
+         data will be appended to the old data already in the buffer.
+   
+            When you execute this function,  DLM  displays  the  number  of
+         entries currently residing in the capture buffer. Press  ENTER  to
+         clear the buffer, or ESCAPE to exit and leave it unchanged.
+   Data Line Monitor                                                Page: 7
+
+
+      3.4 RS-232 Signal monitor
+   
+            This function provides a "light-box", which shows  all  of  the
+         hardware signals being monitored (DTR, DSR, RTS, CTS, DCD, RI, AS1
+         and AS2). Each signal has a "light" which will be  ON  (white)  if
+         the signal is asserted, and  OFF  (dark)  if  the  signal  is  not
+         asserted.
+   
+            Changes occuring in the signal states are shown in "real-time",
+         so that the display always reflects the actual state of  the  line
+         signals.
+   
+            Press ESCAPE at any time to exit this function, and  return  to
+         the main menu.
+   
+      3.5 Serial port parameters
+   
+            This function allows you to set the speed and  data  format  of
+         the ports monitoring DTE  and  DCE  data.  In  order  for  DLM  to
+         correctly monitor the data line, these parameters must be  set  up
+         the same as the devices being monitored.
+   
+            Sub-menus are provided which allow you to set both the DTE  and
+         DCE parameters simultaneously, or individually. Most modern serial
+         communications operate the DTE and  DCE  at  the  same  speed  and
+         format.
+   
+            Press ESCAPE at any time to exit each menu level, and return to
+         the next higher menu.
+   
+      3.6 Disk transfer functions
+   
+            This function provides you with a sub-menu, which allows you to
+         load/save configuration or captured data to/from disk files:
+   
+                   +--------------------+
+                   | Load Data Image    |
+                   | Load Configuration |
+                   | Save Data Image    |
+                   | Save Configuration |
+                   +--------------------+
+   
+            Once you select a transfer operation, you will be prompted  for
+         a file name. The following special keys may be used:
+   
+           Left arrow      - Move to left
+           Right arrow     - Move to right
+           Home            - Move to beginning of name
+           End             - Move to end of name
+           PgUp            - Clear entire field
+           PgDn            - Clear from cursor to end of field
+           ESC             - Cancel and return to higher menu
+           ENTER           - Accept filename & perform operation
+   Data Line Monitor                                                Page: 8
+
+
+      3.7 Exit to DOS
+   
+            This function terminates DLM, and returns to  the  DOS  command
+         prompt.
+   
+   4. DEBUGGING TIPS
+   
+         Here  are  several  common  problems  which  occur   with   serial
+      communications, and information on how you could use DLM to  diagnose
+      them:
+   
+      4.1 Hardware Connections
+   
+            You can easily check out the  hardware  signals  by  using  the
+         "RS-232 Signal monitor".
+   
+            Connecting the DTE to the monitor cable should "raise" the  DTR
+         and RTS signals. If this is not the case, either your  connections
+         are incorrect, or the DTE device is not online properly. (In  some
+         rare cases this may be a normal state for the device).
+   
+            Connecting the DCE to the monitor cable should "raise" the  DSR
+         and CTS signals. If this is not the case, either your  connections
+         are incorrect, or the DTE device is not online properly.  (RI  and
+         DCD are not always ON, so  you  can't  expect  them  to  be  in  a
+         particular state).
+   
+            Once you get the above signals correctly connected,  switch  to
+         "Begin data capture".
+   
+            Data transmitted from the DTE should appear  ABOVE  the  dashed
+         sepatating line, data transmitted from the DCE should appear BELOW
+         the line.
+   Data Line Monitor                                                Page: 9
+
+
+      4.2 Speed and Data format
+   
+            If the speed of the two sending and receiving  devices  is  not
+         the same, no communication will occur. Assuming you know what  the
+         speed SHOULD be, it is easy to  recognize  data  at  an  incorrect
+         speed with DLM.
+   
+            Capture a good sample of ASCII data with DLM set to  the  speed
+         and format which you think the communication  should  be  occuring
+         at, and then look at it in review mode.
+   
+            If the data  completely  readable,  the  speed  and  format  is
+         correct.
+   
+            If the data is partly legible, but about half of the characters
+         seem to be corrupted, the speed is correct, but you have incorrect
+         PARITY.
+   
+            If the data is completely un-readable, examine the  HEX  values
+         of several characters (by moving the cursor  and  looking  at  the
+         status line). If the data has the high bit set (80-FF),  check  to
+         see if it would be readable without the high bit set. If  this  is
+         the case,  the  speed  is  correct,  but  the  data  format  (Data
+         bits/Parity) is incorrect. DATA BITS is the most likely suspect.
+   
+            If the above test does not reveal any readable data, the  speed
+         is probably incorrect. This will also manifest itself with  "lots"
+         of 'F'raming and 'O'verrun errors.
+   
+      4.3 Flow Control
+   
+            Many  modern  devices  are  not  capable  of   receiving   data
+         continuously at the highest speeds supported on the interface.  An
+         example of this is a  printer  which  prints  200  Characters  per
+         second (CPS), and has a serial interface running at 9600 bits  per
+         second which is about 960 CPS.
+   
+            Such devices usually have an  internal  buffer,  which  absorbs
+         data at full speed, and stores it so that it can be printed  at  a
+         slower speed. When this buffer approaches being full, the  printer
+         will assert FLOW CONTROL on the sending device, which causes it to
+         stop sending data until it is later instructed to proceed.
+   
+            If flow control is not working properly, the usual  symptom  is
+         that the first few lines of data are  correctly  received  by  the
+         device, after which symptoms vary from "lost data" to "lock up".
+   
+            There are two common forms of flow control, one  uses  hardware
+         signals, and is called  HARDWARE  FLOW  CONTROL.  The  other  uses
+         reserved data characters, and is called SOFTWARE FLOW CONTROL.
+   Data Line Monitor                                                Page: 10
+
+
+         4.3.1 Hardware Flow Control
+   
+               With  HARDWARE  flow  control,  the  receiving  device  will
+            de-assert  one  of  its  hardware  output  leads  (DTE=DTR/RTS,
+            DCE=DSR/CTS) to inform the sender to stop sending. When  it  is
+            ready to receive more data, it will re-assert the  signal,  and
+            transmission will proceed.
+   
+               Using DLM, you can monitor the hardware signals during  data
+            transmission, and see if one of them is lowered to perform flow
+            control. You can also see if the sending  devices  responds  to
+            the flow control (stops sending), and how quickly  it  responds
+            (by noting how  many  characters  are  sent  after  the  signal
+            drops).
+   
+               If the signal dropping appears to have no effect on the data
+            stream, then you know that hardware flow control is  not  being
+            recognized or acted upon.
+   
+         4.3.2 Software Flow Control
+   
+               With SOFTWARE flow control, the receiving device transmits a
+            character to the sending device to command it to stop  sending.
+            This character is usually CONTROL-S ($13). When it is ready  to
+            receive more data, a different character is  transmitted.  This
+            character is usually CONTROL-Q ($11).
+   
+               Using DLM,  you  can  monitor  the  data  to  and  from  the
+            receiving device, and check for flow  control  characters.  You
+            can also see if the sending device responds to the flow control
+            (stops sending), and how quickly is responds (by noting how may
+            characters are send after the CONTROL-S is received).
+   
+               If a CONTROL-S is transmitted, and it  appears  to  have  no
+            effect on the data stream, then you  know  that  software  flow
+            control is not being recognized or acted upon.
+   Data Line Monitor                                                Page: 11
+
+
+   5. ASCII code chart
+   
+   
+   
+   
+   
+                            Most Significant Figure
+   
+             HEX||  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |
+             ===++=====+=====+=====+=====+=====+=====+=====+=====+
+              0 || NUL | DLE |     |  0  |  @  |  P  |  `  |  p  |
+             ---++-----+-----+-----+-----+-----+-----+-----+-----+
+              1 || SOH | DC1 |  !  |  1  |  A  |  Q  |  a  |  q  |
+         L   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         e    2 || STX | DC2 |  "  |  2  |  B  |  R  |  b  |  r  |
+         a   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         s    3 || ETX | DC3 |  #  |  3  |  C  |  S  |  c  |  s  |
+         t   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+              4 || EOT | DC4 |  $  |  4  |  D  |  T  |  d  |  t  |
+         S   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         i    5 || ENQ | NAK |  %  |  5  |  E  |  U  |  e  |  u  |
+         g   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         n    6 || ACK | SYN |  &  |  6  |  F  |  V  |  f  |  v  |
+         i   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         f    7 || BEL | ETB |  '  |  7  |  G  |  W  |  g  |  w  |
+         i   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         c    8 || BS  | CAN |  (  |  8  |  H  |  X  |  h  |  x  |
+         a   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         n    9 || HT  | EM  |  )  |  9  |  I  |  Y  |  i  |  y  |
+         t   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+              A || LF  | SUB |  *  |  :  |  J  |  Z  |  j  |  z  |
+         F   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         i    B || VT  | ESC |  +  |  ;  |  K  |  [  |  k  |  {  |
+         g   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         u    C || FF  | FS  |  ,  |  <  |  L  |  \  |  l  |  |  |
+         r   ---++-----+-----+-----+-----+-----+-----+-----+-----+
+         e    D || CR  | GS  |  -  |  =  |  M  |  ]  |  m  |  }  |
+             ---++-----+-----+-----+-----+-----+-----+-----+-----+
+              E || SO  | RS  |  .  |  >  |  N  |  ^  |  n  |  ~  |
+             ---++-----+-----+-----+-----+-----+-----+-----+-----+
+              F || SI  | US  |  /  |  ?  |  O  |  _  |  o  | DEL |
+             ---++-----+-----+-----+-----+-----+-----+-----+-----+
+
+
+
+                              Data Line Monitor
+
+                              TABLE OF CONTENTS
+
+
+                                                                        Page
+
+    1. INTRODUCTION                                                        1
+
+       1.1 What is DLM?                                                    2
+       1.2 Hardware Required                                               2
+
+    2. HARDWARE SETUP                                                      3
+
+       2.1 IBM P.C. serial ports                                           3
+       2.2 Passive Monitor Cable                                           4
+
+    3. USING DLM                                                           5
+
+       3.1 Begin data capture                                              5
+       3.2 Review captured data                                            6
+       3.3 Clear capture buffer                                            6
+       3.4 RS-232 Signal monitor                                           7
+       3.5 Serial port parameters                                          7
+       3.6 Disk transfer functions                                         7
+       3.7 Exit to DOS                                                     8
+
+    4. DEBUGGING TIPS                                                      8
+
+       4.1 Hardware Connections                                            8
+       4.2 Speed and Data format                                           9
+       4.3 Flow Control                                                    9
+
+    5. ASCII code chart                                                   11
+

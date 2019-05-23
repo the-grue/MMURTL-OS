@@ -1,0 +1,1018 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                     +------------------------------------+
+                     |                                    |
+                     |  ********************************  |
+                     |  * The IBM-PC WINDOWING library *  |
+                     |  ********************************  |
+                     |                                    |
+                     +------------------------------------+
+    
+    
+    
+    
+    
+                     A PC Character Based Windowing Library
+                        for Stand-Alone 8086 applicatons
+                                 using MICRO-C.
+    
+    
+    
+    
+    
+                       Copyright 1989-1995 Dave Dunfield
+                              All rights reserved.
+    DK86 WINDOWING LIBRARY                                           Page: 1
+
+
+    1. IBM-PC WINDOWING Library
+    
+          The MICRO-C WINDOWING LIBRARY is a set  of  powerful,  very  fast,
+       compact, text based windowing functions  for  use  with  the  MICRO-C
+       compiler, on the IBM  Personal  Computer.  Features  of  the  library
+       include  multiple  open  windows,  overlaid  windows  with  automatic
+       save/restore of screen underneath, scrolling within windows, optional
+       window borders, menu and form entry functions, and more.
+    
+          The library is organized into two parts, the first  is  a  set  of
+       assembly language routines  which  provides  the  basic  "low  level"
+       functions to open/close windows, and to  output  data  in  them.  The
+       second part of the library provides a  set  of  'C'  functions  which
+       provide "high level" functions such as menu and form entry, formatted
+       printing, etc.
+    
+          To add these functions to the 8086 Developers  Kit  library  (TINY
+       and SMALL) models, CD to the LIB86 directory, and use  the  following
+       commands:
+    
+                    cc86 winrtns -afop
+                    slib i=tiny  a=winrtns a=wprintf a=window
+                    slib i=small a=winrtns a=wprintf a=window
+    
+          I have compiled the window demonstration program from the standard
+       DOS compiler using the 8086 Developers Kit with these functions added
+       to its library. Run WINDEMO.COM to see  the  windowing  functions  in
+       action.
+    DK86 WINDOWING LIBRARY                                           Page: 2
+
+
+       1.1 Window Control Block
+    
+             Whenever a new window is opened, the windowing library sets  up
+          a WINDOW CONTROL BLOCK (WCB) which contains information needed  to
+          access and control the window. The format of the WCB is:
+    
+        Offset: 0   - Current video attribute *
+                1   - Window flags (High 8 bits of w_open attrs) **
+                2   - Absolute 'X' position of top left corner of
+                      active region. ***
+                3   - Absolute 'Y' position of top left corner of
+                      active region. ***
+                4   - Width in characters of active region ***
+                5   - Height in characters of active region ***
+                6   - Current 'X' cursor coordinate
+                7   - Current 'Y' cursor coordinate
+                8,9 - Pointer to previous window buffer
+                10  - Previous cursor ENDING line
+                11  - Previous cursor STARTING line
+                12  - Previous cursor absolute 'X' position ****
+                13  - Previous cursor absolute 'Y' position ****
+                14..- Save area for SAVE/RESTORE function
+    
+        *       You may dynamically alter the video attribute of data
+                written to the window by writing to this byte.
+    
+        **      You may dynamically alter the properties of the window by
+                setting or clearing the flag bits with these exceptions:
+                -DO NOT enable SAVE/RESTORE unless opened with it
+                (It is Ok to disable SAVE/RESTORE).
+                -DO NOT change the state of the BORDER bits.
+    
+        ***     For windows opened with a BORDER, this reflects the size
+                of the active region (not including the border). Otherwise,
+                this is the size of the entire window.
+    
+        ****    For full screen window which does not SAVE/RESTORE, you can
+                set these values to zero to home cursor on exit.
+    DK86 WINDOWING LIBRARY                                           Page: 3
+
+
+       1.2 External Variables
+    
+             In addition to the functions decribed on the  following  pages,
+          the windowing library provides the  following  external  variables
+          which may be accessed from within your 'C' program:
+    
+          1.2.1 W_BASE
+    
+                               extern int W_BASE;
+    
+                This variable contains the base address of the video screen,
+             which may be used to determine the type of display present:
+    
+                        B000 = Monochrome
+                        B800 = Color
+    
+    
+          1.2.2 W_OPEN
+    
+                              extern char *W_OPEN;
+    
+                This variable contains a pointer to the WCB for the "active"
+             window, and controls which window  is  manipulated  by  certain
+             library functions. This automatically  set  up  by  "wopen"  to
+             point to the last window opened, but may be changed at any time
+             with:
+    
+                                W_OPEN = window;
+    
+                NOTE, when the active window is closed, W_OPEN is  reset  to
+             point to the window which was active at the time that  it  (the
+             active window) was opened. If windows are closed in other  than
+             the reverse order of which they were opened, W_OPEN may be left
+             pointing to a window which has already  been  closed.  If  this
+             happens, YOU MUST NOT USE THE "ACTIVE" WINDOW FUNCTIONS WITHOUT
+             RESETTING W_OPEN TO POINT TO AN OPEN WINDOW. It  is  your  (the
+             programmer's) responsibility  to  insure  that  you  know  what
+             window will be accessed through W_OPEN at all times  throughout
+             your program.
+    
+       1.3 Window Library Functions
+    
+             The following pages contain  a  description  of  each  function
+          available in the IBM-PC windowing library.
+    WCLEOL                                                           WCLEOL
+    W_CLEOL                                                         W_CLEOL
+    
+    
+    
+    PROTOTYPE:
+    
+        wcleol()
+        w_cleol(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wcleol" function clears the active window  from  the  current
+       cursor position to the end of a line.
+    
+          The "w_cleol" function  clears  the  specified  window  fromt  the
+       current position to the end of the line.
+    
+    
+    EXAMPLES:
+    
+        wputs("Input> ");       /* Display a prompt */
+        wcleol();               /* Clear remainder of input line */
+    WCLEOW                                                           WCLEOW
+    W_CLEOW                                                         W_CLEOW
+    
+    
+    
+    PROTOTYPE:
+    
+        wcleow()
+        w_cleow(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wcleow" function clears the active window  from  the  current
+       position to the end of the window.
+    
+          The "w_cleow"  function  clears  the  specified  window  from  the
+       current position to the end of the window.
+    
+    
+    EXAMPLES:
+    
+        wgotoxy(0, 10);         /* position at line 11 */
+        wcleos();               /* Clear lower part of screen */
+    WCLOSE                                                           WCLOSE
+    W_CLOSE                                                         W_CLOSE
+    
+    
+    
+    PROTOTYPE:
+    
+        wclose()
+        w_close(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wclose" function closes the "active" window, and de-activates
+       it.
+    
+          The  "w_close"  function  closes   the   specified   window,   and
+       de-activates it.
+    
+          If the window being closed is the "active"  window,  the  "active"
+       window will revert to the window which was "active" at the time  that
+       the window being closed was opened.
+    
+    
+    EXAMPLES:
+    
+        wclose();       /* Close active window */
+        w_close(title); /* Close the title window */
+    WCLWIN                                                           WCLWIN
+    W_CLWIN                                                         W_CLWIN
+    
+    
+    
+    PROTOTYPE:
+    
+        wclwin()
+        w_clwin(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wclwin" function clears the entire active window  and  resets
+       the cursor position to the top left hand corner.
+    
+          The "w_clwin" function clears the  entire  specified  window,  and
+       resets the cursor position to the top left hand corner.
+    
+    
+    EXAMPLES:
+    
+        if(c = 0x1b) {          /* Escape command */
+            wclwin();           /* Clear the screen */
+            wputs("Exiting back to main menu");
+            return; }
+    WCURSOR_BLOCK                                             WCURSOR_BLOCK
+    
+    
+    
+    PROTOTYPE:
+    
+        wcursor_block()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          This function enables (turns on) display of the cursor on the  IBM
+       PC video display. The cursor is shown as  flashing  block,  occupying
+       the entire character window.
+    
+    
+    EXAMPLES:
+    
+        if(insert)              /* Test insert mode flag */
+            wcursor_block();    /* Indicate inserting with block cursor */
+        else
+            wcursor_line();     /* Indicate overwrite with line cursor */
+    WCURSOR_LINE                                               WCURSOR_LINE
+    
+    
+    
+    PROTOTYPE:
+    
+        wcursor_line()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          This function enables (turns on) display of the cursor on the  IBM
+       PC video display. The cursor is shown as a single flashing  line,  at
+       the bottom of the character window.
+    
+    
+    EXAMPLES:
+    
+        wcursor_line();     /* Re-enable the cursor */
+        exit(0);            /* And terminate */
+    WCURSOR_OFF                                                 WCURSOR_OFF
+    
+    
+    
+    PROTOTYPE:
+    
+        wcursor_off()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          This function inhibits (turns off) display of the  cursor  on  the
+       IBM PC video display. This affects the cursor  display  only,  screen
+       output will continue to be displayed at the correct cursor position.
+    
+    
+    EXAMPLES:
+    
+        wclscr();           /* Clear screen */
+        wcursor_off();      /* Inhibit cursor */
+        wmenu(10, 10, 0x6007, main_menu, &index); /* Present main menu */
+    WFORM                                                             WFORM
+    
+    
+    
+    PROTOTYPE:
+    
+        register wform(int x, int y, int attrs, char *prompts[],
+                       char *strings,  ...)
+    
+    
+    ARGUMENTS:
+    
+        x       - Absolute COLUMN of upper left corner of form window
+        y       - Absolute ROW    of upper left corner of form window
+        attrs   - Attributes for form window (See WOPEN)
+        prompts - Prompt string for form entries
+        strings - Destination string to receive form data
+        ...     - Additional arguments may be required
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wform" function opens  a  window,  which  contains  a  "form"
+       consisting of prompts and data areas. Each data area is shown  beside
+       its corresponding prompt, and may be edited using the keys  supported
+       by WGETS. the UP and DOWN ARROW keys may be used to move the  editing
+       cursor between the various fields in the input form.*
+    
+          The "attrs" argument contains the open attributes (see WOPEN)  for
+       the menu window, and may  be  used  to  control  the  color,  border,
+       clearing, etc.
+    
+          The "prompts" argument is an array of pointers to  strings,  which
+       define the prompts and input  fields  in  the  form.  The  first  two
+       characters of each string define the 'X' and 'Y'  coordinates  within
+       the window of the prompt string. The  third  character  contains  the
+       length of the destination string, and the  remainder  of  the  string
+       contains the text prompt. The destination string is positioned in the
+       window directly following the prompt string.  This  list  of  prompts
+       must end with a NULL (0) element.
+    
+          The first (0) element of "prompts" does not actually point  to  an
+       input definition, but contains the X and Y sizes for the window to be
+       opened (High byte = X, Low byte = Y).
+    
+          Following the "prompts" argument, there must  be  one  destination
+       "string" argument for each prompt defined. The strings must  be  long
+       enough to contain the number of characters  specified  in  the  third
+       byte of the coresponding "prompt" string.
+          Only the lower seven bits of the field length are used  (length  =
+       1-127), the high bit indicates that the field is to  contain  numbers
+       only. In this case, the corresponding argument is NOT a pointer to  a
+       string, but must be a pointer to an "int" variable.
+    
+          The form is exited by pressing the ESCAPE key.
+    
+    
+    
+    EXAMPLES:
+    
+        /* Sample input form */
+            char *form[] = {
+                50<<8|6,        /* Place in 50 by 6 window */
+                "\x01\x00\x20Software  :",
+                "\x01\x01\x20Author    :",
+                "\x01\x02\x20Directory :",
+                "\x01\x03\x20Filename  :",
+                0 };
+    
+        /* Data areas for input form */
+            char software[0x21] = "MICRO-C",
+                author[0x21]    = "Dave Dunfield",
+                direct[0x21]    = "C:\\MC",
+                filename[0x21]  = "MC*.*";
+    
+        /* Simple main program to display the form */
+        main()
+        {
+            wform(15, 9, 0xE007, form, software, author, direct, filename);
+        }
+    WGETC                                                             WGETC
+    W_GETC                                                           W_GETC
+    
+    
+    
+    PROTOTYPE:
+    
+        int wgetc()
+        int w_getc(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        0-127   - ASCII value of key pressed
+        < 0     - Special function key as defined in "window.h"
+    
+    
+    DESCRIPTION:
+    
+          The "wgetc" function waits until a key is pressed  on  the  system
+       console, and returns its value. The cursor is updated to be placed at
+       the current cursor position in the active window.
+    
+          The "w_getc" function waits until a key is pressed on  the  system
+       console, and returns its value. The cursor is updated to be placed at
+       the current cursor position in the specified window.
+    
+          Note that due to the  buffering  of  the  IBM-PC  keyboard,  every
+       keypress will be reported, even if the WGETC or  W_GETC  function  is
+       called after a key is pressed and released.
+    
+    
+    EXAMPLES:
+    
+        switch(wgetc()) {       /* Handle input keys
+                . . .
+        }
+    WGETS                                                             WGETS
+    
+    
+    
+    PROTOTYPE:
+    
+        int wgets(int x, int y, char *string, int length)
+    
+    
+    ARGUMENTS:
+    
+        x       - COLUMN position for input
+        y       - ROW    position for input
+        string  - Destination string
+        length  - Length of string (High bit set = Numbers only)
+    
+    
+    RETURN VALUE:
+    
+        Character causing exit
+    
+    
+    DESCRIPTION:
+    
+          The "wgets" function positions the cursor at the specified X and Y
+       coordinates, and displays the contents of "string"  (in  a  field  of
+       "length" characters), and waits for input, which may be used to  edit
+       the string.
+    
+          Any normal ASCII characters which are input will be  entered  into
+       the string, The following function keys are recognized:
+    
+            LEFT ARROW          - Position cursor one space to the left
+            RIGHT ARROW         - Position cursor one space to the right
+            BACKSPACE           - Backup cursor & delete previous character
+            DELETE              - Delete character under cursor
+            INSERT              - Toggle between INSERT/OVERWRITE
+            HOME                - Position cursor at start of string
+            END                 - Position cursor at end of scring
+            PAGE UP             - Clear entire field
+            PAGE DOWN           - Clear from cursor to end of field
+    
+          Any other special function keys will cause "wgets"  to  terminate,
+       and return the value of the offending key. (See  "window.h"  for  key
+       definitions).
+    
+          When INSERT mode is enabled, all entered  text  will  be  inserted
+       into the string, with the remainder of the  string  shifting  to  the
+       right. This mode is indicated by a flashing BLOCK cursor.
+    
+          When OVERWRITE mode is enabled, all entered  text  will  overwrite
+       the existing string. This  mode  is  indicated  by  a  flashing  LINE
+       cursor.
+    
+    
+    EXAMPLES:
+    
+        wgets(2, 5, name, 25);
+    WGOTOXY                                                         WGOTOXY
+    W_GOTOXY                                                       W_GOTOXY
+    
+    
+    
+    PROTOTYPE:
+    
+        wgotoxy(int x, int y)
+        w_gotoxy(int x, int y, char *window)
+    
+    
+    ARGUMENTS:
+    
+        x       - New COLUMN
+        y       - New ROW
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wgotoxy" function positions  the  cursor  within  the  active
+       window. Any further display output to that window will occur  at  the
+       new ROW and COLUMN positions.
+    
+          The "w_gotoxy" function positions the cursor within the  specified
+       window. Any further display output to that window will occur  at  the
+       new ROW and COLUMN positions.
+    
+    
+    EXAMPLES:
+    
+        for(i=0; i<10; ++i) {   /* Draw a diagonal line of 'X's */
+            wgotoxy(i, i);
+            wputc('X'); }
+    WMENU                                                             WMENU
+    
+    
+    
+    PROTOTYPE:
+    
+        wmenu(int x, int y, int attrs, char *names[], int &index)
+    
+    
+    ARGUMENTS:
+    
+        x       - Absolute COLUMN of top left corner of menu window
+        y       - Absolute ROW    of top left corner of menu window
+        attrs   - Attributes for menu window (see WOPEN)
+        names   - Array to menu selection text (last entry = 0)
+        index   - Address of message selection index variable
+    
+    
+    RETURN VALUE:
+    
+        0   - Selection was made and ENTER pressed.
+        !0  - Menu was aborted via ESCAPE key.
+    
+    
+    DESCRIPTION:
+    
+          The "wmenu" function opens a window  containing  a  list  of  menu
+       items at the specified ROW and COLUMN address. The user may  use  the
+       UP, DOWN, HOME and END keys to select an entry by moving the  INVERSE
+       VIDEO selection cursor. Pressing an alpha-numeric key  will  position
+       the  selection  bar  to  the  first  entry  which  begins  with  that
+       character.
+    
+          When the desired selection is under the cursor, the  selection  is
+       made by pressing the ENTER key.
+    
+          At any time the menu selection may be  canceled  by  pressing  the
+       ESCAPE key.
+    
+          The "attrs" argument contains the open attributes (see WOPEN)  for
+       the menu window, and may  be  used  to  control  the  color,  border,
+       clearing, etc.
+    
+          The "names" argument must be a pointer to an  array  of  character
+       strings which are the selections to display. This array MUST end with
+       a NULL (0) element to indicate the end of the list.
+    
+          The "index" argument is the address of  an  "int"  variable  which
+       contains the position of the selection cursor. It controls where  the
+       selection cursor will appear when the function is first invoked (0  =
+       first entry), and also is assigned  the  position  of  the  selection
+       cursor when the selection is made.
+    
+          Once a selection is made, the first character  of  that  selection
+       will be hilighted in reverse video.
+    
+    
+    
+    
+    EXAMPLES:
+    
+        char *names[] = { "One", "Two", "Three", "Four", "Five", 0 };
+            . . .
+        index = 0;
+        if(wmenu(10, 10, 0xE007, names, &index))
+            return;         /* Aborted, exit to higher level */
+        switch(index) {     /* Handle selection */
+            . . .
+        }
+    WOPEN                                                             WOPEN
+    
+    
+    
+    PROTOTYPE:
+    
+        char *wopen(int x, int y, int width, int height, int attrs)
+    
+    
+    ARGUMENTS:
+    
+        x       - Absolute COLUMN of top left corner of window
+        y       - Absolute ROW    of top left corner of window
+        width   - The width of the window in characters
+        height  - The height of the window in characters
+        attrs   - The window attributes, BIT definitions:
+                    15 - Enable SAVE/RESTORE screen under window
+                *   14 - Enable SINGLE line BORDER
+                *   13 - Enable DOUBLE line BORDER
+                    12 - Enable CLEAR on OPEN
+                **  11 - Enable CLEAR on CLOSE
+                *** 10 - Disable NEWLINE (LF only)
+                     9 - Enable SCROLLING in window
+                     8 - Enable LINE WRAP in window
+                   7-0 - Video attributes for window
+    
+            *   When BORDER is selected, window will include an enclosing
+                BOX. In this case, the effective height and width of the
+                active region (where text data can be written) will be
+                reduced by 2.
+    
+            **  Has no visual effect when SAVE/RESTORE is enabled.
+    
+            *** If this BIT is set, CTRL-J will behave as LINEFEED only,
+                and will not return the cursor to the left margin.
+    
+    RETURN VALUE:
+    
+        A pointer to the WCB for the newly opened window
+        0 if the window could not be opened
+    
+    
+    DESCRIPTION:
+    
+          The "wopen" function creates a new window on the PC video  screen.
+       This newly created window is also made the "active" window, which  is
+       automatically accessed by many of the windowing functions.
+    
+          If "wopen" is unable to allocate  enough  memory  for  the  window
+       control block (WCB), it will fail and return a value of zero (0).
+    
+    
+    EXAMPLES:
+    
+        /* Create a title window at top of screen */
+        titlewin = wopen(0, 0, 80, 3, 0x6047);
+    WPRINTF                                                         WPRINTF
+    W_PRINTF                                                       W_PRINTF
+    
+    
+    
+    PROTOTYPE:
+    
+        register wprintf(char *format, arg, ...)
+        register w_printf(char *window, char *format, arg, ...)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+        format  - Pointer to format string
+        arg     - Argument as determined by format string
+        ...     - Additional arguments may be required
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wprintf" function performs exactly as the  "PRINTF"  function
+       in the standard function library, except that it outputs directly  to
+       the active window using the low level windowing library functions.
+    
+          The "w_printf" function behaves similar to "wprintf", except  that
+       the window to receive the output is specified as the first parameter.
+    
+          These functions should be used  in  preference  to  "PRINTF"  when
+       using the windowing function library since "PRINTF" will not move the
+       windowing librarys cursor, will not use the attributes from the  WCB,
+       and will not respect the boundarys of the window.
+    
+          NOTE: This function uses a variable number of arguments, and  must
+       be declared as "register" (See "window.h").
+    
+    
+    EXAMPLES:
+    
+        wgotoxy(0, 0);
+        wprintf("Window %u", screen);
+    WPUTC                                                             WPUTC
+    W_PUTC                                                           W_PUTC
+    
+    
+    
+    PROTOTYPE:
+    
+        wputc(int c)
+        wputc(int c, char *window)
+    
+    
+    ARGUMENTS:
+    
+        c       - Character to be written to window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          This "wputc" function displays a character in the active window at
+       the current cursor position.
+    
+          The "w_putc" functino displays a character in the specified window
+       at the current cursor position.
+    
+          Characters are output in "tty" fashion, with  proper  handling  of
+       control codes such as CARRIAGE-RETURN, LINE-FEED and BELL. The screen
+       will scroll upwards when a NEWLINE is printed on the bottom  line  of
+       the screen, or  when  the  bottom  line  wraps  around  to  the  next
+       (Assuming those options are enabled in the window).
+    
+          Although only the lower 8 bits of a passed value are used, "vputc"
+       will not perform ANY output translations if any of the upper  8  bits
+       are set. This provides a method of displaying  the  video  characters
+       represented by control codes such as NEWLINE, and BACKSPACE.
+    
+          The first byte of the window control block (WCB)  for  the  window
+       contains the attributes which will be used to display the  character.
+       This value is written to the attribute location associated  with  the
+       character on the video display hardware. Its effect is  dependant  on
+       the video  adapter  in  use.  The  "window.h"  header  file  contains
+       definitions of the attribute bits for use  on  "standard"  monochrome
+       and color displays.
+    
+    
+    EXAMPLES:
+    
+        w_putc(0x0A, window1);      /* Line-feed, advance cursor */
+        wputc(0x0A | 0xff00);       /* Display 0x0A character code */
+    WPUTF                                                             WPUTF
+    
+    
+    
+    PROTOTYPE:
+    
+        wputf(char *string, int width)
+    
+    
+    ARGUMENTS:
+    
+        string  - Pointer to character string
+        width   - Width of output field
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wputf" function outputs a  character  string  to  the  active
+       window screen using the video library functions.
+    
+          The string is left justified in a field of the specified width. If
+       the string is shorter than "width", the field is padded with  blanks.
+       If the string is longer than "width", the output is truncated.
+    
+    
+    EXAMPLES:
+    
+        wputf(message, 10); 
+    WPUTS                                                             WPUTS
+    W_PUTS                                                           W_PUTS
+    
+    
+    
+    PROTOTYPE:
+    
+        wputs(char *string)
+        w_puts(char *string, char *window)
+    
+    
+    ARGUMENTS:
+    
+        string  - Pointer to character string
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wputs" function outputs a  character  string  to  the  active
+       window.
+    
+          The "w_puts" function output a character string to  the  specified
+       window.
+    
+    
+    EXAMPLES:
+    
+        wputs(message);
+        w_puts(message, window1);
+    WTSTC                                                             WTSTC
+    W_TSTC                                                           W_TSTC
+    
+    
+    
+    PROTOTYPE:
+    
+        int wtstc()
+        int w_tstc(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        0       - No key pressed
+        1-127   - ASCII value of key pressed
+        < 0     - Special function key as defined in "window.h"
+    
+    
+    DESCRIPTION:
+    
+          The "wtstc" function  tests  for  a  key  pressed  on  the  system
+       console, and returns its value. If a character is found,  the  cursor
+       is updated in the active window.
+    
+          The "w_tstc" function tests  for  a  key  pressed  on  the  system
+       console, and returns its value. If a character is found,  the  cursor
+       is updated in the specified window.
+    
+          A returned value of zero (0) indicates that no key was found to be
+       pressed.
+    
+          Note that due to the  buffering  of  the  IBM-PC  keyboard,  every
+       keypress will be reported, even if the WTSTC or  W_TSTC  function  is
+       called after a key is pressed and released.
+    
+    
+    EXAMPLES:
+    
+        if(wtstc() == 0x1B) /* exit loop on ESCAPE key */
+            break;
+    WUPDATEXY                                                     WUPDATEXY
+    W_UPDATEXY                                                   W_UPDATEXY
+    
+    
+    
+    PROTOTYPE:
+    
+        wupdatexy()
+        w_updatexy(char *window)
+    
+    
+    ARGUMENTS:
+    
+        window  - Pointer to WCB for an open window
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+          The "wupdatexy" function updates the real X/Y cursor  position  on
+       the video screen to reflect the "logical"  position  where  the  next
+       character will be output in the active window.
+    
+          The "w_updatexy" function updates the real X/Y cursor position  on
+       the video screen to reflect the "logical"  position  where  the  next
+       character will be output in the specified window.
+    
+          The MICRO-C Windowing library uses a BIOS interrupt  (INT  10)  to
+       position the cursor, which is quite slow, compared to  the  speed  of
+       the library video routines. To prevent this  from  slowing  down  the
+       video output, the cursor is  only  physically  re-positioned  when  a
+       "wgotoxy" or a "wgetc" is executed.
+    
+          This allows the library routines to run at full speed,  and  still
+       put the cursor in the right place when  output  stops  and  an  input
+       request is made.
+    
+          A side effect of this is that the cursor on the  screen  will  not
+       appear to move unless  you  call  "wgotoxy"  or  "wgetc".  This  only
+       affects the physical cursor on the screen, MICRO-C maintains its  own
+       internal cursor location which it uses  to  determine  where  on  the
+       screen the next write will occur.
+    
+          Some applications which run in  real  time  (Such  as  a  terminal
+       emulator) do not call "wgetc", but use "wtstc" to poll  the  keyboard
+       on a regular basis. In this case, the "wupdatexy" routine  should  be
+       called any time that the visual position of the cursor is important.
+    
+    
+    EXAMPLES:
+    
+        wupdatexy();        /* position the cursor *
+        c = wtstc();        /* Test for a character */
+
+
+
+                             DK86 WINDOWING LIBRARY
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. IBM-PC WINDOWING Library                                            1
+
+        1.1 Window Control Block                                            2
+        1.2 External Variables                                              3
+        1.3 Window Library Functions                                        3

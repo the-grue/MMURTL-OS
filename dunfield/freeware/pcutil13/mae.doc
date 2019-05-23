@@ -1,0 +1,92 @@
+The Micro Ascii Encoder (MAE) is a program which encodes one or more binary
+files into an ASCII text file.  This is usually performed in order to transmit
+the file(s) over an electronic mail service, or some other medium in which
+binary data cannot be exchanged. Once the data is received, MAE can be used
+to decode the ASCII file, and re-generate the original binary files.
+
+
+The format of the MAE command is:
+
+    MAE [options] [archive] [files...]
+
+
+[options]:
+  +a     - Archive: Encode the specified files into the named ASCII archive.
+  +r     - Restore: Retrieve the named files from the specified ASCII archive.
+           (if neither '+a' or '+r' are given, MAE lists contents of archive)
+  t=file - Load encoder table from named file (default extension is ".MAT")
+           File must contain a single line, exactly 66 character long. First
+           character is START MARKER, next is END MARKER, and remaining 64
+           characters are the six bit -> ASCII encoder table (See later).
+  -v     - Verbose off: Disables MAE's progress messages
+  w=     - Width: Sets the number of columns in the output file (default 70).
+           (Only has effect with '+a')
+
+
+[archive]:
+  This is the name of the ASCII archive file to be read or written. If an
+  extension is not explicitly specified, it defaults to ".MAE".
+
+
+[files...]:
+  These are the names of the binary files to be archived/retrieved/listed
+  from the ASCII archive. If no names are specified, MAE will archive ALL
+  files in the current directory, or retrieve/list ALL files in the archive.
+
+  Filenames may include the following wildcard characters:
+
+    ?  - Matches any single character in the filename or extension
+    *  - Matches all remaining characters in the filename or extension
+
+
+Examples:
+
+   MAE +a DRAWINGS *.DWG     ; Archive all ".DWG" files to DRAWINGS.MAE
+   MAE +a A:CSOURCE.ASC *.C  ; Archive all ".C" files to A:CSOURCE.ASC
+   MAE +r A:IFILES *.?86     ; Retrieve files with extensions ending in "86"
+
+
+MAE Archive format:
+
+Each MAE ASCII archive file has the following format:
+
+ - START MARKER (Default = '{' )
+ ASCII encoded binary NAME of file #1
+ ASCII encoded binary SIZE of uncompressed file #1
+ ASCII encoded binary SIZE of compressed file #1
+ ASCII encoded binary DATA of file #1
+ ... Repeat for each file ...
+ - END MARKER   (Default = '}' )
+
+ASCII encoded binary data is stored in a 4/3 form.
+Every four bytes of ASCII data contains three bytes of binary data.
+
+Six bits are encoded in each ASCII character. The six bit value is used to
+index into the 64 character encoder table to get a character. The default
+encoder table consists of these characters:
+
+abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,
+
+Every four characters in the output file comprise a "block". The six
+bits in the first character in the block identifies the upper two bits
+for each successive character in the block:
+
+Eaxmple: to encode the hex byte sequence: 0x84, 0x53, 0xF5
+
+   0x84 -> 10000100 -> 000100 -> Table index of 4  -> 'a'
+   0x53 -> 01010011 -> 010011 -> Table index of 19 -> 's'
+   0xF5 -> 11110101 -> 110101 -> Table index of 53 -> 'Q'
+   Upper bits        > 100111 -> Table index of 39 -> 'C'
+
+This value would be encoded as 'CasQ'
+
+All data before the START MARKER, and after the END MARKER is ignored by MAE.
+ASCII data contained within the markers is assumed to be encoded binary data.
+Control characters (Less than 0x20) are ignored within the data block.
+
+The file data is compressed (LZSS Adaptive Huffman Coding), which usually
+more than compensates for the 4/3 expansion introduced by the ASCII encoding
+process, resulting in compact output files.
+
+MAE is "Freely Distributable", and may be used and distributed without payment
+or royalty.

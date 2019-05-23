@@ -1,0 +1,9 @@
+rem Dial a number on a Haye's compatible modem
+
+rem An optional second script file name(+arguments) can be passed to
+rem this file, and will be executed if the connection succeeds.
+
+ifeq '\1' '' : error Number required!
+send ATDT\1\r
+scan 'CONNECT' 30 : error No connection
+ifne '\2' '' : chain \2 \3 \4 \5 \6 \7 \8 \9

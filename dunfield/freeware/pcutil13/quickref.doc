@@ -1,0 +1,293 @@
+                ** PC Utilities - Quick Reference **
+----------------------------------------------------------------------
+CHATTR.COM  -   Change attributes of files
+            Options:
+                +/-A    = ADD/REMOVE Archive bit
+                +/-H    = ADD/REMOVE Hidden bit
+                +/-R    = ADD/REMOVE Readonly bit
+                +/-S    = ADD/REMOVE System bit
+            Examples:
+                chattr \dos\*.* +r
+                chattr \temp\*.* -a
+                chattr c:\command.com +h +r
+
+
+DIFF.COM    -   Fast compare for file differences.
+            Options:
+                -d      = Inhibit display of differences
+                -l      = Inhibit display of line numbers
+                r=num   = Minimum # lines to re-syncronize
+
+
+DR.COM      -   Display OLDest and NEWest files in a directory tree
+            Options:
+                -? or ? = Display help info.
+                -h      = Exclude HIDDEN files
+                -n      = Inhibit display of NEWest file
+                -o      = Inhibit display of OLDest file
+                -r      = Inhibit recursion into sub-directories
+                -s      = Exclude SYSTEM files
+                -v      = Inhibit startup message (header)
+
+
+DUMP.COM    -   Dump contents of file(s)
+            Options:
+                -f      = Pause between each file
+                -o      = Use OCTAL dump (default is HEX)
+                -p      = Pause between each block
+
+
+DUS.COM     -   Display Disk Usage Summary
+            Options:
+                -? or ? = Display help info.
+                -c      = Produce CUMULATIVE display
+                -d      = Inhibit individual display (total only)
+                -h      = Exclude HIDDEN files
+                -p      = Pause between each output page
+                -r      = Inhibit recursion into sub-directories
+                -s      = Exclude SYSTEM files
+                -v      = Inhibit startup message (header)
+            Examples:
+                dus c:\ -c
+                dus \project -d
+
+
+EDT.EXE     -   Fast and simple text editor.
+            Options:
+                -v      = Inhibit visual mode on startup (force line mode).
+            Special keys:
+                PgDn        = Page forward
+                PgUp        = Page backward
+                CTRL-PgUp   = Goto start of file
+                CTRL-PgDn   = Goto end of file
+                Home        = Goto start of line
+                End         = Goto end of line
+                CTRL-Home   = Redraw screen
+                CTRL- '->'  = Move one word to the right
+                CTRL- '<-'  = Move one word to the left
+                INS         = Toggle insert/overwrite mode
+                DEL         = Delete character under cursor
+                BACKSPACE   = Delete character preceeding cursor
+                F1          = Toggle EOL display on/off
+                F2          = Display cursor position
+                F3          = Current line to top of screen
+                F4          = Tag line(s)
+                F5          = Delete to end of line (inclusive)
+                F6          = Delete to end of line (exclusive)
+                F7          = Insert last deleted line
+            F10/Keypad '+'  = Enter line mode command
+             F9/Keypad '-'  = Re-execute last command
+            Commands: format <range>COMMAND[operands]
+                C           = Copy line(s) & insert before current
+                D           = Delete line(s)
+                F           = Display file status
+                <n>H        = Set horizontal tab spacing
+                I           = Insert new line(s)
+                L           = List line(s) (unformatted)
+                M           = Move line(s) & insert before current
+                P           = Print lines (formatted)
+                Q           = Quit editor
+                QQ          = Quit even if unsaved changes
+                R<file>     = Read and insert file before current line
+                S'old'new   = Substitute 'new' for 'old'
+                T           = Tag line(s)
+                V           = Toggle visual/line mode
+            *   W[file]     = Write file
+            *   X[file]     = Exit and write file
+            **  ?text       = Search for text (from start of range)
+            *** $[command]  = Execute DOS command
+                            = Null command moves to first line of range
+            *   = Default range for these commands in entire file.
+            **  = In visual mode, default range for '?' causes it to begin
+                  searching from the first character AFTER the current cursor
+                  position. This allows it to be repeated for multiple finds.
+            *** = '$' with no operands will invode a DOS command shell, use
+                  the 'EXIT' command to return to EDT.
+            Line Ranges:
+                *           = Current line (Usually default)
+                /           = Entire file
+                n           = Line number (n=1 or higher)
+                0           = End of file
+                =           = Tagged lines
+                <r>,<r>     = Lines between FIRST lines of two other ranges
+            Examples:
+                D           = Delete current line
+                1,10c       = Copy lines from 1 to 10 (inclusive) and
+                              insert them before current line.
+                =m          = Move tagged lines to just before current line.
+                /r my.fil   = Insert 'my.fil' at BEGINNING of file
+                0r my.fil   = Insert 'my.fil' at END of file
+
+
+EXTRACT.COM - Extract a section of a larger file
+            Examples:
+                extract file1 100 200 >file2
+                
+
+FDIR.COM    -   Fullscreen DIRectory shell.
+            Options:
+                (+ or -)Attribute
+            Examples:
+                FDIR -h     - Do not display HIDDEN FILES
+                FDIR -d     - Do not display DIRECTORIES
+                FDIR C:\ +v - Include VOLUME LABEL in display
+                FDIR -hs    - No HIDDEN or SYSTEM files
+            Special keys:
+                PgDn        = Page forward
+                PgUp        = Page backward
+                CTRL-PgUp   = Goto start of directory
+                CTRL-PgDn   = Goto end of directory
+                Home        = Goto start of line
+                End         = Goto end of line
+                CTRL-Home   = Redraw screen
+                INS         = Toggle insert/overwrite mode
+                DEL         = Delete character under cursor
+                BACKSPACE   = Delete character preceeding cursor
+                F1          = Toggle automatic filename ON/OFF
+                F2          = Toggle command display ON/OFF
+                F3          = Toggle pausing after commands ON/OFF
+                F4          = Copy last command
+                F5          = Clear command field
+            F10/Keypad '+'  = Execute commands (exit if none)
+             F9/Keypad '-'  = Exit even if commands are present.
+            Notes:
+                Any DOS command may be entered beside a filename,in which case
+                that command will be executed on that file when the Keypad '+'
+                key is pressed. The following special characters may be used in
+                the commands:
+                    @   = Substitute FILENAME & EXTENSION (No path)
+                    $   = Substitute FILENAME (No path or extension)
+                    ^   = Substitute DIRECTORY PATH (No name or extension)
+                    !   = Protect next char from substition
+                If none of the special substitution characters "@$^!" are used,
+                FDIR will append the entire filepath and name to the command
+                (Unless of course the 'f+' switch has been turned off)
+            Examples:
+                FDIR \cmds
+                -> COPY ^@ @    - Copy file from \cmds to current
+
+
+FSCAN.COM   -   FILE SCANNER, records file sizes & CRC's in an "index"
+                file, "\FSCAN.IDX"  which can then be compared with the
+                file on the disk, to detect changes.
+            Options:
+                +b          = Keep backup of index file
+                +d          = Delete files from index file
+                i=name      = Specify alternate index file
+                +l          = List files recorded in index file
+                +m          = Mark file in index file (update)
+                -v          = Inhibit informational messages
+            Examples:
+                fscan               <- Check all files in index
+                fscan \dos          <- Check only \dos\*.*
+                fscan +m \dos       <- Record all files from \dos
+                fscan +d FSCAN.$$$  <- Remove FSCAN.$$$
+                fscan +l            <- List ALL files in index
+                fscan +l \dos       <- List all files in \dos
+                fscan +m +b         <- Record all in current DIR
+                                       FSCAN.BAK = old FSCAN.IDX
+
+
+HEXED.EXE   -   Hexidecimal screen editor
+            Special Keys:
+                PgDn        = Page forward
+                PgUp        = Page backward
+                CTRL-PgUp   = Goto start of file
+                CTRL-PgDn   = Goto end of file
+                Home        = Goto start of line
+                End         = Goto end of line
+                Ins         = Insert a byte at cursor location
+                Del         = Delete a byte at cursor location
+                F1          = Toggle between HEX/ASCII editing
+                CTRL-Home   = Redraw screen
+            F10/Keypad '+'  = Enter command
+             F9/Keypad '-'  = Re-execute last command
+            Commands:
+                G<xxxx>     = Goto address xxxx
+                Q           = Quit editor
+                QQ          = Quit even if unsaved changes
+                W[file]     = Write file
+                X[file]     = Exit and write file
+                ?xx ...     = Search for HEX byte pattern
+                /text...    = Search for ASCII text
+
+
+LOCATE.COM  -   FAST multiple file search
+            Options:
+                +c  = Case sensitive search
+                +r  = Recurse into sub-directories
+                +t  = Display lines where text found
+                -v  = Inhibit line number display
+            Notes:
+                Allows multiple strings to be searched for at once.
+            Examples:
+                LOCATE *.C "printf" "scanf"
+                LOCATE C:\*.C "printf" +r
+
+
+OFF.COM     - Manual scren-saver
+            Press any key to exit
+
+RETAB.COM   -   Retabulates files to different tab stops
+            Options:
+                -f      = Inhibit filling with spaces
+                -s      = Convert spaces to tabs where possible
+                i=n,... = Specify input tab stops
+                o=n,... = Specify output tab stops
+            Notes:
+                RETAB processes multiple files, and allows the tab settings
+                to be defined for each file. The '-f -s i= and o=' parameters
+                must be specified BEFORE the file name where they are to have
+                effect.
+
+                If more tabs are present in the input or output file than were
+                specified (using I= and O=), RETAB assumes that the tabs
+                continue at the spacing of the last two stops. Therefore, if
+                the tabs are at regular intervals, only the first tab stop need
+                be given.
+
+                Both input and output tabs default to 8 space intervals.
+
+                If 'O=0' is specified, RETAB will convert all tabs in the input
+                file to the appriopriate number of spaces.
+            Examples:
+                retab i=4 tab4.fil >tab8.fil
+                retab o=4 tab8.fil >tab4.fil
+                retab i=4 o=2 tab4.file i=8 tab8.fil >tab2.fil
+                retab o=0 tab8.file >space.fil
+
+
+SIZE.COM    -   Display # lines/characters in file(s)
+            Examples:
+                size program.c
+                size prog1.c prog2.c prog.h
+
+
+TIMEIT.COM  -   Time command execution
+            Examples:
+                timeit dir d:
+
+TYPESET.COM -   ASCII Document formatter
+            Options:
+                +c  = Concatinate documents
+                +t  = Write to terminal (standard output)
+                -v  = Inhibit progress messages
+                -w  = Inhibit warnings.
+            See the "typeset" manual fr more information.
+
+
+WDIR.COM    -   Walk Directory & execute commands
+            Options:
+                +r  = recurse into sub-directories
+                -v  = Inhibit display of commands executed
+                +m  = Use multiple (wildcard) forms of commands
+                      (Used with '+r' to cause a command to be executed
+                      once in all sub-directories that have matching files)
+            Notes:
+                Accepts multiple commands.
+                Special characters are available, same as FDIR. Ie: '@$^!'
+            Examples:
+                wdir *.c "del" +r       <- One "DEL" command for each FILE
+                wdir *.c "del" +r +m    <- One "DEL" command for each DIR
+                wdir \cmds\*.bat "copy" "delete"
+                (Copy all ".BAT" files from \cmds and delete them)

@@ -1,0 +1,74 @@
+This archive contains several schematic drawings depicting typical
+8031 system designs, using various memory layouts.
+
+The drawings can be viewed, printed and edited with our "freeware"
+MICROCAD package, which can be downloaded from our BBS. Look for the
+file EMBEDRAW.ZIP
+
+All drawings share the following notes:
+
+ - 0.1uf bypass capacitors should be placed between +5v and Gnd of
+   all IC's. These are not shown in the drawings.
+ - Unless otherwise noted, all capacitors are 10uf electrolytic
+ - Serial I/O port is shown using MAX232, since it requires only
+   +5V for operation. Any suitable RS-232 to TTL level convertor
+   IC can be substituted with the appropriate circuit changes.
+
+The drawings are:
+
+TINY31:
+-------
+This is a minimal 8031 system, which has 32K of external ROM, and no
+external RAM. Different sized ROM's (smaller or larger) can be used if
+desired with minimal circuit changes.
+
+Since this design has no external RAM, the only MICRO-C/51 memory
+model which can be used is TINY. Also, since there is no provision
+for downloading code, you must place your code in the ROM to test
+it (or use an EPROM emulator).
+
+SMALL31:
+--------
+This drawing adds 32K external ROM to the design. The ROM and RAM
+are "overlapped" into a common memory address space. In otherwords,
+you can use either the MOVC or MOVX instructions to read the ROM and
+the RAM. Since there is only 1 address space, the ROM is addressed
+at $0000-$7FFF, and the RAM from $8000-$FFFF.
+
+Any of MICRO-C's TINY, SMALL or COMPACT memory models can be used
+with this design. Since the RAM can be both written to (as DATA),
+and executed from (as CODE), code can be downloaded and tested without
+programming EPROMs. This is an ideal system for use with our MON51
+debug monitor, or the EMILY52 in-circuit simulator/emulator.
+
+LARGE31:
+--------
+This drawing separates the ROM and RAM into the separate CODE and
+DATA addresses allowed by the 8031's "harvard" architecture. Since
+each address space accomodates 64K of memory, we have added 32K of
+ROM and 32K of RAM, giving of 64K each (128K total).
+
+Since the ROM cannot be read directly as data, MICRO-C's TINY, MEDIUM
+or LARGE models must be used with this design. Also, there is again
+no provision for downloading and executing code, so testing will have
+to be done by "burn and test", or use of an EPROM emulator.
+
+DEBUG31:
+--------
+This drawing is similar to LARGE31 above, except that we have replaced
+one of the 32K EPROMS with a 32K RAM chip for code development and
+testing. Like the LARGE31 design, MICRO-C's TINY, MEDIUM or LARGE memory
+models must be used.
+
+To provide write access to this "pseudo ROM", a circuit has been added
+which switches the write signal between it and the normal DATA RAM under
+control of the DTR line from the PC. When DTR is in its normal "asserted"
+state, writes will be directed to the normal DATA RAM. When DTR is
+lowered, writes will be directed to the "pseudo ROM" device. Our EMILY52
+"in-circuit" simulator/emulator has built in support for this circuit,
+and will automatically lower DTR when writing to "code" memory.
+
+Since EMILY's debug kernal requires less than 2K of "real" ROM, additional
+decoding can be added to this design to accomodate up to 62K of "pseudo
+ROM". See the EMILY manual for an example circuit for implementing this
+level of decoding.

@@ -1,0 +1,1036 @@
+MS-DOS help file.
+
+The subsections below contains information on various commands and other
+features which are included with MS-DOS version 5.0.
+>Commands for general use.
+This section describes general user commands.
+>>APPEND [[drive:]path[;...]] [/X[:ON | :OFF]] [/PATH:ON | /PATH:OFF] [/E]
+or APPEND ;
+Allows programs to open data files in specified directories as if they were in
+the current directory.
+
+  [drive:]path Specifies a drive and directory to append.
+  /X:ON        Applies appended directories to file searches and
+               application execution.
+  /X:OFF       Applies appended directories only to requests to open files.
+               /X:OFF is the default setting.
+  /PATH:ON     Applies appended directories to file requests that already
+               specify a path.  /PATH:ON is the default setting.
+  /PATH:OFF    Turns off the effect of /PATH:ON.
+  /E           Stores a copy of the appended directory list in an environment
+               variable named APPEND.  /E may be used only the first time
+               you use APPEND after starting your system.
+
+Type APPEND ; to clear the appended directory list.
+Type APPEND without parameters to display the appended directory list.
+>>ASSIGN [x[:]=y[:][...]] or ASSIGN /STATUS
+Redirects requests for disk operations on one drive to a different drive.
+
+  x        Specifies the drive letter to reassign.
+  y        Specifies the drive that x: will be assigned to.
+  /STATUS  Displays current drive assignments.
+
+Type ASSIGN without parameters to remove all drive assignments.
+>>ATTRIB [+/-R] [+/-A] [+/-S] [+/-H] [[drive:][path]filename] [/S]
+Displays or changes file attributes.
+
+  +/-R   Set/Clear READ-ONLY file attribute.
+  +/-A   Set/Clear ARCHIVE file attribute.
+  +/-S   Set/Clear SYSTEM file attribute.
+  +/-H   Set/Clear HIDDEN file attribute.
+  /S     Recurse into subdirectories.
+
+Note: ATTRIB can also be used as a general "find file" program.
+      EG: to display all ".BAT" file on drive C: attrib c:\*.bat /s
+>>BACKUP source dest: [/S] [/M] [/A] [/F:size] [/D:date[/T:time]] [/L:logfile]
+Backs up one or more files from one disk to another.
+
+  source             Specifies the files, drive, or directory to back up.
+  dest:              Specifies the drive to save backup copies onto.
+  /A                 Adds files to an existing backup (retains old files).
+  /D:date            Backup files changed on or after the specified date.
+  /F:[size]          Specifies the size of the disk to be formatted.
+  /L:logfile         Logs backup to specified file.
+  /M                 Backup files that have changed since the last backup.
+  /S                 Recursivly backup subdirectories.
+  /T:time            Backup files changed at or after the specified time.
+>>BREAK [ON | OFF]
+Sets or clears extended CTRL+C checking.
+
+Type BREAK without a parameter to display the current BREAK setting.
+>>CD [drive:][path]  or  CD [..]
+Displays the name of or changes the current working directory.
+  ..   Specifies that you want to change to the parent directory.
+
+Type CD drive: to display the current directory in the specified drive.
+Type CD without parameters to display the current drive and directory.
+>>CHCP [nnn]
+Displays or sets the active code page number.
+
+  nnn   Specifies a code page number.
+
+Type CHCP without a parameter to display the active code page number.
+>>CHKDSK [drive:][[path]filename] [/F] [/V]
+Checks a integrity of FAT's and directories on a drive.
+
+  [drive:][path]  Specifies the drive and directory to check.
+  filename        Specifies file(s) to check for fragmentation.
+  /F              Fixes errors on the disk.
+  /V              Display full path and name of every file on the disk.
+
+Type CHKDSK without parameters to check the current disk.
+>>CLS
+Clears the console screen.
+>>COMMAND [[drive:]path] [device] [/E:nnnnn] [/P] [/C string] [/MSG]
+Starts a new instance of the MS-DOS command interpreter.
+
+  [drive:]path    Specifies the directory containing COMMAND.COM file.
+  device          Specifies the device to use for command input and output.
+  /E:nnnnn        Sets the initial environment size to nnnnn bytes.
+  /P              Makes the new command interpreter permanent (can't exit).
+  /C string       Carries out the command specified by string, and then stops.
+  /MSG            Specifies that all error messages be stored in memory. You
+                  need to specify /P with this switch.
+>>COMP [data1] [data2] [/D] [/A] [/L] [/N=number] [/C]
+Compares the contents of two files or sets of files.
+
+  data1     Specifies location and name(s) of first file(s) to compare.
+  data2     Specifies location and name(s) of second files to compare.
+  /D        Displays differences in decimal format. This is the default
+            setting.
+  /A        Displays differences in ASCII characters.
+  /L        Displays line numbers for differences.
+  /N=number Compares only the first specified number of lines in each file.
+  /C        Disregards case of ASCII letters when comparing files.
+
+To compare sets of files, use wildcards in data1 and data2 parameters.
+>>COPY [/A|/B] source [/A|/B] [+source [/A|/B] [+...]] [dest [/A|/B]] [/V]
+Copies one or more files to another location.
+
+  source  Specifies the file or files to be copied.
+  /A      Indicates an ASCII text file.
+  /B      Indicates a binary file.
+  dest    Specifies the directory and/or filename for the new file(s).
+  /V      Verifies that new files are written correctly.
+
+To append files, specify a single file for destination, but multiple files
+for source (using wildcards or file1+file2+file3 format).
+>>CTTY device
+Changes the terminal device used to control your system.
+
+  device   The terminal device you want to use, such as COM1.
+>>DATE [date]
+Displays or sets the date.
+
+Type DATE without parameters to display the current date setting and
+a prompt for a new one.  Press ENTER to keep the same date.
+>>DEBUG [[drive:][path]filename [testfile-parameters]]
+Runs Debug, a program testing and editing tool.
+
+  [drive:][path]filename  Specifies the file you want to test.
+  testfile-parameters     Specifies command-line information required by
+                          the file you want to test.
+
+After Debug starts, type ? to display a list of debugging commands.
+>>>Assemble : A [address]
+Translates assembly language mnemonics into machine code, and places it
+at the specified address. If no address is given, continues from the
+last address used.
+>>>Compare : C range address
+Compares the memory region covered by 'range' with the region beginning
+at 'address'.
+>>>Dump : D [range]
+Dumps the range of memory region specified by range in hex/ASCII dump
+format. If range is not given, dumps 128 byte from last dump command.
+>>>Enter : E address [list]
+Enters data from [list] directly into memory at the specified address. If
+[list] is not given, an interactive prompt is issued for data.
+>>>Fill : F range list
+Fills the memory region covered by range with the data values specified by
+list.
+>>>Go : G[=address] [breakpoints]
+Begins program execution at the specified address. If an address is not
+given, execution begins at the addrss in CS:IP.
+
+Up to 10 temporary breakpoints addresses can be specified, and will cause
+the program to trap if execution is attempted at any of those addresses.
+>>>Hex arithmetic : H value1 value2
+Displays the sum and difference of the two hex values.
+>>>Input : I port
+Reads and displays single data byte from the specified I/O port address.
+>>>Load : L [address] [drive start number]
+Loads the number of bytes contained in BX:CX into memory at the specified
+address (Default is CS contents). The filename must have been passed on
+the debug command line, or specified with the 'N'ame command.
+
+If [drive start number] is specified, the MSDOS file system is bypassed,
+and the data is loaded directly from the specified disk drive (0=A, 1=B, ...)
+at the specified sector and number of sectors.
+>>>Move : M range address
+Copies the contents of the memory region specified by 'range', to the
+address given.
+>>>Name : N filename or parameters
+This command is used for two purposes:
+
+If followed by a filename, that name is used for subsequent 'L'oad and
+'W'rite commands.
+
+The specified string is also made available as command line parameters
+to the executable program being tested.
+>>>Output : O port data
+Writes the single byte of data to the I/O port address specified.
+>>>Proceed : P[=address] [number]
+Executes the specified number of instruction, at the given address, and
+then returns to debug. If no address is given, the content of CS:IP is
+used. Default 'number' is one.
+
+The instructions executed are NOT displayed.
+>>>Quit : Q
+Terminates DEBUG, and return to MS-DOS.
+>>>Register : R [register]
+Displays the contents of the named register. If no register is specified,
+all registers are displayed.
+>>>Search : S range list
+Searches the memory region covered by 'range' for the specified list
+of data bytes.
+>>>Trace : T[=address] [number]
+Executes the specified number of instruction, at the given address, and
+then returns to debug. If no address is given, the content of CS:IP is
+used. Default 'number' is one.
+
+The instructions executed are displayed in disassembly format.
+>>>Unassemble : U [range]
+Displays the contents of the specified memory region as machine instruction
+mnemonics (source statements). If no range is specified, unassembly
+continues from the last address.
+>>>Write : W [address] [drive start number]
+Writes the number of bytes contained in BX:CX from memory at the specified
+address (Default is CS contents). The filename must have been passed on
+the debug command line, or specified with the 'N'ame command.
+
+If [drive start number] is specified, the MSDOS file system is bypassed,
+and the data is written directly from the specified disk drive (0=A, 1=B, ...)
+at the specified sector and number of sectors.
+>>>XA count
+Allocates the specified number of 16Kbyte pages of expanded memory, and
+displays the hexidecimal number of the handle created.
+>>>XD handle
+Deallocates the block of expanded memory which is identified by the
+specified handle.
+>>>XM lpage ppage handle
+Maps the specified logical page (lpage) of expanded memory, belonging to
+'handle', to the specified physical page of expanded memory (ppage).
+>>>XS
+Displays information about the current status of expanded memory.
+>>>Range-Format
+Commands requiring a range of memory may be specified as either a
+startng and ending range, using the two addresses:
+
+   eg:   1000 10FF
+
+or as a starting address, and a length (indicated by 'l'):
+
+   eg:   1000 l 100
+>>DEL [drive:][path]filename [/P]
+Deletes one or more files.
+
+  [drive:][path]filename  Specifies the file(s) to delete.  Specify multiple
+                          files by using wildcards.
+  /P                      Prompts for confirmation before deleting each file.
+>>DIR [filespec] [/P] [/W] [/A[[:]attributes]] [/O[[:]sortorder]] [/S] [/B] [/L]
+Displays a list of files and subdirectories in a directory.
+
+  filespec    Specifies drive, directory, and/or files to list.
+  /P          Pauses after each screenful of information.
+  /W          Uses wide list format.
+  /A          Displays files with specified attributes.
+  attributes   D  Directories                R  Read-only files
+               H  Hidden files               A  Files ready for archiving
+               S  System files               -  Prefix meaning "not"
+  /O          List by files in sorted order.
+  sortorder    N  By name (alphabetic)       S  By size (smallest first)
+               E  By extension (alphabetic)  D  By date & time (earliest first)
+               G  Group directories first    -  Prefix to reverse order
+  /S          Displays files in specified directory and all subdirectories.
+  /B          Uses bare format (no heading information or summary).
+  /L          Uses lowercase.
+
+Switches may be preset in the DIRCMD environment variable.  Override
+preset switches by prefixing any switch with - (hyphen)--for example, /-W.
+>>DISKCOMP [drive1: [drive2:]] [/1] [/8]
+Compares the contents of two floppy disks.
+
+  /1   Compares the first side of the disks.
+  /8   Compares only the first eight sectors of each track.
+>>DISKCOPY [drive1: [drive2:]] [/1] [/V]
+Copies the contents of one floppy disk to another.
+
+  /1   Copies only the first side of the disk.
+  /V   Verifies that the information is copied correctly.
+
+The two floppy disks must be the same type.
+You may specify the same drive for drive1 and drive2.
+>>DOSKEY [/REINSTALL] [/BUFSIZE=size] [/MACROS] [/HISTORY]
+        [/INSERT | /OVERSTRIKE] [macroname=[text]]
+
+Edits command lines, recalls MS-DOS commands, and creates macros.
+
+  /REINSTALL    Installs a new copy of Doskey.
+  /BUFSIZE=size Sets size of command history buffer.
+  /MACROS       Displays all Doskey macros.
+  /HISTORY      Displays all commands stored in memory.
+  /INSERT       Specifies that new text you type is inserted in old text.
+  /OVERSTRIKE   Specifies that new text overwrites old text.
+  macroname     Specifies a name for a macro you create.
+  text          Specifies commands you want to record.
+
+UP and DOWN ARROWS recall commands; ESC clears command line; F7 displays
+command history; ALT+F7 clears command history; F8 searches command
+history; F9 selects a command by number; ALT+F10 clears macro definitions.
+
+The following are some special codes in Doskey macro definitions:
+$T     Command separator.  Allows multiple commands in a macro.
+$1-$9  Batch parameters.  Equivalent to %1-%9 in batch programs.
+$*     Symbol replaced by everything following macro name on command line.
+>>DOSSHELL [/T[:res[n]]] [/B]  or  DOSSHELL [/G[:res[n]]] [/B]
+Starts MS-DOS Shell.
+
+  /T        Starts MS-DOS Shell in text mode.
+  :res[n]   A letter (L, M, H) and number indicating screen resolution.
+  /B        Starts MS-DOS Shell using black-and-white color scheme.
+  /G        Starts MS-DOS Shell in graphics mode.
+>>EDIT [[drive:][path]filename] [/B] [/G] [/H] [/NOHI]
+Starts the MS-DOS Editor, which creates and changes ASCII files.
+
+  [drive:][path]filename  Specifies the ASCII file to edit.
+  /B          Allows use of a monochrome monitor with a color graphics card.
+  /G          Provides the fastest update of a CGA screen.
+  /H          Displays the maximum number of lines possible for your hardware.
+  /NOHI       Allows the use of a monitor without high-intensity support.
+>>EDLIN [drive:][path]filename [/B]
+Starts Edlin, a line-oriented text editor.
+
+  /B   Ignores end-of-file (CTRL+Z) characters.
+>>>Append : [n]A
+Loads a portion of a file into memory when insufficent memory prevents
+EDLIN from loading the entire file. 'n' specified the number of lines to
+read. If not given, EDLIN reads until the available memory is 75% full.
+>>>Copy : [line1],[line2],line3[,count]C
+Copies the text from line1 to line2, and places it before line3. 'count'
+specifies the number of times you want EDLIN to insert the lines.
+
+If line1 and line2 are not given, EDLIN uses the current line.
+>>>Delete : [line1][,line2]D
+Delete the lines between line1 and line2 (inclusive). If one or both lines
+are not given, EDLIN assumes the current line.
+>>>End : E
+Writes the current file to disk, and terminates the EDLIN session.
+>>>Insert : [line]I
+Inserts lines before the specified line. (Default is current line)
+>>>List : [line1][,line2]L
+Displays the block of lines specified.
+
+If line1 is omitted, EDLIN displays from 11 lines before the current
+line up to line2.
+
+If line2 is ommited, EDLIN displays up to one page, beginning with line1.
+
+If both line1 and line2 are ommited, EDLIN displays one page, beginning
+11 lines before the current line.
+>>>Move : [line1],[line2],line3M  or  [line1],+n,line3M
+Moves a block of lines from line1 to line2 (inclusive), or from line1 to
+line1+n, and places them before line3. If a line is not specified, EDLIN
+assumes the current line.
+>>>Page : [line1][,line2]P
+Displays all or part of the file, one page at a time.
+>>>Quit : Q
+Terminates EDLIN, and discards any changes to the current file.
+>>>Replace : [line1][,line2][?]R[string1][^Z string2]
+Searches the file from line1 to line2, and replaces all occurances of
+string1 with string2. If '?' is specified, EDLIN prompts for Y/N confirmation
+before replacing each occurance.
+
+If string1 is not specified, it defaults to the last one searched for
+(with either 'S' or 'R' commands).
+>>>Search : [line1][,line2]?S[string]
+Search the filr from line1 to line2, and displays the first line that
+contains the specified string. IF ;?' is specified, EDLIN will prompt
+with "O.K.?" after locating the string, answer 'Y' to termiante the
+search, or 'N' to continue.
+>>>Transfer : [line]T filename
+Inserts the contents of the specified file before the indicated line.
+If line is not specified, the current line is assumed.
+>>>Write : [n]W
+Writes the first portion of the edited file to disk. Used when editing
+files larger than available memory, to save changes before reading
+in the next portion.
+
+The 'n' parameter specifies the number of lines to write. If not
+specified, EDLIN writes until memory is 25% or less used.
+>>EMM386 [ON | OFF | AUTO] [W=ON | W=OFF]
+Turns on or off EMM386 expanded memory support.
+
+  ON | OFF | AUTO       Activates or suspends EMM386.EXE device driver,
+                        or places it in auto mode.
+  W=ON | OFF            Turns on or off Weitek coprocessor support.
+>>EXE2BIN [drive1:][path1]input-file [[drive2:][path2]output-file]
+Converts .EXE (executable) files to binary format.
+
+  input-file   Specifies the .EXE file to be converted.
+  output-file  Specifies the binary file to be created.
+>>EXIT
+Quits the COMMAND.COM program (command interpreter).
+>>EXPAND [drive:][path]filename [[drive:][path]filename [...]] destination
+Expands one or more compressed files.
+
+  [drive:][path]filename  Specifies the location and/or name of a file
+                          or set of files to be expanded. You cannot use
+                          wildcards.
+  destination             Specifies the new location and/or name of an
+                          expanded file or set of files. Destination can
+                          be a drive letter and colon, directory name,
+                          filename, or combination.
+
+The destination can only be a filename if you have specified a single
+filename for the source filename parameter. To expand a file or set
+of files to a different directory and keep the original filename(s),
+specify only a directory as the destination.
+>>FASTOPEN drive:[[=]n] [drive:[[=]n][ ...]] [/X]
+Decreases the amount of time needed to open frequently used files
+and directories.
+
+  drive:  Specifies the hard disk drive you want Fastopen to work with.
+  n       Specifies the maximum number of file locations Fastopen retains
+          in its filename cache.
+  /X      Creates the filename cache in expanded memory.
+>>FC [/A] [/C] [/L] [/LBn] [/N] [/T] [/W] [/nnnn] [file1] [file2]
+or FC /B [file1] [file2]
+
+Compares two files or sets of files and displays the differences between
+them.
+
+  /A     Displays only first and last lines for each set of differences.
+  /B     Performs a binary comparison.
+  /C     Disregards the case of letters.
+  /L     Compares files as ASCII text.
+  /LBn   Sets maximum consecutive mismatches to the specified number of lines.
+  /N     Displays the line numbers on an ASCII comparison.
+  /T     Does not expand tabs to spaces.
+  /W     Compresses white space (tabs and spaces) for comparison.
+  /nnnn  Set number of consecutive lines that must match after a mismatch.
+>>FDISK
+Configure a hard disk for use with MS-DOS.
+>>FIND [/V] [/C] [/N] [/I] "string" [[drive:][path]filename[ ...]]
+Searches for a text string in a file or files.
+
+  /V        Displays all lines NOT containing the specified string.
+  /C        Displays only the count of lines containing the string.
+  /N        Displays line numbers with the displayed lines.
+  /I        Ignores the case of characters when searching for the string.
+  "string"  Specifies the text string to find.
+  [drive:][path]filename
+            Specifies a file or files to search.
+
+If a pathname is not specified, FIND searches the text typed at the prompt
+or piped from another command.
+>>FORMAT drive: [/V[:label]] [/Q] [/U] [/F:size] [/B | /S]
+ or FORMAT drive: [/V[:label]] [/Q] [/U] [/T:tracks /N:sectors] [/B | /S]
+ or FORMAT drive: [/V[:label]] [/Q] [/U] [/1] [/4] [/B | /S]
+ or FORMAT drive: [/Q] [/U] [/1] [/4] [/8] [/B | /S]
+
+Formats a disk for use with MS-DOS.
+
+  /V[:label]  Specifies the volume label.
+  /Q          Performs a quick format.
+  /U          Performs an unconditional format.
+  /F:size     Specifies the size of the floppy disk to format (such 
+              as 160, 180, 320, 360, 720, 1.2, 1.44, 2.88).
+  /B          Allocates space on the formatted disk for system files.
+  /S          Copies system files to the formatted disk.
+  /T:tracks   Specifies the number of tracks per disk side.
+  /N:sectors  Specifies the number of sectors per track.
+  /1          Formats a single side of a floppy disk.
+  /4          Formats a 5.25-inch 360K floppy disk in a high-density drive.
+  /8          Formats eight sectors per track.
+>>GRAFTABL [xxx]  or  GRAFTABL /STATUS
+Enables MS-DOS to display an extended character set in graphics mode.
+
+  xxx      Specifies a code page number.
+  /STATUS  Displays the current code page selected for use with GRAFTABL.
+>>GRAPHICS [type] [filename] [/R] [/B] [/LCD] [/PRINTBOX:STD|/PRINTBOX:LCD]
+Loads a program that can print graphics.
+
+  type         Specifies a printer type (see User's Guide and Reference).
+  filename     Specifies the file containing information on supported printers.
+  /R           Prints white on black as seen on the screen.
+  /B           Prints the background in color for COLOR4 and COLOR8 printers.
+  /LCD         Prints using LCD aspect ratio.
+  /PRINTBOX:STD | /PRINTBOX:LCD
+               Specifies the print-box size, either STD or LCD.
+>>JOIN [drive1: [drive2:]path]  or  JOIN drive1: /D
+Joins a disk drive to a directory on another drive.
+
+  drive1:        Specifies a disk drive that will appear as a directory on
+                 drive2.
+  drive2:        Specifies a drive to which you want to join drive1.
+  path           Specifies the directory to which you want to join drive1. It
+                 must be empty and cannot be the root directory.
+  /D             Cancels any previous JOIN commands for the specified drive.
+
+Type JOIN without parameters to list currently joined drives.
+>>KEYB [xx[,[yyy][,[drive:][path]filename]]] [/E] [/ID:nnn]
+Configures a keyboard for a specific language.
+
+  xx                      Specifies a two-letter keyboard code.
+  yyy                     Specifies the code page for the character set.
+  [drive:][path]filename  Specifies the keyboard definition file.
+  /E                      Specifies that an enhanced keyboard is installed.
+  /ID:nnn                 Specifies the keyboard in use.
+>>LABEL [drive:][label]
+Creates, changes, or deletes the volume label of a disk.
+>>LOADHIGH [drive:][path]filename [parameters]
+Loads a program into the upper memory area.
+
+
+  parameters   Specifies any command-line information required by the
+               program you want to load.
+>>MEM [/PROGRAM | /DEBUG | /CLASSIFY]
+Displays the amount of used and free memory in your system.
+
+  /PROGRAM or /P   Displays status of programs currently loaded in memory.
+  /DEBUG or /D     Displays status of programs, internal drivers, and other
+                   information.
+  /CLASSIFY or /C  Classifies programs by memory usage. Lists the size of
+                   programs, provides a summary of memory in use, and lists
+                   largest memory block available.
+>>MIRROR [drive:[ ...]] [/1] [/Tdrive[-entries][ ...]]
+or MIRROR [/U]  or  MIRROR [/PARTN]
+
+Records information about one or more disks.
+
+  drive:       Specifies the drive for which you want to save information.
+  /1           Saves only the latest disk information (does not back up
+               previous information).
+  /Tdrive      Loads the deletion-tracking program for the specified drive.
+  -entries     Specifies maximum number of entries in the deletion-tracking
+               file.
+  /U           Unloads the deletion-tracking program.
+  /PARTN       Saves hard disk partition information to a floppy diskette.
+
+MIRROR, UNDELETE, and UNFORMAT Copyright (C) 1987-1991 Central Point Software,
+Inc.
+>>MKDIR [drive:]path  or  MD [drive:]path
+Creates a directory.
+>>MODE - Configures system devices.
+
+Printer port:      MODE LPTn[:] [COLS=c] [LINES=l] [RETRY=r]
+Serial port:       MODE COMm[:] [BAUD=b] [PARITY=p] [DATA=d] [STOP=s] [RETRY=r]
+Device Status:     MODE [device] [/STATUS]
+Redirect printing: MODE LPTn[:]=COMm[:]
+Prepare code page: MODE device CP PREPARE=((yyy[...]) [drive:][path]filename)
+Select code page:  MODE device CP SELECT=yyy
+Refresh code page: MODE device CP REFRESH
+Code page status:  MODE device CP [/STATUS]
+Display mode:      MODE [display-adapter][,n]
+                   MODE CON[:] [COLS=c] [LINES=n]
+Typematic rate:    MODE CON[:] [RATE=r DELAY=d]
+>>MORE < [drive:][path]filename  or  command-name | MORE
+Displays output one screen at a time.
+
+  [drive:][path]filename  Specifies a file to display one screen at a time.
+  command-name            Specifies a command whose output will be displayed.
+>>MSHERC [/HALF]
+Installs support for QBasic graphics programs using the Hercules graphics card.
+
+  /HALF       Use when a color adapter is also installed.
+>>NLSFUNC [[drive:][path]filename]
+Loads country-specific information.
+
+  [drive:][path]filename   Specifies the file containing country-specific
+                           information.
+>>PATH [[drive:]path[;...]]
+Displays or sets a search path for executable files.
+
+Type PATH ; to clear all search-path settings and direct MS-DOS to search
+only in the current directory.
+Type PATH without parameters to display the current path.
+>>PRINT [/D:device] [/B:size] [/U:ticks1] [/M:ticks2] [/S:ticks3]
+       [/Q:qsize] [/T] [[drive:][path]filename[ ...]] [/C] [/P]
+
+Prints a text file while you are using other MS-DOS commands.
+
+  /D:device   Specifies a print device.
+  /B:size     Sets the internal buffer size, in bytes.
+  /U:ticks1   Waits the specified maximum number of clock ticks for the printer
+              to be available.
+  /M:ticks2   Specifies the maximum number of clock ticks it takes to print a
+              character.
+  /S:ticks3   Allocates the scheduler the specified number of clock ticks for
+              background printing.
+  /Q:qsize    Specifies the maximum number of files allowed in the print queue.
+  /T          Removes all files from the print queue.
+  /C          Cancels printing of the preceding filename and subsequent
+              filenames.
+  /P          Adds the preceding filename and subsequent filenames to the print
+              queue.
+
+Type PRINT without parameters to display the contents of the print queue.
+>>PROMPT [text]
+Changes the MS-DOS command prompt.
+
+  text    Specifies a new command prompt.
+
+Prompt can be made up of normal characters and the following special codes:
+
+  $Q   = (equal sign)
+  $$   $ (dollar sign)
+  $T   Current time
+  $D   Current date
+  $P   Current drive and path
+  $V   MS-DOS version number
+  $N   Current drive
+  $G   > (greater-than sign)
+  $L   < (less-than sign)
+  $B   | (pipe)
+  $H   Backspace (erases previous character)
+  $E   Escape code (ASCII code 27)
+  $_   Carriage return and linefeed
+
+Type PROMPT without parameters to reset the prompt to the default setting.
+>>QBASIC [/B] [/EDITOR] [/G] [/H] [/MBF] [/NOHI] [[/RUN] [drive:][path]filename]
+Starts the MS-DOS QBasic programming environment.
+ 
+  /B          Allows use of a monochrome monitor with a color graphics card.
+  /EDITOR     Starts the MS-DOS Editor.
+  /G          Provides the fastest update of a CGA screen.
+  /H          Displays the maximum number of lines possible for your hardware.
+  /MBF        Converts the built-in functions MKS$, MKD$, CVS, and CVD to
+              MKSMBF$, MKDMBF$, CVSMBF, and CVDMBF, respectively.
+  /NOHI       Allows the use of a monitor without high-intensity support.
+  /RUN        Runs the specified Basic program before displaying it.
+  [[drive:][path]filename] Specifies the program file to load or run.
+>>RECOVER drive:[path]filename
+Recovers readable information from a bad or defective disk.
+
+Consult your User's Guide and Reference before using the RECOVER command.
+>>RENAME [drive:][path]filename1 filename2
+Renames a file or files.
+
+Note that you cannot specify a new drive or path for your destination file.
+>>REPLACE [drive1:][path1]filename [drive2:][path2] [/A] [/P] [/R] [/W]
+or REPLACE [drive1:][path1]filename [drive2:][path2] [/P] [/R] [/S] [/W] [/U]
+
+Replaces files.
+
+  [drive1:][path1]filename Specifies the source file or files.
+  [drive2:][path2]         Specifies the directory where files are to be
+                           replaced.
+  /A                       Adds new files to destination directory. Cannot
+                           use with /S or /U switches.
+  /P                       Prompts for confirmation before replacing a file or
+                           adding a source file.
+  /R                       Replaces read-only files as well as unprotected
+                           files.
+  /S                       Replaces files in all subdirectories of the
+                           destination directory. Cannot use with the /A
+                           switch.
+  /W                       Waits for you to insert a disk before beginning.
+  /U                       Replaces (updates) only files that are older than
+                           source files. Cannot use with the /A switch.
+>>RESTORE drive1: drive2:[path[filename]] [/S] [/P] [/B:date]
+         [/A:date] [/E:time] [/L:time] [/M] [/N] [/D]
+
+Restores files that were backed up by using the BACKUP command.
+
+  drive1:  Specifies the drive on which the backup files are stored.
+  drive2:[path[filename]]
+           Specifies the file(s) to restore.
+  /S       Restores files in all subdirectories in the path.
+  /P       Prompts before restoring read-only files or files changed since
+           the last backup (if appropriate attributes are set).
+  /B       Restores only files last changed on or before the specified date.
+  /A       Restores only files changed on or after the specified date.
+  /E       Restores only files last changed at or earlier than the specified
+           time.
+  /L       Restores only files changed at or later than the specified time.
+  /M       Restores only files changed since the last backup.
+  /N       Restores only files that no longer exist on the destination disk.
+  /D       Displays files on the backup disk that match specifications.
+>>RMDIR [drive:]path  or  RD [drive:]path
+Removes (deletes) a directory.
+>>SET [variable=[string]]
+Displays, sets, or removes MS-DOS environment variables.
+
+  variable  Specifies the environment-variable name.
+  string    Specifies a series of characters to assign to the variable.
+
+Type SET without parameters to display the current environment variables.
+>>SETVER - Sets the version number that MS-DOS reports to a program.
+
+Display current version table: SETVER [drive:path]
+Add entry:                     SETVER [drive:path] filename n.nn
+Delete entry:                  SETVER [drive:path] filename /DELETE [/QUIET]
+
+  [drive:path]    Specifies location of the SETVER.EXE file.
+  filename        Specifies the filename of the program.
+  n.nn            Specifies the MS-DOS version to be reported to the program.
+  /DELETE or /D   Deletes the version-table entry for the specified program.
+  /QUIET          Hides the message typically displayed during deletion of
+                  version-table entry.
+>>SHARE [/F:space] [/L:locks]
+Installs file-sharing and locking capabilities on your hard disk.
+
+  /F:space   Allocates file space (in bytes) for file-sharing information.
+  /L:locks   Sets the number of files that can be locked at one time.
+>>SORT [/R] [/+n] < [drive1:][path1]filename1 [> [drive2:][path2]filename2]
+      [command |] SORT [/R] [/+n] [> [drive2:][path2]filename2]
+
+Sorts input and writes results to the screen, a file, or another device.
+
+  /R                         Reverses the sort order; that is, sorts Z to A,
+                             then 9 to 0.
+  /+n                        Sorts the file according to characters in
+                             column n.
+  [drive1:][path1]filename1  Specifies a file to be sorted.
+  [drive2:][path2]filename2  Specifies a file where the sorted input is to be 
+                             stored.
+  command                    Specifies a command whose output is to be sorted.
+>>SUBST [drive1: [drive2:]path]  or  SUBST drive1: /D
+Associates a path with a drive letter.
+
+  drive1:        Specifies a virtual drive to which you want to assign a path.
+  [drive:2]path  Specifies a physical drive and path you want to assign to
+                 a virtual drive.
+  /D             Deletes a substituted (virtual) drive.
+
+Type SUBST with no parameters to display a list of current virtual drives.
+>>SYS [drive1:][path] drive2:
+Copies MS-DOS system files and command interpreter to a disk you specify.
+
+  [drive1:][path] Specifies the location of the system files.
+  drive2:         Specifies the drive the files are to be copied to.
+>>TIME [time]
+Displays or sets the system time.
+
+Type TIME with no parameters to display the current time setting and a prompt
+for a new one.  Press ENTER to keep the same time.
+>>TREE [drive:][path] [/F] [/A]
+Graphically displays the directory structure of a drive or path.
+
+  /F   Displays the names of the files in each directory.
+  /A   Uses ASCII instead of extended characters.
+>>TYPE [drive:][path]filename
+Displays the contents of a text file.
+>>UNDELETE [[drive:][path]][filename] [/LIST | /ALL] [/DT | /DOS]
+Restores files which have been deleted.
+
+  /LIST  Lists the deleted files available to be recovered.
+  /ALL   Undeletes all specified files without prompting.
+  /DT    Uses only the deletion-tracking file.
+  /DOS   Uses only the MS-DOS directory.
+
+MIRROR, UNDELETE, and UNFORMAT Copyright (C) 1987-1991 Central Point Software,
+Inc.
+>>UNFORMAT drive: [/J]
+or UNFORMAT drive: [/U] [/L] [/TEST] [/P]  or  UNFORMAT /PARTN [/L]
+
+Restores a disk erased by the FORMAT command or restructured by the RECOVER
+command.
+
+  drive:   Specifies the drive to unformat.
+  /J       Verifies that the mirror files agree with the system information
+           on the disk.
+  /U       Unformats without using MIRROR files.
+  /L       Lists all file and directory names found, or, when used with the
+           /PARTN switch, displays current partition tables.
+  /TEST    Displays information but does not write changes to disk.
+  /P       Sends output messages to printer connected to LPT1.
+  /PARTN   Restores disk partition tables.
+
+MIRROR, UNDELETE, and UNFORMAT Copyright (C) 1987-1991 Central Point Software,
+Inc.
+>>VER
+Displays the MS-DOS version.
+>>VERIFY [ON | OFF]
+Tells MS-DOS whether to verify that your files are written correctly to a
+disk.
+
+Type VERIFY without a parameter to display the current VERIFY setting.
+>>VOL [drive:]
+Displays the disk volume label and serial number, if they exist.
+>>XCOPY source [destination] [/A | /M] [/D:date] [/P] [/S [/E]] [/V] [/W]
+Copies files (except hidden and system files) and directory trees.
+
+  source       Specifies the file(s) to copy.
+  destination  Specifies the location and/or name of new files.
+  /A           Copies files with the archive attribute set,
+               doesn't change the attribute.
+  /M           Copies files with the archive attribute set,
+               turns off the archive attribute.
+  /D:date      Copies files changed on or after the specified date.
+  /P           Prompts you before creating each destination file.
+  /S           Copies directories and subdirectories except empty ones.
+  /E           Copies any subdirectories, even if empty.
+  /V           Verifies each new file.
+  /W           Prompts you to press a key before copying.
+>BatchCommands
+This section describes commands which are intended for use as control
+structures in batch files.
+>>CALL [drive:][path]filename [batch-parameters]
+Calls one batch program from another.
+
+  batch-parameters   Specifies any command-line information required by the
+                     batch program.
+>>ECHO [ON | OFF]  or  ECHO [message]
+Displays messages, or turns command-echoing on or off.
+
+Type ECHO without parameters to display the current echo setting.
+>>FOR %variable IN (set) DO command [command-parameters]
+Runs a specified command for each file in a set of files.
+
+  %variable  Specifies a replaceable parameter.
+  (set)      Specifies a set of one or more files.  Wildcards may be used.
+  command    Specifies the command to carry out for each file.
+  command-parameters
+             Specifies parameters or switches for the specified command.
+
+To use the FOR command in a batch program, specify %%variable instead of
+%variable.
+>>GOTO label
+Directs MS-DOS to a labelled line in a batch program.
+
+  label   Specifies a text string used in the batch program as a label.
+
+You type a label on a line by itself, beginning with a colon.
+>>IF [NOT] string1==string2 command
+or IF [NOT] ERRORLEVEL number command
+or IF [NOT] EXIST filename command
+
+Performs conditional processing in batch programs.
+
+  NOT               Specifies that MS-DOS should carry out the command only
+                    if the condition is false.
+  ERRORLEVEL number Specifies a true condition if the last program run returned
+                    an exit code equal to or greater than the number specified.
+  command           Specifies the command to carry out if the condition is
+                    met.
+  string1==string2  Specifies a true condition if the specified text strings
+                    match.
+  EXIST filename    Specifies a true condition if the specified filename
+                    exists.
+>>PAUSE
+Suspends processing of a batch program and displays the message
+"Press any key to continue...."
+>>REM [comment]
+Records comments (remarks) in a batch file or CONFIG.SYS.
+>>SHIFT
+Shifts the parameters in a batch file by one place. '%0' takes the value
+of '%1', '%1' takes the value of '%2' etc...  '%9' takes the value of any
+additional parameter on the command line, which was previously unaccessable.
+>DeviceDrivers
+This section describes the device drivers which are supplied with DOS.
+>>ANSI.SYS [/x] [/k]
+Allows the PC console to recognize ANSI escape sequences.
+
+  /x  Remaps extended keys independantly on 101 key keyboards
+  /k  Ignores extended keys on 101 key keyboards
+>>DISPLAY.SYS con[:]=(type[,hwcp][,(n,m)]])
+Allows the PC console to support code page switching.
+
+  type   Display type: MONO, CGA, EGA or LCD
+         MONO and CGA are ignored - code page switching not supported
+         Use EGA for EGA or VGA displays
+  hwcp   Specifies the number of code pages supported by your hardware.
+         This list shows the code pages MS-DOS supports, and the country
+         or language for each:
+           437  United States
+           850  Multilingual (Latin I)
+           852  Slavic (Latin II)
+           860  Portuguese
+           863  Canadian-French
+           865  Nordic
+  n      Specifies number of additional code pages the hardware can support
+         in addition to the hwcp parameter. Valid range is 0-6. For EGA, the
+         maximum value is 6, for LCD, the maximum value is 1.
+
+  m      Specifies the number of subfonts the hardware supports for each code
+         page. The default is 2 for EGA, and 1 for LCD.
+>>DRIVER.SYS /d:number [/C /f:factor /h:heads /s:sectors /t:tracks]
+Creates a logical drive that you can use to refer to a physical floppy disk
+drive.
+
+  /d:number Specifies the number of the floppy disk drive (0=A, 1=B, ...)
+  /c        Indicates that the physical drive has change line support.
+  /f:factor Indicates the type of disk drive:
+             0 = 160/180K or 320/360K
+             1 = 1.2 Megabyte
+             2 = 720K (default)
+             7 = 1.44 Megabyte
+             9 = 2.88 Megabyte
+  /h:heads   Specifies the number of heads in the disk drive.
+  /s:sectors Specifies the number of sectors per track.
+  /t:tracks  Specifies the total number of tracks on the disk drive.
+>>EGA.SYS
+Saves and restores the display when using the MS-DOS task swapper. If you
+have an EGA display, you must install EGA.SYS if using the task swapper.
+>>EMM386.EXE
+    [ON|OFF|AUTO memory W=ON|OFF Mx|FRAME=address/Pmmmm Pn=address X=mmmm-nnnn
+    I=mmmm-nnnn B=address L=minXMS A=altregs H=handles D=nnn RAM NOEMS]
+
+Simulates expanded memory while using extended memory, and provides access to
+the opper memory area on a computer with 80386 or higher processor.
+
+  ON|OFF|AUTO Activates(ON) or deactivates(OFF) the EMM386 driver.
+              AUTO activates EMM386 only of a program calls for it.
+  memory      Specifies the amount of memory (in K) to allocate to EMM386.
+  W=ON|OFF    Enable(ON) or Disable(OFF) Weitek co-processor support.
+  Mx          Specifies address of page frame:
+                1=C000,  2=C400,  3=C800,  4=CC00,  5=D000,  6=D400,  7=D800
+                8=DC00,  9=E000, 10=8000, 11=8400, 12=8800, 13=8C00, 14=9000
+  frame=addr  Specify the page frame segment base directly.
+  /Pmmmm      Specifies the address of the page frame.
+  Pn=address  Specify the segment address of a specific page.
+  X=mmmm-nnnn Prevents EMM386 from using the specified range of segments.
+  I=mmmm-nnnn Allows EMM386 to use the specified range of segments
+  B=address   Set lowest segment address available for EMS banking.
+  L=minXMS    Insure that nK of XMS memory is available after loading EMM386.
+  A=altregs   Specifies how many alternalte register sets to allocate.
+  H=handles   Specifies how many handls EMM386 can use.
+  D=nnn       Specified how many K of memory reserved for buffered DMA.
+  RAM         Provides access to both expanded memory and upper memory are.
+  NOEMS       Provides access to upper memory area, but prevents expanded.
+>>HIMEM.SYS
+    [/hmamin=m /numhandles=n /int15=xxxx /machine:xxxx /a20control:OFF|ON
+    /shawdowram:OFF|ON /cpuclock:OFF|ON]
+
+Manages the use of extended memory and the high memory are (HMA).
+
+  /hmamin=m     Amount of memory (K) a program must use before HIMEM.SYS
+                allows it to use the high memory area.
+  /numhandles=n Maximum number of EMB handles that can be used simultaneously.
+  /int15=xxx    Allocates xxxK of extended memory for int15 (VDISK) interface.
+  /machine:xxx  Specifies the A20 handler to be used. See manual.
+  /a20control   OFF=Do not take control of A20 if already switched on.
+  /shawdowram   OFF=Disable shadow RAM and add it to himem's pool.
+  /cpuclock     ON=try and avoid changing CPU clock speed on some hardware.
+>>PRINTER.SYS LPTx=(type[,[hwcp][,n]])
+Supports code page switching for parallel ports.
+
+  LPTx   Specifies the number of the parallel port
+  type   Specifies the printer in use. (See manual)
+  hwcp   Specifies the code page your hardware supports.
+           437  United States
+           850  Multilingual (Latin I)
+           852  Slavic (Latin II)
+           860  Portuguese
+           863  Canadian-French
+           865  Nordic
+  n      Specifies the number of additional code pages your hardware supports.
+>>RAMDRIVE.SYS [disksize secsize [Entries]] [/E|/A]
+Creates a RAM disk from system memory to simulate a fast hard drive.
+
+  Disksize  Specifies the size (K) of the RAM disk (default=64)
+  Secsize   Specifies the sector size (default 512 recommended)
+  Entries   Specifies the number of root directory entries created.
+  /E        Use extended memory. (if neither '/E' or '/A' is specified, the
+  /A        Use expanded memory.  RAMdrive is created in conventional memory)
+>>SETVER.EXE
+Loads the MSDOS version table into memory.
+See also the SETVER command.
+>>SMARTDRV.SYS [Initsize] [minsize] [/A]
+Creates a disk cache in extended or expanded memory.
+
+  Initsize  Specifies the initial size of the cache (K).
+  Minsize   Specifies the minimum cache size (K).
+  /A        Use expanded memory, otherwise extended is used.
+>Config.Sys
+The following statements are for use in the system configuration file.
+>>Break
+Use BREAK=ON or BREAK=OFF to enable/disable extended control-C
+checking.
+>>Buffers - Allocate memory for disk buffers.
+BUFFERS=n[,m]
+
+  n   Specifies the number of disk buffers (1 to 99)
+  m   Specifies the number of buffers in the secondary cache (1 to 8)
+>>Country - Enables international time/date/currency and case conversions.
+COUNTRY=xxx[,[yyy][,[file]]
+
+  xxx   Specifies the country code
+  yyy   Specifies the code page for the country
+  file  Specifies the file containing country information
+>>Device - Load a device driver into memory
+DEVICE=filename [parameters]
+
+  filename     The name of the file containing the device driver
+  [parameters] Any command parameters to be passed to the driver.
+>>Devicehigh - Load a device driver into the upper memory area
+DEVICEHIGH=[filename] [parameters]
+  or
+DEVICEHIGH SIZE=hexsize [filename] [parameters]
+
+  hexsize      Specifies the minimum amount of memory (in hex) that must be
+               available before DEVICEHIGH will attempt to load the driver.
+  filename     The name of the file containing the device driver.
+  [parameters] Any command parameters to tbe passed to the driver.
+>>Dos - Specifies DOS's use of upper and high memory areas.
+DOS=HIGH|LOW[,UMB|NOUMB]
+
+  HIGH     Indicates that DOS should load partly into the HIGH memory area.
+  LOW      Indicates that DOS should load itself into conventional memory.
+  UMB      Indicates that DOS should maintain links to upper memory.
+  NOUMB    Indicates that DOS should not maintain links to upper memory.
+
+Note: You must first install HIMEM.SYS before using HIGH or UMB.
+>>Drivparm - Define parameters for block devices.
+DRIVPARM=/d:number [/c /f:factor /h:heads /i /n /s:sectors
+
+  /d:number Specifies the physical drive number (0=A, 1=B, ...)
+  /c        Indicates that the physical drive has change line support.
+  /f:factor Indicates the type of disk drive:
+             0 = 160/180K or 320/360K
+             1 = 1.2 Megabyte
+             2 = 720K (default)
+             7 = 1.44 Megabyte
+             9 = 2.88 Megabyte
+  /h:heads   Specifies the number of heads in the disk drive.
+  /i         Specifies an "electonically compatible" 3.5-inch floppy drive.
+             Use this switch if your BIOS does not support 3.5-inch drives.
+  /n         Indicates a non-removable block device.
+  /s:sectors Specifies the number of sectors per track.
+  /t:tracks  Specifies the total number of tracks on the disk drive.
+>>Fcbs - Specify number of File Control Blocks that MS-DOS can open.
+FCBS=x
+
+  X    Specify the number of file control blocks that MS-DOS can have open
+       at any one time. Valid range is 1 to 255. Default is 4.
+>>Files - Set the number of file that MS-DOS can open at one time.
+FILES=x
+
+  X    Specifies the number of files that MS-DOS can access at one time.
+       Valid range is 8 to 255. Default is 8.
+>>Install - Installs memory resident programs
+INSTALL-filename [parameters]
+
+  filename     The name of the file containing the memory resident program.
+  [parameters] Any command parameters to be passed to the program.
+>>Lastdrive - Specify the maximum number of disk drives in the system.
+LASTDRIVE=x
+
+  x    Specifies the last drive letter which is recognized by the system.
+>>Rem - Insert a comment line
+The REM statement causes the remainder of the line to be ignored.
+>>Shell - Specify the name of the MS-DOS command interpreter.
+SHELL=filename [parameters]
+
+  filename     The name of the file containing the command interpreter.
+  [parameters] Any command parameters to be passed to the command interpreter.
+>>Stacks - Supports dynamic use of data stacks to handle hardware interrupts.
+STACKS=n,s
+
+  n    Specifies the number of stacks. Valid values are 0, and 8-64.
+  s    Specifies the size (in bytes) of each stack. Valid is 0, and 32-512.
+>>Switches - Force enhanced keyboard to behave like standard one.
+SWITCHES=/K
+
+  /K   Indicates that the extended keyboard keys are to be ignored.

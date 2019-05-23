@@ -1,0 +1,91 @@
+TFB: A Tsr File Browser
+
+   This is a small file viewing utility, that can be installed as a TSR,
+allowing you to view files from within most other DOS applications. Its
+main features are:
+
+ - Small! (< 10K .COM file)
+ - Can be installed as TSR, or run as standard DOS command.
+ - View files up to 65535 lines (no other size limit).
+ - You can have up to 10 "place markers" per file.
+ - Remembers where you are in up to 10 separate files, allowing you to
+   pop up and down, and switch between them without losing your place.
+   Position, Place markers, Tab size, Search string etc. are stored and
+   recalled when you select another file from the "pick list".
+
+TFB command syntax:
+
+   TFB [/ACLRS] [filename]
+
+   [/ACLRS] = Hotkeys for TSR operation.
+     A=Alt, C=Ctrl, L=LeftShift, R=RightShift, S=SysReq*
+         *=SysReq may not work on some systems
+     If no hotkeys are specified, TFB runs as a normal DOS command.
+
+   [filename] = Initial file to browse
+     If not given, TFB will prompt for the file (in TSR operation,
+     this prompt will occur the first time you "pop-up").
+
+While inside the TFB main display screen, you can use the following keys:
+
+   Up       - Backup display on line.
+   Down     - Advance display one line.
+   Left     - Shift display one column to the Left.
+   Right    - Shift display one column to the right.
+   PgUp     - Backup display one screen (23 lines).
+   PgDn     - Advance display one screen (23 lines).
+   Home     - Shift display 20 columns to the left.
+   End      - Shift display 20 columns to the right.
+   CTL-Home - Position display to column one.
+   CTL-PgUp - Position display to beginning of file.
+   CTL-PgDn - Position display to end of file.
+   F1       - Display Function Key summary.
+   F2       - Prompt for line# and go to line.
+   F3       - Prompt for string and search (from current line).
+   F4       - Repeat last search (from current line + 1).
+   F5       - Position to tagged line number.
+   F6       - Set a tag at current line number.
+   F7       - Prompt for new TAB spacing.
+   F8       - Change screen colors.
+   F9       - Open another file.
+   F10      - "Pick" list of last 10 files opened.
+   ESC      - Exit TFB
+
+Misc Notes:
+
+ - Most functions may be aborted by the ESCAPE key.
+
+ - TFB re-opens the file every time you "pop-up" or "pick" a new file.
+   This allows it to not have any files open when it is inactive. If you
+   plan to "cd" to another directory, you should specify the entire
+   pathname for any files that you open. If TFB pops up and cannot find
+   the file you were last viewing, you will be prompted to enter a new one.
+
+ - If you modify a file that you are viewing, you should re-select it from
+   the "pick list", so that TFB will re-index it, and insure that the line
+   numbers are correct.
+
+ - In order that you may pop up and down quickly, TFB does not prompt for
+   confirmation before exiting. If you are running it as a TSR, simply
+   press your hotkeys again, and you will be right back where you were
+   before pressing ESC.
+
+TFB makes it easy to view our online .DOC files while working in your
+favorite editor (or other environment). It is also particularly useful
+with our DDS development kits, for referencing source files from within
+monitors or other debuggers. For example, to compile an 8051 'C' program
+(in small model), and view a complete assembly language listing with 'C'
+source code as comments, and showing memory addresses, you could use:
+
+          CC51 myprog m=s -cl      /* Compile & generate .LST file */
+          TFB/RL myprog.lst        /* Load TFB with listing file */
+          ... Download "myprog.hex" to target, and debug program ...
+          ... Press SHIFT-SHIFT to view listing / 'C' source ...
+          ... Use "pick" list to view include, library etc. ...
+          ... Press ESCAPE to return to debugger ...
+
+
+Dunfield Development Systems
+P.O. Box 31044
+Nepean, Ontario Canada
+K2B 8S8

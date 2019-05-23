@@ -1,0 +1,9 @@
+rem Hang up hayes compatible modem using escape commands
+
+invisible
+echo Hanging up modem...
+wait 2
+send +++
+wait 2
+send ATH0\r
+print Done

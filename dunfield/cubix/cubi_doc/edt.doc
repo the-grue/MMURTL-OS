@@ -1,0 +1,536 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                      EDT
+    
+                            A fully featured visual
+                             text editor for CUBIX
+    
+                               Revised: 30-Jul-90
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1983,1990 Dave Dunfield
+                              All rights Reserved
+    The EDT editor                                                   Page: 1
+
+
+    
+    1. INTRODUCTION
+    
+          EDT is a fully featured, in-memory, text editor, for use under the
+       CUBIX operating system. It operates in either a line by  line,  or  a
+       visual screen format.
+    
+          In line by line mode, EDT assumes nothing about the terminal,  and
+       displays all data in a "glass teletype" format.
+    
+          The visual screen format of EDT will work with most 24 line by  80
+       character  ASCII  video  terminals,  and  uses  the  "TTY"   terminal
+       interface library to achieve terminal independance.
+    
+          Consult the "TTY" manual for information on  using  "TTYPATCH"  to
+       customize the control codes and function keys used by EDT.
+    
+    2. INVOKING EDT
+    
+          EDT is invoked with the command 'EDT  <filename>',  if  the  named
+       file already exists, EDT will load and edit  it,  otherwise  a  blank
+       file is presented.
+    
+          If the CURSOR POSITIONING string is defined (See "TTYPATCH"),  EDT
+       will  automatically  enter  visual  mode,  clearing  the  screen  and
+       displaying the first page of the file. Otherwise, EDT enters line  by
+       line mode, and prompts for a command with '*'.
+    
+          The EDT which is distributed with the CUBIX system  has  no  "TTY"
+       entries defined and will default to line mode operation.
+    The EDT editor                                                   Page: 2
+
+
+    3. LINE MODE OPERATION
+    
+       3.1 Line ranges
+    
+             The line-range is an optional specification which controls  the
+          range of lines for which the command has effect. Unless  otherwise
+          stated, the default line-range assumed for  each  command  is  the
+          "current" line (*).
+    
+             The "current" line is the line at which EDT  is  positioned  in
+          line by line mode, and is also the line on  which  the  cursor  is
+          positioned in visual mode.
+    
+             The following are the valid line range formats:
+    
+           *        - The "current" line
+           /        - The entire file
+           =        - The tagged lines
+           0        - The end of the file
+           <n>      - Line number <n>, (<n> >= 1)
+           <r>,<r>  - Range between beginning of two other ranges.
+    
+             The '+' and '-' characters may be used to  add  or  subtract  a
+          constant value from a line range.
+    
+                    eg: '0-12' <- 12 lines from end of file
+    
+             If '+' or '-' is used but no range is specified, an offset from
+          the current line is assumed.
+    
+             The line range specification is entered immediately  preceeding
+          the command name.
+    
+                         ie: '<r><command> <operands>'
+    
+       3.2 C - Copy text
+    
+             The 'C'opy command performs a  copy  of  the  active  range  of
+          lines, placeing the copy directly ahead of the current line.
+    
+          Examples:
+    
+                    C               - Duplicate current line
+                    1,10C           - Copy lines 1 to 10 inclusive
+                    =C              - Copy tagged lines
+    
+       3.3 D - Delete text
+    
+             The 'D'elete command deletes the active range of lines.
+    
+          Examples:
+    
+                    D               - Delete current line
+                    -5,+5D          - Delete 11 lines -5 to +5 from current
+                    /D              - Delete entire file
+    The EDT editor                                                   Page: 3
+
+
+       3.4 F - File information
+    
+             This command displays information about the file being  edited,
+          includes  the  filename,  the  size  of  the  file  in  lines  and
+          characters, and the size and position of the specified line range.
+    
+          Examples:
+    
+                    F               - Display file & current line information
+                    =F              - Display file & tagged lines information
+    
+       3.5 I - Insert new text
+    
+             The 'I'nsert command prompts  for  'Input:',  and  inserts  all
+          lines typed directly ahead of the active range. Enter a null  line
+          to exit.
+    
+          Examples:
+    
+                    I               - Insert ahead of current line
+                    /I              - Insert at start of file
+                    0I              - Insert at end of file
+    
+       3.6 L - List text in simple form
+    
+             The 'L'ist command displays the  active  range  of  lines.  The
+          display does not include  line  numbers  or  special  indications.
+          'L'ist is faster and mode efficent that 'P'rint.
+    
+          Examples:
+    
+                    L               - List current line
+                    /L              - List entire file
+                    -10,+10L        - List 21 lines, centered on current
+    
+       3.7 M - Move text
+    
+             The 'M'ove command moves the  active  range  of  lines  to  the
+          location directly ahead of the current line.
+    
+          Examples:
+    
+                    =M              - Move tagged lines
+                    +1M             - Interchange active & next line
+    
+       3.8 P - Print text (Enhanced 'L'ist)
+    
+             The 'P'rint command displays the active range  of  lines.  This
+          display includes the line  number  which  may  be  preceded  by  a
+          special indication flag ('*' for  current  line,  '='  for  tagged
+          lines).
+    
+          Examples:
+    
+                    P               - Display current line
+                    /P              - Display entire file
+    The EDT editor                                                   Page: 4
+
+
+       3.9 Q - Quit (exit) editor
+    
+             The 'Q'uit command exits the  editor.  This  command  will  not
+          allow an exit if unsaved changes are present in the file.
+    
+          Examples:
+    
+                    Q               - Quit editor
+    
+       3.10 QQ - Unconditional 'Q'uit
+    
+             The 'QQ'uit command exits the editor unconditionaly.
+    
+          Examples:
+    
+                    QQ              - Quit unconditionaly.
+    
+       3.11 R <filename> - Read file
+    
+             The 'R'ead command reads the entire contents of  the  specified
+          file, and inserts it directly ahead of the active range.
+    
+          Examples:
+    
+                    Rabc            - Insert file 'abc' at current
+                    /Rabc           - Insert file 'abc' at start
+                    0Rabc           - Append file 'abc' at end
+    
+       3.12 S<dc><search><dc><replace> - Substitute
+    
+             The 'S'ubstitute command searches the active  range  of  lines,
+          and replaces all occurrances  of  the  string  <search>  with  the
+          string  <replace>.  The  <dc>  delimiter  character  may  be   any
+          character not contained within the <search> string.
+    
+          Examples:
+    
+                    S'abc'def       - Change 'abc' to 'def' in current
+                    /S'abc'def      - Change 'abc' to 'def' in entire file
+    
+       3.13 T - Tag lines
+    
+             The 'T'ag command tags the active range of lines, allowing them
+          to be referred to by '=' in a subsequent command range.
+    
+          Examples:
+    
+                    T               - Tag current line
+                    1,10T           - Tag lines 1 to 10
+                    *,+5T           - Tag six lines starting at current
+    The EDT editor                                                   Page: 5
+
+
+       3.14 V - Switch Visual Mode
+    
+             The 'V' command causes EDT to switch visual modes. This  enters
+          visual mode if EDT was previously in line by line mode, and enters
+          line by line mode if previously in visual mode.
+    
+          Examples:
+    
+                    V               - Switch visual modes
+    
+       3.15 W [filename] - Write to file
+    
+             The 'W' command writes the active range of lines to  the  named
+          file, or to the original file edited if no name is specified.  Use
+          of this command also resets the FILE CHANGED flag,  allowing  exit
+          via 'q'.
+    
+             The default line range assumed for 'W'rite is the entire file.
+    
+          Examples:
+    
+                    W               - Write entire file
+                    *W              - Write current line
+                    Wabc            - Write entire file to 'abc'
+                    =Wabc           - Write tagged lines to 'abc'
+    
+       3.16 X [filename] - Write file and eXit
+    
+             This command behaves exactly as the 'W'rite  command,  followed
+          immediatly by a 'Q'uit command. It provides  a  shorthand  way  of
+          saving your file and leaving the editor.
+    
+          Examples:
+    
+                    X               - Write file & exit
+                    Xabc            - Write to 'abc' and exit
+    
+       3.17 ?<text> - Search for text
+    
+             The '?' command moves the active line to the first occurance of
+          the specified string within the active range.
+    
+             The default range assumed for '?' is  one  character  past  the
+          current cursor position (in visual mode) or the first character of
+          the active line (In line by line mode), through to the end of  the
+          file.
+    
+          Examples:
+    
+                    ?string         - Find next occurance of "string"
+                    /?string        - Find first occurance of "string"
+    The EDT editor                                                   Page: 6
+
+
+       3.18 $<command> - Execute CUBIX command
+    
+             The '$' command executes  the  specified  CUBIX  command.  Care
+          should be taken to execute only internal  comands,  and  utilities
+          which return via 'RTS' and do not overwite the EDT image in ram.
+    
+          Examples:
+    
+                    $files          - Execute 'files' command
+    
+       3.19 <no command> - Goto line
+    
+             If a line range is given without a command, EDT will reposition
+          the "current" line to the beginning of that range.
+    
+          Examples:
+    
+                    100             - Move to line 100
+                    /               - Move to start of file
+                    0               - Move to end of file
+                    =               - Move to tagged line(s)
+    The EDT editor                                                   Page: 7
+
+
+    4. VISUAL MODE OPERATION
+    
+          When in VISUAL mode, EDT presents a window on the terminal  screen
+       which displays the contents of a section of the file. Editing of  the
+       file may be performed directly on the  screen  via  special  function
+       keys, and the screen is updated so that you see your changes as  they
+       are being performed.
+    
+       4.1 Entering text
+    
+             Text may be entered into  the  file  being  edited,  simply  by
+          typeing it at the terminal keyboard. EDT automatically places  the
+          text in the file, and  updates  the  screen  to  reflect  the  new
+          contents. The  position  of  the  terminal  cursor  indicates  the
+          position at which the text will be entered.
+    
+             The arrow keys on the terminal may be used to move  the  cursor
+          around the displayed image.  Moveing  beyond  the  bottom  of  the
+          screen causes EDT to scroll forward one line, and shift the screen
+          up. Moveing beyond the top of the  screen  causes  EDT  to  scroll
+          backward one half screen, and redisplay the text. If  the  end  of
+          the file is within the area  shown  on  the  screen,  the  message
+          '*EOF*' is displayed in special video.
+    
+       4.2 Visual mode function keys
+    
+             The following terminal keys must be defined  using  "TTYPATCH",
+          and have special meaning to EDT:
+    
+          4.2.1 Right arrow
+    
+                Moves the cursor forward one character positon in the  file,
+             if at the end of a line, the cursor will advance to  the  first
+             position of the next line.
+    
+          4.2.2 Left arrow
+    
+                Moves the cursor backward one character positon in the file,
+             if at the beginning of a line, the cursor will  backup  to  the
+             last position of the previous line.
+    
+          4.2.3 Up arrow
+    
+                Moves the cursor up one line. If at the top of  the  screen,
+             the display will scroll backwards by one half a screen page.
+    
+          4.2.4 Down arrow
+    
+                Moves the cursor down one line. If  at  the  bottom  of  the
+             screen, the display will scroll forward by one line.
+    The EDT editor                                                   Page: 8
+
+
+                The cursor may appear to jump back and forth as it is  moved
+             up and down, if it ancounters lines which are shorter than  the
+             current character position within  the  line,  or  lines  which
+             contain tabs. This is because whenever possible, the cursor  is
+             returned to the same number of  physical  characters  from  the
+             start of the line as is was on the first line from which the UP
+             or DOWN arrow was pressed.
+    
+          4.2.5 Page up
+    
+                This key  pages  backward  one  screen.  (Top  line  becomes
+             bottom)
+    
+          4.2.6 Page down
+    
+                This key pages forward one screen. (Bottom line becomes top)
+    
+          4.2.7 Page right
+    
+                Moves the cursor to the end of the line. If already  at  the
+             end of a line, it is moved to the end of the next line.
+    
+          4.2.8 Page left
+    
+                Moves the cursor to the beginning of  the  line.  If  it  is
+             already at the  beginning  of  a  line,  it  is  moved  to  the
+             beginning of the previous line.
+    
+          4.2.9 Home
+    
+                This key moves the cursor to the beginning of the first line
+             in the file.
+    
+          4.2.10 End
+    
+                This key moves the cursor to the end of the file.
+    
+          4.2.11 Delete character
+    
+                Deletes the character under the cursor, without  moving  the
+             cursor.
+    
+          4.2.12 Delete previous
+    
+                Moves the cursor backward to the  previous  character,  then
+             deletes that character.
+    
+          4.2.13 Clear screen
+    
+                Redraws the screen image of the file. This is normally  used
+             in the case of the screen being corrupted by data  transmission
+             errors, or asynchronus messages from the  operating  system  or
+             its users.
+    The EDT editor                                                   Page: 9
+
+
+          4.2.14 Function key 1
+    
+                Prompts for a line mode command, and executes  it.  See  the
+             section on line mode operation.
+    
+          4.2.15 Function key 2
+    
+                Re-executes the last line mode command entered.
+    
+          4.2.16 Function key 3
+    
+                Toggles between character  INSERT  and  OVERWRITE  mode.  In
+             INSERT mode, all characters typed at the terminal are  inserted
+             into the text. In OVERWRITE mode, only  the  NEWLINE  character
+             and data entered at the end of a line is  inserted,  all  other
+             characters will overwrite the existing text.
+    
+          4.2.17 Function key 4
+    
+                Toggles ON/OFF the display of NEWLINE characters at the  end
+             of each line of text.
+    
+          4.2.18 Function key 5
+    
+                Displays the current cursor position, including  the  actual
+             and character offsets from the start of line.
+    
+          4.2.19 Function key 6
+    
+                Brings the line the cursor is on to the top of the screen.
+    
+          4.2.20 Function key 7
+    
+                Tags one or more lines for a  later  operation.  The  tagged
+             lines are displayed in special video if the  terminal  supports
+             it. Once one line is tagged, pressing this key on another  line
+             causes all lines between them to be tagged. Pressing  it  again
+             on the first line of the tagged range removes the tags.
+    
+          4.2.21 Function key 8
+    
+                Deletes from the cursor position to  the  end  of  the  line
+             (inclusive).
+    
+          4.2.22 Function key 9
+    
+                Deletes from the cursor position to  the  end  of  the  line
+             (exclusive).
+    
+          4.2.23 Function key 10
+    
+                Inserts the deleted  line  text  (From  Function  key  8  or
+             Function key 9) at the current cursor position.
+    The EDT editor                                                   Page: 10
+
+
+          4.2.24 Function key 11
+    
+                Moves the cursor to the beginning of the next word.
+    
+          4.2.25 Function key 12
+    
+                Moves the cursor to the beginning of the previous word.
+
+
+
+                                 The EDT editor
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. INVOKING EDT                                                        1
+
+
+     3. LINE MODE OPERATION                                                 2
+
+        3.1 Line ranges                                                     2
+        3.2 C - Copy text                                                   2
+        3.3 D - Delete text                                                 2
+        3.4 F - File information                                            3
+        3.5 I - Insert new text                                             3
+        3.6 L - List text in simple form                                    3
+        3.7 M - Move text                                                   3
+        3.8 P - Print text (Enhanced 'L'ist)                                3
+        3.9 Q - Quit (exit) editor                                          4
+        3.10 QQ - Unconditional 'Q'uit                                      4
+        3.11 R <filename> - Read file                                       4
+        3.12 S<dc><search><dc><replace> - Substitute                        4
+        3.13 T - Tag lines                                                  4
+        3.14 V - Switch Visual Mode                                         5
+        3.15 W [filename] - Write to file                                   5
+        3.16 X [filename] - Write file and eXit                             5
+        3.17 ?<text> - Search for text                                      5
+        3.18 $<command> - Execute CUBIX command                             6
+        3.19 <no command> - Goto line                                       6
+
+     4. VISUAL MODE OPERATION                                               7
+
+        4.1 Entering text                                                   7
+        4.2 Visual mode function keys                                       7

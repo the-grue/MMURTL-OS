@@ -1,0 +1,375 @@
+                    ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»
+                    º   Dunfield Development Systems   º
+                    º   Product catalog & Price List   º
+                    º   Revised: 16-NOV-94             º
+                    ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼
+
+Catalog and pricing are in effect until Jan 1996. Anyone placing an order
+will receive a current edition of this document with the order. You may
+also obtain the catalog by downloading it from our BBS system, or by
+calling our main number with a FAX machine (dial 1 at the voice prompt).
+
+Unless otherwise stated, all disks include complete documentation in
+the form of ASCII text files.
+
+All prices are listed in U.S. funds. For the convenience of our Canadian
+customers, we have also listed Canadian dollar prices (shown in brackets).
+
+All orders must include sufficent payment for shipping charges. See
+shipping rate table on order form. Please allow 3-4 weeks for airmail
+shipping from Canada to U.S. and international destinations.
+
+Cheques or money orders should be payable to "Dunfield Development Systems".
+Canadian residents please add 7% Goods and Services Tax (GST), Ontario
+residents add 8% Provincial Sales Tax (PST).
+
+NOTE TO INTERNATIONAL CUSTOMERS: Please insure that your cheque or money
+order has proper bank encoding along the bottom. Unencoded cheques cannot
+be processed by our bank, and will be returned. If you wish to make payment
+by wire transfer, please contact us.
+
+We cannot accept credit card orders at this time.
+
+    Dunfield Development Systems
+    P.O. Box 31044   Nepean, Ontario Canada   K2B 8S8
+    Tel: 613-256-5820   Fax: 613-256-5821   BBS: 613-256-6289
+
+International Distributors:
+
+Micro Amps Limited              Tel: 44 1483-268999 Fax: 44 1483-268397
+66 Smithbrook Kilns,  Cranleigh Surrey, GU6 8JJ,    UNITED KINGDOM
+
+Antratek Electronics            Tel: 31 1803-17666  Fax: 31 1803-16664
+Lelieveld 123,  2914 CD Nieuwerkerk A/D Ijssel      THE NETHERLANDS
+
+Orbit Computer Co., Ltd.        Tel: 886 7-3461364  Fax: 886 7-3451956
+7F No. 346 TZYH YOW 2nd Road,   Kaohsiung,          TAIWAN R.O.C.
+
+MicroCraft Electronics          Tel: 61 2-744-5440  Fax: 61 2-744-9280
+15 Broughton St.  Concord  N.S.W. 2137              AUSTRALIA
+
+Grantronics                     Tel/Fax: 61 2-631-1236
+45 Monash Street. PO Box 275 Wentworthville N.S.W. 2145 AUSTRALIA
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+DDS MICRO-C Developers Kits:
+
+    These are complete PC based cross development systems which include
+    EVERYTHING you need to develop 'C' and 'ASM' software for one CPU.
+    - Includes MICRO-C compiler, optimizer, XASM cross assembler, and
+      related utilities for the particular CPU.
+    - Integrated Development Environment. Edit, Compile, Download and Debug
+      from one application. Configurable with lots of options. Many extra
+      features like: multi-file browser, "pop-down" HEX calculator and
+      ASCII character set chart. Command line tools are also included.
+    - Hand coded (efficent ASM) standard library for CPU (Source included).
+    - Includes Monitor/Debugger for CPU (ASM source). *
+    - Includes text editor, telecomm program, MAKE and many other utilities.
+    - Complete documentation (on disk).
+    68HC08  Developers Kit  : $99.95 US     ($124.95 CDN) *
+    6809    Developers Kit  : $99.95 US     ($124.95 CDN)
+    68HC11  Developers Kit  : $99.95 US     ($124.95 CDN)
+    68HC16  Developers Kit  : $99.95 US     ($124.95 CDN) *
+    8051/52 Developers Kit  : $99.95 US     ($124.95 CDN)
+    8080/85 Developers Kit  : $99.95 US     ($124.95 CDN)
+    8086    Developers Kit  : $99.95 US     ($124.95 CDN)
+    8096    Developers Kit  : $99.95 US     ($124.95 CDN)
+    Super   Developers Kit  : $400.00 US    ($500.00 CDN) **
+    * 68HC08 and 68HC16 Developers Kits do not include a monitor/debugger.
+    ** All of the above + extra assemblers and tools from XASM package.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+EMILY52: A PC based 8051/52 Simulator / Emulator
+
+    A software simulator/emulator for the Intel 8051/8052 series of
+    microcontrollers. EMILY features an easy to use "windowed" user
+    interface, and is capable of simulating at better than  500,000
+    instructions per second on a 486/33mhz PC.
+    - Supports full 64K of PROGRAM and 64K of DATA memory. DATA and PROGRAM
+      memory may also be overlapped into a single 64K address space.
+    - Optionally interfaces with a Resident Control Program (supplied) on
+      your target system which allows you to include the physical I/O lines,
+      timers, serial port etc. in your simulation.
+    - Single step, Multi Step, Animate and High Speed execution modes,
+      with 4095 instruction traceback recorder in all modes.
+    - Simultaneous on-screen displays of program disassembly, internal
+      memory, CPU registers and simulation messages.
+    - Full screen editors for CPU registers, Special Function Registers
+      (SFR's), and each of the INTERNAL, EXTERNAL DATA and PROGRAM memory
+      spaces. All of the above may be viewed/altered at any time during the
+      debugging session.
+    - Multiple breakpoints are transparent to the user program.
+    - Supports the additional SFR's and internal RAM of the 8052 series,
+      and is user configurable for additional SFR's of expanded chips.
+    - Serial I/O in a window on the screen, or redirected to a PC COMM port.
+    - Includes MONICA52, a PC hosted monitor program for ON-BOARD debugging,
+      with a user interface that's virtually identical to EMILY52.
+    - Supports single-chip in-circuit emulation using DS5000 CPU.
+    - Many more features.
+    Software price  : $49.95 US     ($62.50 CDN)
+
+EMILY320: As above for Dallas 80C320: $49.95 US   ($62.50 CDN)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+XASM: A set of cross assemblers and related utility programs
+
+    - Includes 6800, 6801/6803, 6805, 6502, 68HC08, 6809, 68HC11, 68HC16,
+      8051/52, 8080/85, 8086 and 8096 cross assemblers.
+    - Output files in either INTEL or MOTOROLA hex format.
+    - Fully compatible with our MICRO-C code generators.
+    - Many example programs: BASIC interpreter, FORTH compiler... more.
+    - Utility programs included:
+        MACRO   - Powerful macro pre-processor.
+        CREF    - Cross-references ASM source files.
+        PSOURCE - Protects distributed source code.
+        HEXFMT  - General HEX file manipulation, including:
+            - Calculate checksums over all or part of code file.
+            - Reformat output record type (INTEL/MOTOROLA/BINARY) & length.
+            - Change base and load address of code image.
+            - Remove strings of $FF (unprogrammed) data bytes.
+        + Utilities for converting to/from other popular assembler formats.
+    Software price  : $99.95 US     ($124.95 CDN)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+MONITORS: Powerful software debugger and monitor programs.
+
+    - Monitors for 6809, 68HC11, 8051/52, 8080/85, 8086 and 8096.
+    - Includes XASM compatible, well documented source code.
+    - Completely stand-alone, runs on the bare hardware.
+    - Very compact, occupies less than 8K of ROM.
+    - Built in disassembler.
+    - Edit/Dump Memory, Processor registers and Interrupt vectors.
+    - Multiple breakpoints, which are completely transparent to the user
+      program, and remain effective until removed.
+    - Software Single-Step works even when tracing ROMed code.
+    - Download INTEL or MOTOROLA format hex data.
+    - Revector any/all interrupts to the user program.
+    - Online help display of commands and syntax.
+    - Many more features.
+    * Some features may differ slightly in some monitors.
+    Monitor package : $49.95 US     ($62.50 CDN) (Includes all six monitors)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+DLM: Data Line Monitor. Turns your P.C. into a DATASCOPE.
+
+    This program monitors both sides of an asynchronous data communications
+    line using a passive "Y" cable which connects to the monitored devices
+    and BOTH comm ports (COM1 and COM2). This tool is invaluable for debugging
+    ANY asynchronous connection, such as TERMINALS, MODEMS, SERIAL PRINTERS
+    and PROTOCOL debugging. It allows you to actually SEE the data and signals
+    being passed between the devices.
+    - Easy to use menu driven interface.
+    - "Split Line" display for easy viewing of the interaction
+      between two devices. Display is updated in "real time".
+    - Over 50 screens may be "buffered" and reviewed later.
+    - Displays/Stores hardware signal information as well as all
+      data passed between the devices.
+    - Captured buffers may be saved to disk for later reference.
+    - Includes directions for constructing your own "Y" cable.
+    Software price  : $29.95 US     ($37.50 CDN)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Project Plans:
+
+    This package include all of the necessary schematics, software
+    and documentation to construct the described devices:
+
+    EPROM: Stand-Alone EPROM programmer.
+        - Supports 2716, 2732, 2764, 27128 and 27256 type devices.
+        - Controlled by keypad/LED display, or over remote serial link.
+        - On-Board memory for loading, editing and re-programming.
+        - Upload/Download INTEL or MOTOROLA hex files.
+
+    D-BOX: Computer Control of VCR's etc.
+        - Controls virtually all VCR, CAMCORDER etc. functions.
+        - Reports current MODE, STATUS and TAPE COUNTER of VCR.
+        - Control up to 8 devices using CONTROL-L (LANC).
+        - RS-232 serial interface to host computer.
+
+    RINGSWITCH: Automatic telephone line switch.
+        - Interprets "distinctive ringing" (ident-a-call) and directs
+          incomming call to one of three jacks.
+        - Gives "busy" to any sets that go off-hook while line in use.
+
+    8031DESIGN: Several 8031/8051 core system designs
+        - No (0K), Shared (64K) and Separate (128K) memory configs.
+        - Standard and Debug (RAM as pseudo-ROM with download).
+
+    8051ICE: In-circuit emulator for 8051 microcontroller.
+        - Supports download/debugging of SINGLE-CHIP 8051 designs.
+        - Uses DALLAS DS5000 or DS2250 8051 derivative.
+        - Serial interface to PC.
+        - Compatible with our EMILY/MONICA software.
+
+    ALL PROJECTS    : $29.95        ($37.50 CDN)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+DEMO: Our freeware and shareware DEMONSTRATION disk
+
+    High density diskette (1.2 or 1.4Mb) containing freeware and demo
+    versions of our software. This diskette includes many example programs,
+    and LOTS of source code ('C' and ASM).
+    DEMO disk by itself     : $ 5.00 US     ($6.00 CDN)
+    With any other order    : No charge
+                             ** Order Form (NO94) **
+
+    Name: __________________________________________________________________
+
+    Street Address: ________________________________________________________
+
+    City: _________________ State/Prov: _____________ Zip/Postal: __________
+
+    Country: ______________ Tel: __________________ Fax: ___________________
+
+    ÚÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    ³Qty³ Item description                      ³   Price   ³     Total     ³
+    ÃÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ³   ³                                       ³           ³               ³
+    ÃÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+    ³ Diskette Format     ³                      Subtotal-A ³               ³
+    ³                     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+    ³ [ ] 3.5"  LD (720k) ³ Shipping (See rate table below) ³               ³
+    ³                     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+    ³ [ ] 5.25" LD (360k) ³                      Subtotal-B ³               ³
+    ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+    ³       GST: 7% of Subtotal-B (Canadian residents only) ³               ³
+    ³       PST: 8% of Subtotal-A (Ontario  residents only) ³               ³
+    ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+    ³                                               Total   ³               ³
+    ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    Make cheques or money orders payable to:   "Dunfield Development Systems"
+
+        Shipping rates***   ³Delivery³ U.S.** ³ Canada*³ International**
+        ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        Airmail (diskettes) ³1-4 Wks ³  $5.00 ³  $5.00 ³  $5.00 U.S.
+        Fed-Ex  (diskettes) ³Next Day³ $15.00 ³ $10.00 ³ Call for rates
+    *   Canadian rates are in Canadian Dollars, all others are in U.S. funds.
+    **  Customer is responsible for any customs related charges and fees.
+    *** Rates are based on carriers pricing, and may change without notice.
+
+    GST# R131905739
+                   ** Common Questions and Answers **
+
+Q: Is MICRO-C a full ANSI compiler?
+
+    No, MICRO-C is a "subset" compiler. It does however, support much more
+    of the 'C' language than most other subset compilers, including:
+      - All 'C' statements:
+        if/else     while   do/while    for     break   continue
+        return      goto    switch/case/default {}      ;       asm
+      - All 'C' operators:
+        +  -  *  /  %  &  |  ^  <<  >>  >  <  == ~ ++ -- ?: , . ->
+        += -= *= /= %= &= |= ^= <<= >>= >= <= != ! () [] sizeof
+      - The following data types:
+        int     char    unsigned    (including: unsigned char)
+        struct  union   extern  static  register
+        *(pointer to any type, incl. pointers and structs)
+        - Arrays of any type (incl. multi-dimension, pointers & structs)
+        - Function can return any type
+        - Typecast of values to other types
+      - Decimal, Octal and Hex constants. eg: 127, 0177, 0x7f
+      - Full support for strings and character constants: ('' "")
+        Including: \n \r \t \b \f \177(Octal) \x7F(Hex)
+        (16 bit character constants are supported. eg: 'ab')
+      - Inline assembly code (single or multi statement).
+      - Preprocessor commands:
+        #define     (fully parameterized & multi-line)
+        #undef
+        #forget     (multi undef -similar to FORTH forget)
+        #include
+        #ifdef/#ifndef/#else/#endif (fully nested)
+        #file       (sets filename displayed in error messages)
+      - It DOES NOT support:
+        Typedef, Long* / Double / Float / Enumerated data types, Bit fields.
+      * 32 bit "long" number math functions are provided in the library.
+        These may be easily adjusted to manipulate even larger numbers.
+        (8051 Compiler includes a floating point library)
+
+Q: Is MICRO-C just another version of SMALL-C?
+
+    No, MICRO-C is a completely new design, with several advantages:
+      - Supports more of the 'C' language: structs & unions, unsigned int
+        & char, pointers to pointers, arrays of pointers, multi-dim arrays,
+        typecasting, sizeof, parameterized and multi-line defines ...
+      - Much more efficent code generated, much faster compilation.
+      - More portable: MICRO-C was designed to support many CPU architectures.
+
+Q: Does MICRO-C run on a (Macintosh, UNIX box, etc...)?
+
+    At the present time, all of our official products run on the IBM PC
+    under DOS or a DOS compatible operating system. We may be able to
+    provide un-official ports to other platforms, however technical support
+    will be minimal. Contact us for more information.
+
+Q: Does MICRO-C output assembly code?  Do I need an assembler?
+
+    MICRO-C generates assembly code. All developers kits include our XASM
+    cross assembler, which our IDE and CC commands automatically run for you,
+    giving you a "one step" compile.  A command option allows you to include
+    the 'C' source code as comments in the ASM listing.
+
+Q: Does MICRO-C support the (insert favorite processor)?
+
+    See the CATALOG for a list of processors which we directly support.
+    We have application notes on adapting the compiler to use with CPU
+    variants (such as extra registers/ports or differing memory maps).
+
+    If you need support for a different processor, please check with us.
+    We may be planning a release for the processor you want (or perhaps
+    you can "convince" us that is would be a good idea).
+
+Q: How much code can I fit in (nK) of memory?
+
+    That depends on so many factors that its impossible to give you a general
+    answer. It is usually more that you would think, because MICRO-C produces
+    fairly compact code. This is especially true with our "Developers Kits",
+    because their libraries are hand-coded in assembly language, using very
+    tight code. Here are some examples of appications:
+
+    MICRO-C Compiler (compiled itself!)                     23K
+    ANSI terminal with built in XMODEM file transfer        10K
+    Combination lock (rotary encoder, led indicator)        2K
+    Telephone "distinctive ring" switcher (1 - 3 lines)     1.5K
+
+Q: Is your EMILY52 simulator really that fast?
+
+    EMILY's speed is dependant on your PC (>150,000 inst/sec on 386/25,
+    >500,000 inst/sec on 486/33).
+
+    My tests have shown EMILY on the 386/25 to be roughly equivalent to a
+    4Mhz 8052. For example, a customer reported that an algorithm he had
+    calculated would take about 1 second on a 12Mhz 8052 took 3 seconds
+    under EMILY. In contrast, the same program took over 20 MINITES when
+    run with another popular simulator.
+
+Q: Is MICRO-C really as good as you say it is?
+
+    Sturgeons Rule has it that 90% of science fiction is junk. A similar
+    rule applies to PC software, but I'd say that 90% is a lower bound.
+    Once in a while, though, you find a product that makes up for the rest..
+    If price has kept you out of the microcontroller C market, you have no
+    further excuses. Micro-C is as good as it gets!
+                                    - Circuit Celler INK Dec91/Jan92
+
+    I just obtained Micro C, and I'm very impressed!...
+    The portability of Micro C is second-to-none, as is it's professionally
+    written code and overall usability... I need to emphasize here that
+    Micro C is by far the best coded compiler I've ever seen. This excellent
+    code quality extends throughout all associated modules.
+                                    - FIDOnet 'C' programmers echo
+
+    Dave, Thanks for responding to the minor problem I had with your
+    wonderful little compiler.
+                                    - A satisifed customer

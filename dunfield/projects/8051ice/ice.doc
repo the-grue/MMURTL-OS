@@ -1,0 +1,640 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                       A
+    
+                                    LOW COST
+    
+                              In-Circuit Emulator
+    
+                                    for the
+    
+                                      8051
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1994-1995 Dave Dunfield
+                              All rights reserved.
+    8051 In-Circuit Emulator                                         Page: 1
+
+
+    1. INTRODUCTION
+    
+          The 8051 is a popular single-chip microcontroller. It offers 4K of
+       on board ROM, 128 bytes of RAM, up to 32 parallel I/O lines, a serial
+       port, and two timers with external control inputs. Although "old"  by
+       technology standards, the 8051 has endured well, and is still used in
+       many new product designs. Its popularity is further evidenced by  the
+       host  of  "spin-off"  processors  which  are  have  been   introduced
+       recently.
+    
+          The 8051 also has the capability to address up to 128K of external
+       memory, however to use this ability, you must "give up" 18 of the  32
+       available I/O lines.  In  addition,  external  memory  is  much  more
+       difficult for software to manipulate than internal memory. What  this
+       means in practical terms, is that the 8051 is much better  suited  to
+       true single-chip designs in which all memory is contained within  the
+       chip.
+    
+          The disadvantage of the single-chip 8051 design lies in  the  area
+       of software development. There is no provision  for  downloading  and
+       testing code using the standard 8051 parts. While  Mask-ROM  and  OTP
+       versions of the chip are fairly inexpensive, windowed EPROM  versions
+       are quite costly and have limited life. Even with  an  EPROM  device,
+       the best you can do is  "Burn  and  Learn",  a  process  whereby  you
+       program the device with your code, and try it, hoping  that  it  will
+       work or at least you will be able to figure out what when wrong.  All
+       too often, the first time you program and try your code,  the  result
+       is a deafening silence (No apparent activity). Every time you want to
+       make a change or try something else, you must erase the device (under
+       a U/V lamp), and then re-program it with the new code.  This  can  be
+       very time consuming.
+    
+          Professional developers use "In Circuit Emulators" (ICE)  to  test
+       their code and hardware. This is a device that acts like an  8051  as
+       far as the the hardware and  software  are  concerned,  but  provides
+       external access to the memory and registers along with numerous other
+       features to facilitate debugging. These systems are  usually  out  of
+       reach of most hobbiests, who are then forced  to  adopt  an  external
+       memory design in which they can use a conventional ROM debug monitor,
+       and RAM for downloading. In doing so, they are  cheated  out  of  the
+       power and flexibility of the single-chip design, and end up having to
+       construct a system considerably more complex than necessary.
+    
+          You will often see a "homebrew" design containing an 8031 (ROMless
+       8051), ROM, RAM, (plus required address latch), RS-232  driver  chip,
+       and external I/O latches where  a  single  OTP  8051  could  be  used
+       instead.
+    8051 In-Circuit Emulator                                         Page: 2
+
+
+          This document presents the details  on  constructing  a  LOW  COST
+       in-circuit emulator for the 8051. The hardware for the device can  be
+       constructed for well under $100, and can be  completed  in  a  single
+       evening. It provides a 40 pin header which plugs into the CPU  socket
+       of your target system and behaves like  a  single-chip  8051,  and  a
+       serial interface to a PC. As a minimum, it will let you download your
+       code into RAM for testing, without giving up the  8051's  I/O  ports.
+       With  added  software,  it  provides  download,   run,   single-stop,
+       breakpoints, register and memory access and  more  features  using  a
+       windowed user interface on the PC.
+    
+    2. HARDWARE
+    
+          This section describes the hardware design of the  8051  emulator.
+       Refer to the schematic diagram for connection details.
+    
+       2.1 Emulation Processor
+    
+             The heart of the emulator is the DS5000 processor  from  Dallas
+          Semiconductor. This is a standard 8051 core with  32K  of  on-chip
+          non-volitile RAM, and a  couple  of  extra  control  registers  to
+          facilitate mapping the RAM into the 8051's code and  data  address
+          spaces. The nice thing about having the RAM on-chip, is  that  the
+          I/O ports are unaffected. When  the  RAM  is  configured  as  CODE
+          memory, the DS5000 behaves exactly  as  a  single-chip  8051.  The
+          NV-RAM is static with a  built-in  lithium  battery,  and  has  no
+          limitations on the number of writes. You can download your code as
+          many times as you like without damaging  the  device.  The  DS5000
+          also includes a loader in ROM, which permits you to bootstrap code
+          into the RAM to get underway.
+    
+             The Dallas chip comes in several variations. The  DS5000  is  a
+          standard 40 pin DIP package (Well, mostly standard, it is really a
+          BOX which is about double the height of a normal chip).  There  is
+          also a SIP  version  called  the  DS2250,  which  is  functionally
+          identical to the DS5000 but usually slightly less expensive. There
+          is also the DS2250T, which contains an extra 32K RAM (64K  total),
+          and a real time clock (Also run from the lithium battery).
+    
+             I used a DS2250T in my emulator. A DS2250  can  be  substituted
+          without modification. A DS5000 can also be used, but keep in  mind
+          that the pinout shown on my schematic is for the SIP  socket.  The
+          SIP socket pinout is reversed from the 40 pin DIP devices  (Pin  1
+          is on the right), and one  row  of  pins  is  offset  by  1/2  pin
+          spacing. Otherwise the pinouts are the same.
+    8051 In-Circuit Emulator                                         Page: 3
+
+
+       2.2 Emulation Header
+    
+             Connection to the target (test) system is performed  through  a
+          40 pin DIP header J1, which has the pinout of an  8051  processor.
+          Note that the ribbon cable assembly reverses the pins so that  the
+          pin header on the board has pin 1 on the  RIGHT  (This  works  out
+          very well when using  a  DS2250,  because  it  also  has  reversed
+          connections).
+    
+             All pins of the  DS5000/2250  are  connected  directly  to  the
+          emulation header, except for: RESET,  P3.0/RXD,  P3.1/TXD,  XTAL1,
+          XTAL2 and VCC.
+    
+       2.3 Power Supply
+    
+             Having only two IC's, the power requirements  of  the  emulator
+          are very low. Power is supplied by a standard 9V "wall wart" power
+          supply connected to J2, and an on-board 7805 +5V regulator.  There
+          is also the option of powering the  emulator  from  the  processor
+          socket of the target system. Switch S1 is a SPDT which selects the
+          power source. A center-off position cuts power completely.
+    
+       2.4 Host interface
+    
+             Communication with the host  PC  is  accomplished  through  the
+          on-chip serial port. The P3.0/RXD  and  P3.1/TXD  lines  from  the
+          emulation processor are directed to a PC serial interface.  RS-232
+          level conversion is performed  by  a  MAX-232,  which  allows  the
+          system to operate using only +5V.
+    
+             To replace the "stolen" serial port, a second serial connection
+          from the PC is brought down and directed to the  emulation  header
+          serial I/O pins. Switch S2 is a DPDT which selects between "DEBUG"
+          mode in which serial I/O is directed through the PC, and  "BYPASS"
+          in which serial I/O occurs directly to the emulation header.
+    
+             In "DEBUG" mode, the PC can generate and intercept messages  to
+          and from the emulator containing debug information, while  copying
+          any application serial I/O  to  the  emulation  header  through  a
+          second COMM port.
+    
+             In "BYPASS" mode, the PC cannot communicate with the  emulator,
+          although it can monitor serial transmission in both directions via
+          its two COMM ports. The processor communicates directly  with  the
+          emulation header. This is useful for testing the final code  after
+          debugging is complete, without involving the emulator software.
+    
+       2.5 Program Loading
+    
+             When the DS5000/2250 powers up, it samples its PSEN pin, and if
+          it is held LOW, it executes an on-chip ROM containing a  "loader".
+          The loader has its own command set, and permits you  to  configure
+          the on-chip RAM, and download your program to it. Switch S3  is  a
+          SPST which grounds the PSEN line, thus enabling the loader.
+    8051 In-Circuit Emulator                                         Page: 4
+
+
+       2.6 Reset Circuit
+    
+             The  emulator  provides  four  means  of  reseting  the  target
+          processor:
+    
+             - Power up reset circuit
+             - Manual reset button
+             - Host PC controlled reset
+             - Target system generated reset
+    
+             The power-up reset  circuit  consists  of  a  capacitor  and  a
+          resistor.  When  power  is  first  applied,   the   capacitor   is
+          discharged, and pulls the  reset  line  to  +5V  (reset).  As  the
+          capacitor is charged through the resistor, the reset line drops to
+          0V (not reset).
+    
+             The manual reset button S5 provides a momentary  connection  to
+          +5V to reset the processor at any time.
+    
+             Transistor Q1 and associated circuitry provide a reset via  the
+          RTS line of the PC host interface. By lowering  RTS,  the  PC  can
+          cause a reset at any time.
+    
+             Switch S4 connects the reset circuitry  to  the  target  system
+          reset line on the emulation header. When this  switch  is  closed,
+          the target system can reset the emulator.
+    
+       2.7 Crystal
+    
+             The emulator contains its own 11.059Mhz crystal,  which  (along
+          with the internal power supply) permits it to  operate  without  a
+          target system attached. Jumper block  S6  permits  to  you  switch
+          between the internal crystal, and the crystal connections  of  the
+          emulation header. You may also substitute a crystal  by  attaching
+          it to a two pin header, and pluging it into the center two pins of
+          S6.
+    8051 In-Circuit Emulator                                         Page: 5
+
+
+    3. SOFTWARE
+    
+          This section describes software techniques that can be  used  with
+       the 8051 emulator.
+    
+       3.1 Native Loader
+    
+             The emulator can be used without  any  additional  software  by
+          using the internal loader of the  DS5000/2250.  Simply  load  your
+          program using the loader, then RUN it.
+    
+             While this does not provide many debugging features, it is much
+          faster and easier than programming and replacing  processors.  The
+          download RAM eliminates programming  and  erasing  time,  and  the
+          emulation header prevents you from having  to  remove/replace  the
+          CPU in the test system.
+    
+             This method of using the emulator  is  also  an  ideal  way  to
+          checkout your final code before committing it to ROM, even if  you
+          are debugging with some of the software add-on's described below.
+    
+             You can interact with your program via the serial  port  (DEBUG
+          mode), or connect the processor serial port to the  target  system
+          socket for use by the application (BYPASS mode).  Even  in  BYPASS
+          mode, you can monitor both sides of the data transfer from the two
+          PC COMM ports.
+    
+             Dunfield Development Systems sells a low-cost Data Line Monitor
+          (DLM) program that can  be  used  to  capture,  examine  and  save
+          bidirectional serial data using two COMM ports.
+    
+       3.2 Resident Monitor
+    
+             Any 8051 monitor program  can  be  installed  in  the  emulator
+          (using the internal loader), and it can then be used  to  download
+          and  test  other  programs.  With  a  decent  monitor,   you   can
+          examine/change registers and memory, disassemble program code, set
+          and clear breakpoints, run and single-step the program.
+    
+             Most monitors require only a serial TTY connection, and can  be
+          directy connected to the emulator.
+    
+             Since the 8051 cannot normally write to its download RAM,  most
+          monitors require that CODE  and  DATA  be  mapped  into  a  single
+          address space in external memory. The DS5000/2250 does not provide
+          this configuration, however you  re-map  CODE  and  DATA  memories
+          under software control. You will likely have to modify the monitor
+          to re-map  CODE  as  DATA  whenever  it  wishes  to  write  to  it
+          (Download, Setting/Clearing Breakpoints etc.). See the section  on
+          DS5000 Enhancements later in this document.
+    
+             Dunfield Development Systems sells an 8051 ROM monitor as  part
+          of our MONITORS  package.  It  is  also  included  with  our  8051
+          Developers Kit.
+    8051 In-Circuit Emulator                                         Page: 6
+
+
+       3.3 PC Hosted Emulation Kernal
+    
+             To obtain  maximum  performnce  from  the  emulator,  both  the
+          emulator and the PC must work together to minimize the  impact  of
+          the debugger on the target system. By placing a small "kernal"  in
+          the emulator, and most of the debugger  logic  in  a  PC,  we  can
+          achieve the following benefits:
+    
+          - Better user interface. The PC can provide a nice "windowed" user
+            interface with pop-up menus, which is much nicer  than  the  TTY
+            oriented command interpreter of most monitors.
+    
+          - Very small kernal. Less than the 2K minimum code  block  of  the
+            DS5000/2250.
+    
+          - No resources used. The kernal can upload/download information to
+            the PC, instead of requiring a block  of  RAM  as  most  monitor
+            programs do.
+    
+          - High speed interface. The  kernal  and  PC  can  talk  a  binary
+            protocol which is double the speed of the  HEX  formats  usually
+            used by debug monitors. I  run  my  PC<>EMULATOR  connection  at
+            28800 bps, which is three times faster than the 9600 bps typical
+            of most monitors. This gives me download  times  which  are  six
+            times faster than with most monitors.
+    
+          - Serial I/O redirection. When the program under test is  running,
+            the PC can redirect serial I/O to and from the second COMM port,
+            which causes to to appear at the target system processor socket.
+            Using this technique, the emulator provides a PC connection, AND
+            use of the serial port by the application at the same time.  You
+            can also redirect the applications serial I/O to a window on the
+            PC screen.
+    
+          - "in-circuit" simulation. With a defined kernal protocol, you can
+            implement a simulator on the  PC  which  communicates  with  the
+            kernal to perform physical I/O of the 8051 ports and  timers.  A
+            simulator   can   give   you   additional   debugging   features
+            not-possible on the "real" processor without additional hardware
+            (such as a traceback buffer).
+    
+             The EMILY52 simulator/emulator package available from  Dunfield
+          Development Systems contains a PC hosted  debugger/kernal  and  an
+          in-circuit simulator which provides maximum capability of the 8051
+          emulator, including all of the features described above.
+    8051 In-Circuit Emulator                                         Page: 7
+
+
+    4. DS5000 Enhancements
+    
+          The  DS5000/2250  processor  has  several  enhancements  over  the
+       standard 8051. These include on-chip nv-RAM, a watchdog circuit,  and
+       an encyrytion system. These enhancements are  accessed  via  two  new
+       Special Function Registers, and six additional bits in the  PCON  and
+       IP registers.
+    
+       4.1 TA - Timed Access Register ($C7)
+    
+             The timed access register is used to access  certain  protected
+          functions in other registers. To performed the timed  access,  you
+          must have three seqential writes. First a $AA is writen to the  TA
+          register, then $55 is written to the TA register, then the desired
+          value is written to the "protected" function.
+    
+            TA      EQU     $C7         Address of TA regsiter
+                    MOV     TA,#$AA     Write unlock code 1
+                    MOV     TA,#$55     Write unlock code 2
+                    ORL     IP,#$80     Reset watchdog timer
+    
+             Any  attempt  to  alter  protected  functions  which   is   not
+          immediately precedded by the correct sequence of writes to TA will
+          be blocked.
+    
+       4.2 MCON - Memory Control Register ($C6)
+    
+             This register configures the memory layout of the on-chip RAM.
+    
+           7     6     5     4     3     2     1     0
+        +-----+-----+-----+-----+-----+-----+-----+-----+
+        | PA3 | PA2 | PA1 | PA0 | RA  | CE2 | PAA | n/u |
+        +-----+-----+-----+-----+-----+-----+-----+-----+
+    
+        PA3 PA2 PA1 PA0     - Set Code/Data address
+         0   0   0   0      $0000 (Not used)
+         0   0   0   1      $0800
+         0   0   1   0      $1000       Any addresses below the programmed
+         0   0   1   1      $1800       value appear as CODE memory. Equal
+         0   1   0   0      $2000       or above addresses appear as DATA.
+         0   1   0   1      $2800
+         0   1   1   0      $3000
+         0   1   1   1      $3800
+         1   0   0   0      $4000
+         1   0   0   1      $4800
+         1   0   1   0      $5000
+         1   0   1   1      $5800
+         1   1   0   0      $6000
+         1   1   0   1      $6800
+         1   1   1   0      $7000
+         1   1   1   1      $8000   Note 4K increment instead of 2K
+        PAA bit (MCON.1) must be set to 1 to write PA3-PA0.
+        TA is NOT required once PAA is set to 1.
+    8051 In-Circuit Emulator                                         Page: 8
+
+
+        RA  - Sets the maximum useable address in Embedded memory
+            0 = 8K  (0000-1FFF)
+            1 = 32K (0000-7FFF)
+          This bit cannot be altered by the application.
+          It can only be written during Program Load Mode.
+    
+        CE2 - Enables the CE2 signal to additional embedded RAM data memory.
+            0 = Data memory disabled
+            1 = Data memory enabled (DS2250T only!)
+          When enabled, data memory appears beginning at $0000 in the DATA
+          address space (in parallel with the CODE).
+    
+        PAA - Partition Address Access
+            0 = Partition Address Bits (PA3-PA0) cannot be modified
+            1 = Enable write to Partition Address Bits
+          TIMED ACCESS (TA) is required to write to this bit
+    
+       4.3 PCON - Power Control Register ($87)
+    
+    
+             Five bits have been added to the 8051 PCON register:
+    
+        POR (PCON.6) - Indicates the previous RESET was caused by POWER ON
+          This bit is cleared to 0 when a power on reset occurs.
+          It remains at 0 until it is set to 1 by software.
+          TIMED ACCESS (TA) is required to write this bit.
+    
+        PFW (PCON.5) - Power Fail Warning
+          This bit is set to 1 whenever VCC falls below 4.6 volts.
+          Remains set even if VCC rises.
+          Cleared to 0 after any read of the PCON register.
+    
+        WTR (PCON.4) - Watchdog Timer Reset
+          This bit is set to 1 following a RESET caused by the watchdog.
+          Cleared to 0 after any read of the PCON register.
+    
+        EPF (PCON.5) - Enable Power Fail Interrupt
+            0 = Power Fail Interrupt disabled
+            1 = Power Fail Interrupt enabled
+          Cleared to zero following any type of reset.
+    
+        EWT (PCON.4) - Enable Watchdog Timer Reset
+            0 = Watchdog timer reset disabled
+            1 = Watchdog timer reset enabled
+          Clear to zero on a POWER ON reset only.
+          TIMED ACCESS (TA) is required to write this bit.
+    8051 In-Circuit Emulator                                         Page: 9
+
+
+       4.4 ROM Bootstrap Loader
+    
+             The DS5000/2250 contains  an  internal  loader  in  ROM,  which
+          permits you to load code  and  configure  the  chip.  Due  to  the
+          non-volitile nature of the device, you should only have to do this
+          once.
+    
+             To access the bootstrap loader, hold the PSEN line to  a  logic
+          zero (ground) while resetting the DS5000/2250. Then press ENTER  a
+          few times on an attached PC running terminal  emulation  software,
+          until you see the ROM loader's welcome message and '>' prompt.
+    
+             The loader auto-detects the  incoming  serial  baud  rate.  The
+          acceptable rates for some  common  crystal  fequencies  are  shown
+          below. For a more complete  reference,  consult  the  DALLAS  data
+          books.
+    
+              Mhz      300    1200    2400    4800    9600
+            12.0000             X       X       X
+            11.0592     X       X       X       X       X
+            11.0000     X       X       X       X       X
+            10.0000             X       X       X
+             9.2160     X       X       X       X       X
+             8.0000             X
+             7.3728     X       X       X       X       X
+             6.1440     X       X       X
+             6.0000     X       X       X
+             5.1200     X       X       X
+             5.0000     X       X       X
+             4.0960     X
+             3.5795     X       X       X       X       X
+             2.0000     X
+             1.8432     X       X       X       X       X
+    
+             Once  you  have  reached  the  loaders  prompt,  the  following
+          commands are available:
+    
+            C   - Return CRC-16 of embedded RAM
+            D   - Dump Intel Hex file
+            F   - Fill embedded RAM with constant
+            K   - Load 40 bit encryption key
+            L   - Load Intel Hex file
+            R   - Read MCON register
+            T   - Trace (Echo) incoming Intel Hex data
+            U   - Clear security lock & erase key
+            V   - Verify with incoming Intel Hex data
+            W   - Write MCON register
+            Z   - Set security lock
+    8051 In-Circuit Emulator                                         Page: 10
+
+
+    5. USING THE EMULATOR
+    
+          The "standard" configuration for the  emulator,  is  with  the  S2
+       switch set to DEBUG, and the PC connected to the CONTROL connector of
+       the host interface cable. If you are  using  the  EMILY  package,  or
+       other software which performs serial redirection, a second PC  serial
+       port should be connected to the DATA connector.
+    
+       5.1 Loading your program
+    
+             To enter LOAD mode, switch S3 to  LOAD,  and  press  the  RESET
+          button (S5). Press ENTER on the PC a few times, until you see  the
+          DALLAS loader welcome message and prompt. At the prompt, enter the
+          following command:
+    
+            'U' to unlock the RAM
+            'L' to load your program
+            Send an INTEL HEX format download file
+            'W nn' to set the memory configuraton.
+            (To determine the value 'nn', consult the MCON register
+            description in the previous section).
+    
+       5.2 Running your program
+    
+             Once you have loaded your program, switch  S3  to  NORMAL,  and
+          press RESET to start execution.
+    
+             If your application requires that the serial port be  connected
+          on your target system, switch S2 to BYPASS.  Note  that  you  will
+          have to switch it back to DEBUG before you can download again.  If
+          you leave S2 set to DEBUG, you can communicate with  your  program
+          through the CONTROL port.
+    
+             Even in BYPASS  mode,  you  can  monitor  serial  communication
+          occuring on the system from each of the two COM ports. The CONTROL
+          port will show data originating at the CPU, and the DATA port will
+          show data originating on the board. My DLM program can be used  to
+          show both data streams in  a  single  "split  line"  display  with
+          control codes etc.
+    
+             Make sure that your PC communications software is configured to
+          raise the RTS line, otherwise the emulator will be held in RESET.
+    
+       5.3 Using EMILY/MONICA
+    
+             If you are using my EMILY52 package, you will have a  total  of
+          four debugging modes available:
+    
+          5.3.1 No debugger
+    
+                This is the simple emulation described above, in which  your
+             program simply executes directly on  the  DS5000/2250  with  no
+             intervention by a debugger. It is most useful for a final  test
+             of your code before commiting to ROM.
+    8051 In-Circuit Emulator                                         Page: 11
+
+
+          5.3.2 In-Circuit Debugging
+    
+                This involves the use of MONCA52, the  in-circuit  debugger.
+             This allows you to load code, view/modify memory and registers,
+             disassemble code, set  breakpoints,  run  and  single-step  the
+             program, and perform remote reset, all from the PC.
+    
+                To use in-circuit debugging, connect  the  CONTROL  port  to
+             COM2, and the DATA port to COM1.  (You  can  use  the  /SWAPCOM
+             options or EMSETUP program to reverse MONICA's use of  the  COM
+             ports if you  perfer).  Load  the  kernal  using  the  internal
+             bootstrap  loader,  and  use  "W  18"   to   set   the   memory
+             configuation. Finally,  RUN  the  kernal  (Leave  S2  in  DEBUG
+             position), and invoke MONICA52 with the /DS5000 option. See the
+             MONICA52 user  manual  for  details  on  using  the  in-circuit
+             debugger.
+    
+          5.3.3 In-Circuit Simulation
+    
+                Using the EMILY52 simulator,  you  can  perform  a  software
+             simulation of  the  8051  processor,  and  still  have  serial,
+             parallel  I/O  and  timer  functions  occuring  on  the  actual
+             hardware. The simulator provides a couple  of  useful  features
+             not  avaiable  on  the  in-circuit  debugger  such  as  a  4095
+             instruction  traceback  buffer,  and  the  ability   to   cause
+             interrupts at any specific point.
+    
+                To use in-circuit simulation,  set  up  as  described  under
+             "In-Circuit debugging" above, but run  EMILY52  with  the  '/H'
+             option instead of MONICA52. See the  EMILY52  user  manual  for
+             details on using the simulator.
+    
+          5.3.4 Stand-Alone Simulation
+    
+                This final debugging mode does not include the emulator.  It
+             consists  of  simply  running  EMILY52  in   stand-alone   (non
+             hardware) mode.  Consult  the  EMILY52  user  manual  for  more
+             information.
+
+
+
+                            8051 In-Circuit Emulator
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+
+     2. HARDWARE                                                            2
+
+        2.1 Emulation Processor                                             2
+        2.2 Emulation Header                                                3
+        2.3 Power Supply                                                    3
+        2.4 Host interface                                                  3
+        2.5 Program Loading                                                 3
+        2.6 Reset Circuit                                                   4
+        2.7 Crystal                                                         4
+
+     3. SOFTWARE                                                            5
+
+        3.1 Native Loader                                                   5
+        3.2 Resident Monitor                                                5
+        3.3 PC Hosted Emulation Kernal                                      6
+
+     4. DS5000 Enhancements                                                 7
+
+        4.1 TA - Timed Access Register ($C7)                                7
+        4.2 MCON - Memory Control Register ($C6)                            7
+        4.3 PCON - Power Control Register ($87)                             8
+        4.4 ROM Bootstrap Loader                                            9
+
+     5. USING THE EMULATOR                                                 10
+
+        5.1 Loading your program                                           10
+        5.2 Running your program                                           10
+        5.3 Using EMILY/MONICA                                             10

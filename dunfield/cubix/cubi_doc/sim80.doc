@@ -1,0 +1,177 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                                     SIM80
+    
+                               An 8080 simulator
+                                  for the 6809
+    
+                               Revised: 30-Jul-90
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                       Copyright 1983,1990 Dave Dunfield
+                              All rights Reserved
+    SIM80                                                            Page: 1
+
+
+    1. INTRODUCTION
+    
+          SIM80 is an simulator for the Intel 8080 processor, which runs  on
+       the motorola 6809 under CUBIX. It allows software written for an 8080
+       to be run on the 6809.
+    
+       1.1 DIFFERENCES
+             SIM80 exactly emulates the 8080 instructions and  architecture,
+          except for the following:
+    
+          1) SIM80 executes slower than a hardware 8080.
+    
+          2) The parity flag is not supported, along with the parity testing
+             instructions (JPE, JPO, CPE, CPO, RPE, RPO). Most 8080 software
+             does not use the parity flag, and it was decided emulating  the
+             parity flag was not worth  the  reduction  in  emulation  speed
+             which would be incurred, as this is an operation  not  directly
+             supported on the 6809.
+    
+          3) The I/O instructions 'IN' and 'OUT' are not  supported  because
+             the 6809 has no I/O address space.  The  'OUT'  instruction  is
+             used to interface to the 6809 operating system (Below).
+    
+          4) The enable/disable interrupts instructions 'EI'  and  'DI'  are
+             not supported due to lack of  physical  interrupt  lines  on  a
+             simulated processor.
+    
+          5) The 8080 restart instructions are not supported.
+    
+             If SIM80 encounters a halt instruction, and invalid opcode,  or
+          an unsupported  opcode,  it  issues  an  appropriate  message  and
+          terminates, returning to the 6809 DOS.
+    SIM80                                                            Page: 2
+
+
+    2. USING SIM80
+    
+          To run an 8080 program under SIM80, first download the  8080  code
+       into a file with the type '.80'. Then, to execute the  8080  program,
+       type: ' SIM80 <filename> ' where <filename> is the name of  the  file
+       containing the 8080 code.
+    
+          The 'DE' register pair of the emulated 8080 processor will be  set
+       to point to the command line after the filename, allowing operands to
+       be parsed by the program under simulation.
+    
+          The 'SP' register of the emulated 8080 processor will  be  set  to
+       point to the top of available memory.
+    
+    3. INTERFACE TO 6809 OPERATING SYSTEM
+    
+          SIM80 supports an interface to the 6809 DOS (CUBIX) via the unused
+       8080 'OUT' instruction. When an OUT instruction is encountered by the
+       simulator, the 8080 registers are mapped to  the  6809  registers  as
+       follows:
+    
+                    8080         6809
+    
+                    B-C   <==>    A-B (D)
+                    D-E   <==>    Y
+                    H-L   <==>    X
+    
+          SIM80 then executes the system call indicated by the  port  number
+       specified by the OUT instruction. After the system call is performed,
+       the processor registers are mapped back, the  return  code  from  the
+       system call is placed  in  the  8080  'A'  register,  and  simulation
+       resumes.
+    SIM80                                                            Page: 3
+
+
+       3.1 Debug mode
+    
+             The simulator has a  built  in  8080  debugger,  which  can  be
+          invoked by the '/DEBUG' qualifier on the SIM80 command.
+    
+                        Eg:  ' SIM80/DEBUG <filename> '
+    
+             If this qualifier is used, SIM80 will load  the  file,  display
+          the starting address, and then prompt with '8080> '. The following
+          commands may now be entered:
+    
+    
+    
+      SET    TRACE                     - Enable/Disable TRACE mode.
+             NOTRACE
+    
+             PSW <value>
+             BC  <value>
+             DE  <value>               - Set contents of 8080 Registers.
+             HL  <value>
+             SP  <value>
+             PC  <value>
+    
+             BRKPT <0-7> <address>     - Set breakpoint.
+    
+    
+      DISPLAY                          - Displays registers and breakpoints.
+      MEMORY <start addr> <end addr>   - Display memory.
+    
+      STORE <address> <byt1> <byt2>... - Store into memory.
+    
+      EXIT                             - Exit debugger.
+    
+      GO                               - Begin simulation, If TRACE is
+                                         enabled, then address, opcode
+                                         and registers  are  displayed
+                                         as simulation  occurs.  <ESC>
+                                         key can be used to abort.
+    
+      STEP                             - Similar to  go,  but  prompts
+                                         with ':' and waits for  space
+                                         before simulating  each  8080
+                                         instruction. <CR> exits.
+    
+    NOTE: SIM80 executes considerably SLOWER when using the '/DEBUG'
+          qualifier.
+
+
+
+                                     SIM80
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+        1.1 DIFFERENCES                                                     1
+
+     2. USING SIM80                                                         2
+
+
+     3. INTERFACE TO 6809 OPERATING SYSTEM                                  2
+
+        3.1 Debug mode                                                      3

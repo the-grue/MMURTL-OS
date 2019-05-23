@@ -1,0 +1,7 @@
+ Developing Your Own 32-Bit Operating System
+ Install All MMURTL Files , ALL.BAT
+ Install Only MMURTL Operating System , OS.BAT
+ Install Only MMURTL Source Code , SOURCE.BAT 
+ Install Only CM32 Compiler and DASM Assembler , COMPASS.BAT
+ Install Only MMURTL Sample Programs , SAMPLE.BAT
+ Install Only MSCode16 Utilities , MSCODE.BAT

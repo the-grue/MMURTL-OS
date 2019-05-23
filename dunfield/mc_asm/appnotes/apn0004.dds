@@ -1,0 +1,110 @@
+MICRO-C: Simulating structs/unions in older MICRO-C versions
+
+The 'C' constructs of structures and unions are not supported by versions
+of the MICRO-C compiler prior to 3.0. If you have version 2.xx or earlier
+of MICRO-C, this application note describes ways by which you can achieve
+similar functionality to these constructs.     If you have version 3.0 or
+later, you do not need to use this application note, since you can define
+and use structures/unions directly.
+
+
+If you are writing a new program, it is fairly easy to avoid these features,
+since equivalent functionality can usually be accomplished with multiple
+arrays. Consider the structure definitions:
+
+    struct data_record {
+        char name[11];                  /* A name (10+\0 chars max) */
+        char flags;                     /* Character type indicator */
+        unsigned value;                 /* A 16 bit value */
+        };
+
+    struct data_record records[10];     /* Declare actual variable space */
+
+    main()
+    {
+        strcpy(records[0].name, "test");    /* Write 1st name */
+        records[0].flags = 'A';             /* Write 1st type */
+        records[0].value = 0;               /* Write 1st value */
+
+        print_record(&records[0]);          /* Pass structure to function */
+    }
+
+    print_record(rec)
+        struct data_record *rec;
+    {
+        printf("%s:%c=%u\n", rec->name, rec->flags, rec->value);
+    }
+
+You can write the above without structures as:
+
+    char record_name[10][11];           /* 10 names */
+    char record_flags[10];              /* 10 types */
+    unsigned record_value[10];          /* 10 values */
+
+    main()
+    {
+        strcpy(record_name[0], "test");     /* Write 1st name */
+        record_flags[0] = 'A';              /* Write 1st type */
+        record_value[0] = 0;                /* Write 1st value */
+
+        printf_record(0);                   /* Pass index to function */
+    }
+
+    printf_record(r)
+        unsigned r;
+    {
+        printf("%s:%c=%u\n", record_name[r], record_flags[r], record_value[r]);
+    }
+
+There are occasions however when real structures would be useful, in the above
+example, 'printf_record' can access only the one array of "pseudo structure's",
+whereas the version using structures could be passed a pointer to any structure
+member anywhere. Another case where structures are required is when you want
+to group data in a certain layout, and treat it as a single block of memory.
+
+We can obtain the entire functionality of structures by using the MICRO-C
+extended pre-processor (MCP), and some parameterized macros. The tecnique
+is to place your structure in an array (or use a pointer to the memory
+containing the structure), and define macros for each member, which add the
+offset to that member, and use typecasting and indirection (if necessary)
+to access the required type at that address:
+
+    #define Rname(s)    ((char*)(s+0))          /* Name */
+    #define Rflags(s)   (*(char*)(s+11))        /* Type at offset 11 */
+    #define Rvalue(s)   (*(unsigned*)(s+12))    /* Value at offset 12 */
+    #define Rsize       14                      /* Total size */
+
+    char records[10][Rsize];                    /* Array to hold structure */
+
+    main()
+    {
+        strcpy(Rname(records[0]), "test");  /* Write 1st name */
+        Rflags(records[0]) = 'A';           /* Write 1st type */
+        Rvalue(records[0]) = 0;             /* Write 1st value */
+
+        print_record(records[0]);           /* Pass member to function */
+    }
+
+    print_record(rec)
+        char *rec;
+    {
+        printf("%s:%c=%u\n", Rname(rec), Rflags(rec), Rvalue(rec));
+    }
+
+Notes:
+    The 'Rname' macro does not use indirection, since the name is a character
+    array, and is expected to evaluate to an address. The 'Rflags' and
+    'Rvalue' do use indirection since those members represent memory content.
+
+    In this case, the 'Rname' macro could be simplified to '(s)'.
+
+This method of simulating structures involves a little more work than actual
+structures do, since you have to code the offset to each member. It does
+however allow you to insure that each member is placed EXACTLY where you
+wish in the structure. You can also overlap members (fully or partially),
+creating "unions". Since you can do this on a member by member basis, you
+have great flexibility in creating combination structure/unions that you
+could not easily define with the standard 'C' syntax.
+
+If you use this tecnique on a processor that reqires word alignment, you must
+be careful to insure that all structures and members are aligned appropriatly.

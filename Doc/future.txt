@@ -1,0 +1,34 @@
+MMURTL is in it's infancy. The idea behind MMURTL was
+simplicity with power. I suspect MMURTL will have a
+GUI before long. You can bet it won't be a Mac or
+Windows clone.  It will also support a greater number
+of devices than it does now.
+
+Several people are already working on applications
+or have expressed a desire to do so. If this book is
+popular enough, a second version will undoubtedly
+be in the works. I would like to include user 
+applications in subsequent versions.
+
+Loading of DLLs and Device Drivers doesn't work in version
+1.0 of MMURTL. This will not be a problem for you while
+using MMURTL as a basis for your own operating system.
+If, however, you want to add device drivers, you will
+have to rebuild the operating system to do this. It's actually
+quite simple. Just look at any of the drivers in the system.
+
+The code is not very well optimized right now. For a 486 and the
+Pentium, alignment of targets for CALL and JMP (Jz) instructions
+should really be on DWORD and Paragraph boundaries for the best
+speed. Also rearrangment of register usage would speed things up
+considerably. This will all have to wait for version 2 and
+a better C compiler. The .PARA align command does, however, work
+in DASM, so things can be lined up modulo 16.
+
+I'd like to hear your ideas, but simplicity is foremost in 
+my mind. 
+
+Thank you,
+
+Rich Burgess
+2/9/95

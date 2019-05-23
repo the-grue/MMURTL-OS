@@ -1,0 +1,42 @@
+CHAINSAW
+
+This utility removes an entire directory tree, asking for permission
+only once, before beginning.
+
+This is very useful for removing entire software packages etc. which can
+have many files and sub-directories. Using the DOS delete command, you would
+have to visit each directory (starting at the leaves of the tree), delete
+all files (replying 'Y' to the prompt), backup one directory level, remove
+the directory, cd to the next "leaf" directory, and repeat the process.
+
+For a software package with 10 sub-directories (not uncommon today), this
+means entering at least 50 command lines (counting the 'Y' prompt to DEL).
+This is assuming you make no mistakes.
+
+CHAINSAW allows you to remove an entire tree, using a single command, which
+requires a single confirmation prompt.
+
+Use: CHAINSAW [directory] [/Quiet /System /Yes]
+
+ /Quiet   - Inhibit informational messages.
+ /System  - Removes SYSTEM and READONLY files.
+ /Yes     - Bypass "ARE YOU SURE" prompt *** CAUTION ***
+
+ * If [directory] is not specified, CHAINSAW will offer to remove the
+   tree from your current directory outward.
+
+*** NOTE *** - CHAINSAW is a *VERY* dangerous program if abused!
+If you are careless, you could lose a lot of data. CHAINSAW is much
+more potent than "DEL *.*".
+
+To minimize chances of disaster, I've made the command name 8 characters
+(the maximum allowed by DOS). It's unlikely that you will enter it by
+accident, however, DO NOT GET IN THE HABIT OF AUTOMATICALLY RESPONDING 'Y'
+TO THE "ARE YOU SURE" PROMPT!!!
+
+Also, in the interest of safety, CHAINSAW aborts on ANY error If this
+happens, fix the problem, and run CHAINSAW again.
+
+Enjoy,
+
+Dave Dunfield

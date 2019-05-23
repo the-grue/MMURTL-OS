@@ -1,0 +1,65 @@
+
+   This archive contains the TOUCH command which is distributed as  part
+of the MAKE facility of my MICRO-C compiler. Its purpose  it  to  update
+the timestamp of a file to the current or arbitrary time and date.
+
+   The MICRO-C source code for this command  is  included  in  the  file
+TOUCH.C, and demonstrates the use of MICRO-C's inline assembly  language
+feature. Many more utilities and example programs (over 1Meg of data) is
+included with the registered MICRO-C compiler. See the CATALOG file  for
+ordering information.
+
+NOTE: "TOUCH.C" is formatted to tab stops every 4 spaces.
+
+   Permission if hereby  granted  to  copy  and  use  this  program  for
+personal (non commercial) use, with  the  provision  that  my  copyright
+notices must not be altered or removed.
+
+Dave Dunfield
+--------------------------------------------------------------------------
+
+   The following in an excerpt from the MICRO-C reference  manual  which
+describes the operation of TOUCH (as it pertains to MAKE):
+
+
+   8.4 The TOUCH command
+
+         TOUCH is a small utility program which sets  the  timestamp  of
+      one or more files to the current or  specified  time/date.  It  is
+      useful as a  method  of  forcing  MAKE  to  recognize  a  file  as
+      "changed", even when it has not.
+
+         For example, if  you  had  decided  to  "undo"  several  recent
+      changes by restoring a backup of 'main.c', the restored file  will
+      probably have a timestamp which is  older  than  the  last  module
+      which was built. In this case, MAKE would be unaware that the file
+      has changed, and would therefore not rebuild the module.
+
+         The TOUCH command could then be used to "update" the  timestamp
+      of 'main.c' to the current time, causing MAKE to recognize it as a
+      changed file.
+
+                              TOUCH main.c
+
+         You could also use TOUCH to force rebuilding of several files:
+
+                       TOUCH main.c sub1.c sub2.c
+
+         Or even ALL '.C' files:
+
+                               TOUCH *.c
+
+         TOUCH can also be used to set the timestamp of  a  file  to  an
+      arbritrary value, this may be useful  to  PREVENT  a  change  from
+      causing an update:
+
+                     TOUCH main.c t=0:00 d=31/10/80
+
+         NOTE: Use of the 't=' or 'd=' parameters to  TOUCH  allows  the
+      possibility that a changed file  will  go  unnoticed.  CAUTION  is
+      advised.
+
+         The MSDOS  implementation  of  TOUCH  supports  '-h'  and  '-s'
+      options, which cause it to set  the  timestamp  of  HIDDEN  and/or
+      SYSTEM files. If these options are not used, TOUCH will not affect
+      those types of files.

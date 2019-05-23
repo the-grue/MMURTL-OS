@@ -1,0 +1,307 @@
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                  +-----------------------------------------+
+                  |                                         |
+                  |  *************************************  |
+                  |  * The IBM-PC COMMUNICATIONS library *  |
+                  |  *************************************  |
+                  |                                         |
+                  +-----------------------------------------+
+    
+    
+    
+    
+    
+                     An interrupt driven serial I/O lobrary
+                        for Stand-Alone 8086 applicatons
+                                 using MICRO-C.
+    
+    
+    
+    
+    
+                       Copyright 1990-1995 Dave Dunfield
+                              All rights reserved.
+    DK86 COMMUNICATIONS LIBRARY                                      Page: 1
+
+
+    1. IBM-PC COMMUNICATIONS Library
+    
+          The  MICRO-C  WINDOWING  LIBRARY  is  a  set  of  functions  which
+       implement serial I/O with an 8250 type UART device, such as  is  used
+       on most PC serial cards.
+    
+          The routines support  interrupt  driven  reception,  and  XON/XOFF
+       software flow control, as well as setting and monitoring  the  RS-232
+       control signals.
+    
+          To install  these  function  into  the  8086  library,  place  the
+       COMM.ASM file in the library subdirectory  (usually  \MC\LIB86),  and
+       issue the following commands:
+    
+                    slib i=tiny  a=comm
+                    slib i=small a=comm
+    
+       1.1 Function Definitions
+    
+             The  following  functions   are   available   in   the   IBM-PC
+          communications library:
+    CCLOSE                                                           CCLOSE
+    
+    
+    
+    PROTOTYPE:
+    
+        Cclose()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+             This function closes the communications port previously  opened
+          using "Copen". The system interrupt vectors and all other hooks to
+          the comm port are restored.
+    
+             This function must be called before any program  using  "Copen"
+          terminates, otherwise the communications port will be left  in  an
+          indeterminate state.  If  this  is  not  done,  there  will  be  a
+          possibility of system crash if an interrupt is received  from  the
+          port after the program has terminated.
+    
+    
+    EXAMPLES:
+    
+        Cclose();       /* Close comm port */
+        exit(0);        /* And terminate */
+    CGETC                                                             CGETC
+    
+    
+    
+    PROTOTYPE:
+    
+        int Cgetc()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        Character read from the communications port
+    
+    
+    DESCRIPTION:
+    
+             This function reads a single character from the  communications
+          port previously opened with "Copen". If no character is available,
+          "Cgetc" will wait for one.
+    
+    
+    EXAMPLES:
+    
+        /* Get a string from the comm port */
+        while((c = cgetc()) != '\r')
+            *ptr++ = c;
+        *ptr = 0;
+    COPEN                                                             COPEN
+    
+    
+    
+    PROTOTYPE:
+    
+        int Copen(int port, int speed, int mode, int modem)
+    
+    
+    ARGUMENTS:
+    
+        port    - Comm port to use (1, 2, 3 or 4)
+        speed   - Baudrate divisor to set
+        mode    - Communications parameters to set
+        modem   - Modem control lines to set
+    
+    RETURN VALUE:
+    
+        0       - Successful open
+        !0      - Requested comm port is not available
+    
+    
+    DESCRIPTION:
+    
+             The "Copen" function opens a serial communications port on  the
+          IBM PC for  access.  An  independant  interrupt  handler  and  I/O
+          drivers  are  installed,  which  allow  high  speed  full   duplex
+          operation of the serial port with optional XON/XOFF  flow  control
+          of both receive and transmit streams.
+    
+             Only one serial port may be accessed  at  a  time  using  these
+          functions,  If  "Copen"  is  called  more  than  once,   it   will
+          automatically close the last port before opening the new one.
+    
+             The meaning of the "speed", "mode", and "modem"  parameters  if
+          documented in the "comm.h" header file.
+    
+             An external "char" variable "Cflags" may be accessed to  enable
+          or disable transparency of the serial channel. When  "transparent"
+          is selected, XON/XOFF flow control is disabled, and  all  data  is
+          sent and received with no changes. When operating  in  this  mode,
+          you must insure that "Cgetc" is called frequently enough that  the
+          256 byte internal receive buffer will not overflow.
+    
+             Since "Cflags" is used by the  interrupt  handler,  you  should
+          disable and enable interrupts around any accesses to it.
+    
+    
+    
+    EXAMPLES:
+    
+        #include comm.h     /* Get comm port defintions */
+    
+        extern char Cflags;
+    
+        /*
+         * Program to read & echo characters on the serial port
+         * in transparent mode. (Until ESCAPE char is received)
+         */
+        main()
+        {
+            char c;
+    
+            if(Copen(1, _2400, PAR_NO|DATA_8|STOP_1, SET_RTS|SET_DTR))
+                abort("Cannot access COM1");
+    
+            disable();                  /* Disable interrupts */
+            Cflags |= TRANSPARENT;      /* Set transparency */
+            enable();                   /* Re-enable interrupts */
+    
+            while((c = Cgetc()) != 0x1B)    /* Do until ESCAPE */
+                Cputc(c);
+    
+            Cclose();                   /* Close the serial port */
+        }
+    CPUTC                                                             CPUTC
+    
+    
+    
+    PROTOTYPE:
+    
+        Cputc(char c)
+    
+    
+    ARGUMENTS:
+    
+        c       - Character to write to communciation port
+    
+    
+    RETURN VALUE:
+    
+        None
+    
+    
+    DESCRIPTION:
+    
+             The  "Cputc"  function  writes  the  given  character  to   the
+          communcinations port previously opened by "Copen".
+    
+    
+    EXAMPLES:
+    
+        while(*ptr)         /* Write a string to comm port */
+            Cputc(*ptr++);
+    CSIGNALS                                                       CSIGNALS
+    
+    
+    
+    PROTOTYPE:
+    
+        int Csignals()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        The modem input signals read from the open comm port
+    
+    
+    DESCRIPTION:
+    
+             This function reads the modem input signals (DSR, CD,  RI  etc)
+          from the serial communication port previously opened  by  "Copen",
+          and returns them as an integer value.
+    
+             The meaning of the individual bits in  the  value  returned  by
+          "Csignals" is documented in the "comm.h" header file.
+    
+    
+    EXAMPLES:
+    
+        if(!(Csignals() & DSR)) {
+            Cclose();
+            abort("Modem not ready"); }
+    CTESTC                                                           CTESTC
+    
+    
+    
+    PROTOTYPE:
+    
+        int Ctestc()
+    
+    
+    ARGUMENTS:
+    
+        None
+    
+    
+    RETURN VALUE:
+    
+        0-255   - Character read from comm port
+        -1      - No character available
+    
+    
+    DESCRIPTION:
+    
+             This function tests for a  character  from  the  communications
+          port previously opened with "Copen", and returns that character if
+          one if found. If no character is available, "Ctestc" returns -1.
+    
+    
+    EXAMPLES:
+    
+        if((c = Ctestc()) == -1) {
+            Cclose();
+            abort("No character available"); }
+
+
+
+                          DK86 COMMUNICATIONS LIBRARY
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. IBM-PC COMMUNICATIONS Library                                       1
+
+        1.1 Function Definitions                                            1
