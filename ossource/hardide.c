@@ -1,9 +1,12 @@
-/* MFM & IDE Hard Disk Device Driver for MMURTL.
-   This driver does not depend on the data stored in CMOS RAM for 
-   drive geometry.  Three routines determine number of sectors per track, 
-   number of cylinders, and number of heads by actually trying to seek 
-   and/or read them. This eliminates dependence on some system's proprietary
-   CMOS locations.
+/* IDE ATA-2 Device Driver for MMURTL.
+   This driver depends on data requested from ATA-2 devices
+   for drive geometry.  This will not work for older IDE
+   devices. This REPLACES the old HARDIDE.C driver.
+   This requires the newer Fsys.c (Version 1.1).
+
+  MMURTL Operating System Source Code
+  Copyright 1991,1992,1993,1994,1995,1996 Richard A. Burgess
+  ALL RIGHTS RESERVED   Version 1.1
 */
 
 #define U32 unsigned long
@@ -131,7 +134,7 @@ static U32  hddev_init(U32  dDevNum,
 #define CmdSetMedia 7   /* Not used unless mountable */
 #define CmdResetHdw 8   /* Used to reset controller hardware */
 
-/* CmdReadSect is the only device specific call in the IDE/MFM hard
+/* CmdReadSect is the only device specific call in the IDE hard
    disk device driver.  This allows you to read ONE sector
    specified by Cylinder, head and Sector number.
    Cylinder is HiWord of dLBA in DeviceOp call,
@@ -215,6 +218,7 @@ When reading from the port+X (where X =):
 #define HDC_SEEK       0x70   /* 0111 0000 */
 #define HDC_DIAG       0x90   /* 1001 0000 */
 #define HDC_SET_PARAMS 0x91   /* 1001 0001 */
+#define HDC_ID         0xEC   /* 1001 0001 */
 
 /* L O C A L   D A T A  */
 
@@ -242,6 +246,51 @@ static U8  hd1_type;
 static U8  hd1_heads;
 static U8  hd1_secpertrk;
 static U16 hd1_cyls;
+
+#define sIDEid 512
+
+static struct idestruct
+ {					/* 16 BIT WORD offset */
+  U16 config;		/* 0  General IDE configuration */
+  U16 ncyls;		/* 1 */
+  U16 rsvd1;		/* 2 */
+  U16 nheads;		/* 3 */
+  U16 rsvd2;  		/* 4 */
+  U16 rsvd3;  		/* 5 */
+  U16 nsectpertrk;	/* 6 */
+  U16 rsvd4[3];		/* 7-9    Vendor specific */
+  U16 serial[10];	/* 10-19  Device serial # */
+  U16 rsvd5[2];     /* 20-21  Vendor specific */
+  U16 bytesavail;	/* 22     # of vendor specific bytes avail on read LONG */
+  U8 firmrev[8];	/* 23-26  Firmware revision - ASCII 8 */
+  U8 model[40];		/* 27-46  Device Model # */
+  U16 rdmulti;		/* 47     Info on Read Multiple commands */
+  U16 rsvd6;		/* 48 */
+  U16 capabil;		/* 49     Capabilties */
+  U16 rsvd7;		/* 50 */
+  U16 pioxfermode;	/* 51 */
+  U16 dmaxfermode;	/* 52 */
+  U16 validflds;	/* 53 */
+  U16 ncylsx;		/* 54-56 current/xlated cyls, heads, sect per tracks */
+  U16 nheadsx;
+  U16 nsectpertrkx;
+  U32 capsectors;	/* 57-58 long */
+  U16 rdmultisect;	/* 59    More info in read multiple sectors command */
+  U32 totalsectlba;	/* 60-61 Total sectors in LBA mode only */
+  U16 singldmaxfer;	/* 62 */
+  U16 multidmaxfer;	/* 63 */
+  U16 advancedpio;	/* 64 */
+  U16 dmatimemin;	/* 65 */
+  U16 dmatimerec;	/* 66 */
+  U16 piotimemin;	/* 67 */
+  U16 piotimerec;	/* 68 */
+  U16 piorsvd;		/* 69 */
+  U16 piorsvd1;		/* 70 */
+  U16 rsvd8[127-71+1]; 	/* 71-127 */
+  U16 rsvd9[159-128+1];	/* 128-159 */
+  U16 rsvd9[255-160+1];	/* 160-255 */
+  };
+static struct idestruct IDEid;
 
 #define sStatus 64
 
@@ -278,7 +327,7 @@ static struct statstruct
 static struct statstruct hdstatus;
 static struct statstruct HDStatTmp;
 
-static struct dcbtype 
+static struct dcbtype
 {
 	S8   Name[12];
 	S8   sbName;
@@ -352,6 +401,10 @@ U32  erc;
    on the first read.
 */
 
+	hd0_type =	1;
+	hd1_type =	1;
+
+/* COMMENT OUT
 	hd0_type =	ReadCMOS(0x19);	/* read this but don't use it */
 	hd0_heads = 16;			/* Max */
 	hd0_secpertrk = 17;		/* most common */
@@ -361,6 +414,7 @@ U32  erc;
 	hd1_heads = 16;
 	hd1_secpertrk = 17;
 	hd1_cyls = 1024;
+*/
 
 	erc = AllocExch(&hd_exch);		/* Exhange for HD Task to use */
 
@@ -373,13 +427,7 @@ U32  erc;
    We have to make this sucker work the hard way.
 */
 
-/* Reset the HDC - hd_reset resets the controller (which controlls
-   both drives). We have to do it once, then try both physical drives.
-   If the second drive is not there, some controllers will lock-up
-   (the el-cheapos).  In this case we have to reset it again so it
-   will work.  It seems like a lot of work, but to make it function
-   with the widest range of IDE and MFM controllers this is the
-   only way I have found that works.
+/* Reset the HDC - The reset is a hardware rest.
 */
 
 	hd_reset();		/* no error is returned */
@@ -430,16 +478,64 @@ U32  erc;
 
 }
 
+/* FROM OLD HD_INIT */
+/* COMMENT -- set max heads, sectors and cylinders
+
+  if (drive == 0)
+  {								/* Drive 0 */
+    hd_Cmd[2] = hd0_secpertrk;					/* sector count */
+    hd_Cmd[6] = (drive << 4) | ((hd0_heads-1) & 0x0f) | 0xa0; /* hds & drv */
+  }
+  else
+  {										/* Drive 1 */
+    hd_Cmd[2] = hd1_secpertrk;					/* sector count */
+    hd_Cmd[6] = (drive << 4) | ((hd1_heads-1) & 0x0f) | 0xa0; /* hds & drv */
+  }
+  hd_Cmd[1] = 0;
+  hd_Cmd[3] = 0;
+  hd_Cmd[4] = 0;								/* cyl = 0 for init */
+  hd_Cmd[5] = 0;								/* cyl = 0 for init */
+*/
+
+
+/*************************************************************
+  This reads the ID the 512 bytes of ID from the controller
+  which determines drive geometry (nCyls, nHeads, nSectors, etc.).
+****************************************************************/
+
+static U32  hd_init(U8 drive)
+{
+U32 erc;
+
+  hd_Cmd[1] = 0;
+  hd_Cmd[2] = 0;
+  hd_Cmd[3] = 0;
+  hd_Cmd[4] = 0;
+  hd_Cmd[5] = 0;
+  hd_Cmd[6] = (drive << 4); 	/*  drive */
+
+  erc = send_command(HDC_ID);
+
+  erc = hd_wait();					/* wait for interrupt */
+  if (!erc)
+  	erc = hd_status(HDC_READ);
+  if (!erc)		/* && (statbyte & DATA_REQ))  */
+  	InWords(HD_PORT, &IDEid, 512);
+
+  return(erc);
+}
+
 /************************************************************
  Reset the HD controller.  This should only be called by
  DeviceInit or hdisk_setup.  This resets the controller
- and reloads parameters for both drives (if present) and
- attempts to recal them.
+ and calls hd_init which IDs the ATA device which fills the
+ IDEid structure.   This also attempts to recal them.
 *************************************************************/
 
 static void hd_reset(void)
 {
 U32 i;
+
 	UnMaskIRQ(14);      		/*  enable the IRQ */
 	OutByte(4, HD_REG_PORT); 	/*  reset the controller */
    	MicroDelay(4);  			/*  Delay 60us */
@@ -454,8 +550,12 @@ U32 i;
 
 	hdstatus.ResetStatByte = statbyte;	/* The ISR gets statbyte */
 
-	if (i) hdstatus.fIntOnReset = 1;
-	else hdstatus.fIntOnReset = 0;
+	/* For my general knowledge */
+	if (i)
+		hdstatus.fIntOnReset = 1;
+	else
+		hdstatus.fIntOnReset = 0;
+
 
 }
 
@@ -499,36 +599,6 @@ S16 count;
   return(ErcNotReady);	 /* controller out to lunch! */
 }
 
-/*************************************************************
-  This sends the SetParams command to the controller to set
-  up the drive geometry (nHeads, nSectors, etc.).
-****************************************************************/
-
-static U32  hd_init(U8 drive)
-{
-U32 erc;
-  /* set max heads, sectors and cylinders */
-  if (drive == 0) 
-  {								/* Drive 0 */
-    hd_Cmd[2] = hd0_secpertrk;					/* sector count */
-    hd_Cmd[6] = (drive << 4) | ((hd0_heads-1) & 0x0f) | 0xa0; /* hds & drv */
-  }
-  else
-  {										/* Drive 1 */
-    hd_Cmd[2] = hd1_secpertrk;					/* sector count */
-    hd_Cmd[6] = (drive << 4) | ((hd1_heads-1) & 0x0f) | 0xa0; /* hds & drv */
-  }
-  hd_Cmd[1] = 0;
-  hd_Cmd[3] = 0;
-  hd_Cmd[4] = 0;								/* cyl = 0 for init */
-  hd_Cmd[5] = 0;								/* cyl = 0 for init */
-
-  erc = send_command(HDC_SET_PARAMS);		/* Send the command */
-  erc = hd_wait();							/* wait for interrupt */
-  if (!erc)
-      erc = hd_status(HDC_SET_PARAMS);
-  return(erc);
-}
 
 /******************************************
 Wait for the hardware interrupt to occur.
@@ -645,7 +715,7 @@ static U32  setupseek(U32 dLBA, U32 nBlks)
   hd_nsectors = nBlks;
   if (hd_nsectors == 256) hd_nsectors = 0;   /* 0==256 for controller */
 
-  if (hd_drive == 0) 
+  if (hd_drive == 0)
   {		/* drive 0 */
 
 	cyl = dLBA / (hd0_heads * hd0_secpertrk);
@@ -790,12 +860,12 @@ U32 erc, nleft, nBPS;
   erc = setupseek(dLBA, dnBlocks);		/* sets up for implied seek */
   if (!erc) erc = send_command(HDC_READ);
 
-  while ((nleft) && (!erc)) 
+  while ((nleft) && (!erc))
   {
 	  erc = hd_wait();					/* wait for interrupt */
 	  if (!erc)
 	  	erc = hd_status(HDC_READ);
-	  if (!erc)		/* && (statbyte & DATA_REQ))  */ 
+	  if (!erc)		/* && (statbyte & DATA_REQ))  */
 	  {
 	  	InWords(HD_PORT, pDataRet, nBPS);
 	  	pDataRet+=nBPS;
@@ -864,7 +934,7 @@ U32  erc;
 }
 
 /******************************************************************
-   ReadSector is the only device specific call in the IDE/MFM hard
+   ReadSector is the only device specific call in the IDE hard
    disk device driver.  This allows you to read ONE sector
    specified by Cylinder, head and Sector number.
    Cylinder is LoWord of dLBA in DeviceOp call,
@@ -908,7 +978,7 @@ Called for all device operations.  This
 assigns physical device from logical number
 that outside callers use. For Hard disk,
 12=0 and 13=1. This will check to make sure a
-drive type is assigned and check to see if 
+drive type is assigned and check to see if
 they are going to exceed max logical blocks.
 *******************************************/
 
@@ -1019,7 +1089,7 @@ U32 i;
  	hdstatus.nSectors = hd0_secpertrk;
 	hdstatus.nBPS = hdcb[0].nBPB;
  }
- else 
+ else
  {
 	hdstatus.erc = hdcb[1].last_erc;
  	hdstatus.type_now = hd1_type;
@@ -1043,21 +1113,10 @@ U32 i;
 
 /******************************************
 Called to reset the hard disk controller
-and set drive parameters.  The Initdata
-is a copy of the 64 byte status block
-that is read from status.  The caller
-normally reads the block (DeviceStat),
-makes changes to certain fields and
-calls DeviceInit pointing to the block
-for the changes to take effect.
-This should ONLY be called once for each HD
-to set it's parameters before it is used
-the first time after the driver is loaded,
-or after a fatal error is received that
-indicates the controller may need to be
-reset (multiple timeouts etc.).
-The DCB values are updated if this is
-successful.
+and query drive parameters.  ATA specs are
+used.  The Initdata block is ignored with this
+ATA spec driver.
+The DCB values are updated if this is successful.
 This is called by the PUBLIC call DeviceInit.
 *******************************************/
 
@@ -1068,60 +1127,62 @@ static U32  hddev_init(U32  dDevice,
 {
 U32 erc, i;
 
-  erc = 0;
+	erc = 0;
 
  /* Read the init status block in */
 
- if (sdInitData > sStatus) i = sStatus;		/* no more than 64 bytes! */
- else i = sdInitData;
-
- CopyData(pInitData, &HDStatTmp, i);		/* copy in their init data */
-
  /* Set internal drive number */
- if (dDevice == 12) hd_drive=0;
- else hd_drive = 1;
+	if (dDevice == 12) hd_drive=0;
+	else hd_drive = 1;
 
- if (hd_drive==0)
- {
- 	hd0_type  = HDStatTmp.type_now;
-	if (hd0_type) 
+	if (hd_drive==0)
 	{
- 	  hd0_cyls  = HDStatTmp.nCyl;
- 	  hd0_heads = HDStatTmp.nHead;
- 	  hd0_secpertrk = HDStatTmp.nSectors;
- 	}
- 	else erc = ErcInvalidDrive;
- }
- else 
- {
- 	hd1_type  = HDStatTmp.type_now;
-	if (hd1_type) 
-	{
-		hd1_cyls  = HDStatTmp.nCyl;
-	 	hd1_heads = HDStatTmp.nHead;
-	 	hd1_secpertrk = HDStatTmp.nSectors;
+		erc = hd_init(0);
+		if (!erc)
+		{
+			hd0_cyls  = IDEid.ncyls;
+	 		hd0_heads = IDEid.nheads;
+		 	hd0_secpertrk = IDEid.nsectpertrk;
+
+			 xprintf("IDEid.ncyls:      %d\r\n",IDEid.ncyls);
+			 xprintf("IDEid.nheads:     %d\r\n",IDEid.nheads);
+			 xprintf("IDEid.nsectpertrk:%d\r\n",IDEid.nsectpertrk);
+
+		}
+	 	else
+	 	{
+	        hd0_type = 0;
+	 		erc = ErcInvalidDrive;
+		}
 	}
- 	else erc = ErcInvalidDrive;
- }
+	else
+	{
+		erc = hd_init(1);
+		if (!erc)
+		{
+			hd0_cyls  = IDEid.ncyls;
+	 		hd0_heads = IDEid.nheads;
+		 	hd0_secpertrk = IDEid.nsectpertrk;
+		}
+		else
+		{
+    	    hd1_type = 0;
+	 		erc = ErcInvalidDrive;
+		}
+	}
 
-/* If no error, initialize it and recal */
+	/* If no error, update corresponding DCB values */
 
- if (!erc) erc = hd_init(hd_drive);
- if (!erc) erc = hd_recal(hd_drive);
+	if (!erc)
+	{
+		hdcb[hd_drive].last_erc = 0;
+		hdcb[hd_drive].nBlocks =
+				IDEid.ncyls * IDEid.nheads * IDEid.nsectpertrk;
+	}
 
-/* If no error, update corresponding DCB values */
+	hdcb[hd_drive].last_erc = erc;			/* update DCB erc */
 
- if (!erc) 
- {
-	hdcb[hd_drive].nBPB = HDStatTmp.nBPS;
-	hdcb[hd_drive].last_erc = 0;
-	hdcb[hd_drive].nBlocks =
-				HDStatTmp.nCyl * HDStatTmp.nSectors * HDStatTmp.nHead;
- }
-
- hdcb[hd_drive].last_erc = erc;			/* update DCB erc */
-
- return(erc);
+	return(erc);
 }
 
 /*===========  THE END  =========================================*/

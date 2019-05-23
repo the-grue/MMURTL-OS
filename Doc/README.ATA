@@ -1,0 +1,21 @@
+Notes on FSys.c and HardIDE.c in EIDEfix.zip
+
+These two files are for those people with newer machines
+that use Enhanced IDE controllers.  They change the way
+the OS initializes drive geometry on these newer machines.
+
+They were written to the ATA-2 specification.
+There is STILL another bug in the file system code
+that deals with the way I figure out the partitions
+on a system. One drives with many partitions and
+especially ones that use OS/2 boot manager, it gets
+confused. I could sure use some help on this one!
+
+Meanwhile, save the two files with the same name, then
+copy these into the OSSource directory and rebuild the OS
+with the BuildAll batch file. Then load it with MMLoader.
+
+That's all there is to it.
+Thanks to everyone for your patience and help.
+Richard Burgess
+5/3/96

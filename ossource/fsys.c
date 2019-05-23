@@ -1,9 +1,10 @@
 /* This is the MMURTL, MS-DOS Compatible (FAT) File system.  */
-
+/* This version is for ATA-2 Enhanced IDE systems. */
+/* To use this file, you need the newer HardIDE.c version 1.1 */
 /*
   MMURTL Operating System Source Code
-  Copyright 1991,1992,1993,1994 Richard A. Burgess
-  ALL RIGHTS RESERVED   Version 1.0
+  Copyright 1991,1992,1993,1994, 1995, 1996 Richard A. Burgess
+  ALL RIGHTS RESERVED   Version 1.1
 */
 
 /*
@@ -179,7 +180,7 @@ extern far U32 RegisterSvc(S8 *pName, U32 Exch);
 /* NEAR support for debugging */
 
 extern long xprintf(char *fmt, ...);
-extern U32 Dump(unsigned char *pb, long cb);
+/* extern U32 Dump(unsigned char *pb, long cb); */
 
 /* File System error codes */
 
@@ -549,6 +550,40 @@ static unsigned long keycode;			/* for testing */
 
 /*========================== BEGIN CODE ============================*/
 
+/*********************************************
+ This does a hex dump to the screen of a
+ memory area passed in by "pb"
+**********************************************/
+
+void Dump(unsigned char *pb, long cb)
+{
+U32 erc, i, j;
+unsigned char buff[17];
+
+	erc = 0;
+	while (cb)
+	{
+		if (cb > 15) j=16;
+		else j = cb;
+		for (i=0; i<j; i++)
+		{
+			xprintf("%02x ",*pb);
+			buff[i] = *pb++;
+			if (buff[i] < 0x20)
+				buff[i] = 0x2E;
+			if (buff[i] > 0x7F)
+				buff[i] = 0x2E;
+		}
+		buff[i+1] = 0;
+		xprintf("%s\r\n", &buff[0]);
+
+		if (cb > 15) cb-=16;
+		else cb=0;
+	}
+	return erc;
+}
+
+
 /************************************************
  Called from read_PE, this gets the starting
  cylinder, head and sector for the first boot
@@ -563,7 +598,7 @@ static void GetBSInfo(U32 d, U32 i)
  PDrvs[d].BS1Sect = partab[i].SecStart;
  PDrvs[d].BS1Cyl  = partab[i].CylStart;
 
- if (!i) 
+ if (!i)
  {		/* primary partition info - use it for PDrv info */
 	 PDrvs[d].nHeads = partab[i].HeadEnd;
 	 PDrvs[d].nSecPerTrk = partab[i].nFirstSector & 0xff;
@@ -590,7 +625,7 @@ Ldrv[0].DevNum= 10;		/* Device Numbers for floppies */
 Ldrv[1].DevNum= 11;
 
 erc = DeviceStat(ld+10, &FDDevStat, 64, &i);
-if (!erc) 
+if (!erc)
 {
 	PDrvs[ld].nHeads = FDDevStat.nHead;
 	PDrvs[ld].nSecPerTrk = FDDevStat.nSectors;
@@ -620,7 +655,7 @@ else
 
 static U32 read_PE(void)
 {
-U32 erc, ercD12, ercD13, i, j;
+U32 erc, ercD12, ercD13, i, j, keycode;
 U8 fFound1, fFound2;
 
 fFound1 = 0;		/* Have we found first valid partition on drive */
@@ -630,50 +665,49 @@ fFound2 = 0;
    correctly when the partition table and boot sectors are read.
 */
 
-for (i=2; i< nLDrvs; i++) 
+for (i=2; i< nLDrvs; i++)
 {	/* default to no logical hard drives */
    Ldrv[i].DevNum = 0xff;
 }
 
 i = 2;		/* first Logical Number for hard drives "C" */
 
-for (j=2; j<4; j++) 
+for (j=2; j<4; j++)
 {	/* Array index Numbers for 2 physical hard Disks */
 
   erc = DeviceOp(j+10, 1, 0, 1, abRawSector); /* add 10 for Disk device nums */
-  if (j==2) ercD12 = erc;
-  else ercD13 = erc;
+  if (j==2)
+  	ercD12 = erc;
+  else
+  	ercD13 = erc;
 
-  if (!erc) 
+  if (!erc)
   {
     CopyData(&abRawSector[0x01fe], &partsig, 2);
 
 	/* It MUST have a partition table or we can't use it! */
 
-	if (partsig != 0xAA55) return ErcNoParTable;
-
     CopyData(&abRawSector[0x01be], &partab[0].fBootable, 64);
 
-/*
-	 Dump(&partab[0].fBootable, 64);
-	 ReadKbd(&keycode, 1);
-*/
+	Dump(&partab[0].fBootable, 64);
 
-    if (partab[0].nSectorsTotal > 0) 
+	if (partsig != 0xAA55) return ErcNoParTable;
+
+    if (partab[0].nSectorsTotal > 0)
     {
      Ldrv[i].LBA0 =partab[0].nFirstSector;	/* lba for Start of LDrv (bootSect) */
      Ldrv[i].LBAMax =partab[0].nSectorsTotal;	/* Max lba for logical drive */
 	 if (partab[0].FATType > 3)
         Ldrv[i].fFAT16 = 1;
      Ldrv[i].DevNum = j+10;
-     if ((j==2) && (!fFound1)) 
+     if ((j==2) && (!fFound1))
      { GetBSInfo(2, 0); fFound1=1; }
        if ((j==3) && (!fFound2))
      { GetBSInfo(3, 0); fFound2=1; }
        i++;					/* if valid partition go to next LDrv */
      }
 
-    if (partab[1].nSectorsTotal > 0) 
+    if (partab[1].nSectorsTotal > 0)
     {
      Ldrv[i].LBA0   = partab[1].nFirstSector;
      Ldrv[i].LBAMax = partab[1].nSectorsTotal;
@@ -685,7 +719,7 @@ for (j=2; j<4; j++)
      i++;					/* if we had a valid partition go to next */
     }
 
-    if (partab[2].nSectorsTotal > 0) 
+    if (partab[2].nSectorsTotal > 0)
     {
      Ldrv[i].LBA0   = partab[2].nFirstSector;
      Ldrv[i].LBAMax = partab[2].nSectorsTotal;
@@ -697,22 +731,22 @@ for (j=2; j<4; j++)
      i++;					/* if we had a valid partition go to next */
     }
 
-    if (partab[3].nSectorsTotal > 0) 
+    if (partab[3].nSectorsTotal > 0)
     {
      Ldrv[i].LBA0   = partab[3].nFirstSector;
      Ldrv[i].LBAMax = partab[3].nSectorsTotal;
 	 if (partab[3].FATType > 3)
         Ldrv[i].fFAT16 = 1;
      Ldrv[i].DevNum = j+10;
-     if ((j==2) && (!fFound1)) 
-     { 
-     	GetBSInfo(2, 3); 
-     	fFound1=1; 
+     if ((j==2) && (!fFound1))
+     {
+     	GetBSInfo(2, 3);
+     	fFound1=1;
      }
-     if ((j==3) && (!fFound2)) 
-     { 
-     	GetBSInfo(3, 3); 
-     	fFound2=1; 
+     if ((j==3) && (!fFound2))
+     {
+     	GetBSInfo(3, 3);
+     	fFound2=1;
      }
      i++;					/* if we had a valid partition go to next */
      }
@@ -724,41 +758,38 @@ for (j=2; j<4; j++)
 }
 
 /********************************************************************
-  Reads in the first boot sector from each physical drive to get
-  drive geometry info not available in partition table.  This includes
-  number of heads and sectors per track.  Then we call DeviceInit
-  for each physical device to set its internal drive geometry.
-  This must be done before we even try to read the other boot sectors
-  if the disk has mulitple partitions (otherwise it fails).
+  This statuses the hard disk driver, then reads in the first boot
+  sector from each physical drive to get logical drive geometry info not
+  available in partition table.  This includes number of heads
+  and sectors per track.
+  This must be done before we try to read the boot sectors.
 *********************************************************************/
 
-static U32 SetDriveGeometry(U32 d)		/* d is the device number (12 or 13) */
+static U32 GetDriveGeometry(U32 d)		/* d is the device number (12 or 13) */
 {
 U32 erc, i;
 
-  if (d==12) 
+  if (d==12)
   {
-	erc =  DeviceStat(12, &HDDevStat, 64, &i);
-	if (!erc) 
+	erc = DeviceStat(12, &HDDevStat, 64, &i);
+	if (!erc)
 	{
-	  HDDevStat.nHead = PDrvs[2].nHeads;
-	  HDDevStat.nSectors = PDrvs[2].nSecPerTrk;
-      erc = DeviceInit(12, &HDDevStat, 64); /* Set up drive geometry */
+	  PDrvs[2].nHeads = HDDevStat.nHead;
+	  PDrvs[2].nSecPerTrk = HDDevStat.nSectors;
     }
   }
 
-  if (d==13) 
+  if (d==13)
   {
-	erc =  DeviceStat(13, &HDDevStat, 64, &i);
-	if (!erc) 
+	erc = DeviceStat(13, &HDDevStat, 64, &i);
+	if (!erc)
 	{
-	  HDDevStat.nHead = PDrvs[3].nHeads;
-	  HDDevStat.nSectors = PDrvs[3].nSecPerTrk;
-      erc = DeviceInit(13, &HDDevStat, 64); /* Set up drive geometry */
+	  PDrvs[3].nHeads = HDDevStat.nHead;
+	  PDrvs[3].nSecPerTrk = HDDevStat.nSectors;
     }
   }
+  return erc;
 
-return erc;
 }
 
 /********************************************************************
@@ -771,7 +802,7 @@ static U32 read_BS(U32 i)
 {
 U32 erc, j;
 
-if (Ldrv[i].DevNum != 0xff) 
+if (Ldrv[i].DevNum != 0xff)
 {
 
     j = Ldrv[i].DevNum;			/* j is MMURTL Device number */
@@ -3915,26 +3946,39 @@ U8 *pMem;
   if (!erc)
 	  FillData(paFUB, 4096, 0);
 
-  if (!erc)	erc = read_PE();	/* reads partition tables */
+    erc = DeviceInit(12, &HDDevStat, 64); /* Get drive geometry */
 
-  if (!erc)	erc = SetDriveGeometry(12);
+	if (!erc)
+		erc = GetDriveGeometry(12);
 
-  if (!erc)	
-  {
-  	erc = SetDriveGeometry(13);
-    if (erc == 663) erc = 0;		/* may be invalid drive */
-  }
+	if (!erc)
+	{
+	    erc = DeviceInit(13, &HDDevStat, 64); /* Reset drive */
+	  	erc = GetDriveGeometry(13);
+	    if (erc == 663) erc = 0;		/* may be invalid drive */
+	}
+
+	for (i=2; i< 4; i++)
+	{
+  	  xprintf("Physical drive %d: Heads %d, Sec/Trk %d\r\n",
+	  			i,
+	  			PDrvs[i].nHeads,
+	  			PDrvs[i].nSecPerTrk);
+  	}
+
+	if (!erc)
+		erc = read_PE();	/* reads partition tables */
 
   StatFloppy(0);
   StatFloppy(1);
 
 	/* read all logical drive boot sectors */
 
-  if (!erc) 
+  if (!erc)
   {
-	for (i=0; i< nLDrvs; i++) 
+	for (i=0; i< nLDrvs; i++)
 	{
-	  if (Ldrv[i].DevNum != 0xff) 
+	  if (Ldrv[i].DevNum != 0xff)
 	  {
 		  	read_BS(i);
 	  }
@@ -3942,7 +3986,7 @@ U8 *pMem;
   }
 
   for (i=0; i<nLDrvs; i++)
-  	if (Ldrv[i].DevNum != 0xff) 
+  	if (Ldrv[i].DevNum != 0xff)
   	{
 	j=12;
   	  if (Ldrv[i].fFAT16)
