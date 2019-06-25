@@ -218,6 +218,16 @@ extern long xprintf(char *fmt, ...);
 
 #define ErcNewMedia		 605	/* for floppy mounting from FDD */
 
+/****************  FAT Filesystem Type Codes   **********************/
+#define FAT12	0x01
+#define FAT16	0x04
+#define EXTP	0x05
+#define FAT16B	0x06
+#define FAT32	0x0B
+#define FAT32L	0x0C
+#define FAT16L	0x0E
+#define EXTPL	0x0F
+
 /**************** FAT Buffer control structure **********************/
 
 /*
@@ -430,7 +440,9 @@ static U8  abTmpSector[516];
 static U8  abDirSectBuf[516];
 
 /* These arrays keep track of physical drive data (0-4). */
-#define nPDrvs 4
+/* #define nPDrvs 4 */
+/* Update setting to include up to 4 physical drives */
+#define nPDrvs 6
 
 static struct phydrv {
 	U32 nHeads;     	/* heads per drives   */
@@ -661,7 +673,7 @@ U8 fFound1, fFound2;
 fFound1 = 0;		/* Have we found first valid partition on drive */
 fFound2 = 0;
 
-/* Set defaults for 4 physical drives. This info will be set
+/* Set defaults for x4x 6 physical drives. This info will be set
    correctly when the partition table and boot sectors are read.
 */
 
@@ -672,8 +684,10 @@ for (i=2; i< nLDrvs; i++)
 
 i = 2;		/* first Logical Number for hard drives "C" */
 
-for (j=2; j<4; j++)
-{	/* Array index Numbers for 2 physical hard Disks */
+/*for (j=2; j<4; j++)*/
+/* Why not use nLDrvs instead of hardcoded 4? */
+for (j=2; j<nLDrvs; j++)
+{	/* Array index Numbers for x2x 4 physical hard Disks */
 
   erc = DeviceOp(j+10, 1, 0, 1, abRawSector); /* add 10 for Disk device nums */
   if (j==2)
@@ -697,7 +711,8 @@ for (j=2; j<4; j++)
     {
      Ldrv[i].LBA0 =partab[0].nFirstSector;	/* lba for Start of LDrv (bootSect) */
      Ldrv[i].LBAMax =partab[0].nSectorsTotal;	/* Max lba for logical drive */
-	 if (partab[0].FATType > 3)
+/*	 if (partab[0].FATType > 3)	*/
+	 if ((partab[0].FATType == FAT16) || (partab[0].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1))
@@ -711,7 +726,8 @@ for (j=2; j<4; j++)
     {
      Ldrv[i].LBA0   = partab[1].nFirstSector;
      Ldrv[i].LBAMax = partab[1].nSectorsTotal;
-	 if (partab[1].FATType > 3)
+/*	 if (partab[1].FATType > 3)	*/
+	 if ((partab[1].FATType == FAT16) || (partab[1].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1)) { GetBSInfo(2, 1); fFound1=1; }
@@ -723,7 +739,8 @@ for (j=2; j<4; j++)
     {
      Ldrv[i].LBA0   = partab[2].nFirstSector;
      Ldrv[i].LBAMax = partab[2].nSectorsTotal;
-	 if (partab[2].FATType > 3)
+/*	 if (partab[2].FATType > 3)	*/
+	 if ((partab[2].FATType == FAT16) || (partab[2].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1)) { GetBSInfo(2, 2); fFound1=1; }
@@ -735,7 +752,8 @@ for (j=2; j<4; j++)
     {
      Ldrv[i].LBA0   = partab[3].nFirstSector;
      Ldrv[i].LBAMax = partab[3].nSectorsTotal;
-	 if (partab[3].FATType > 3)
+/*	 if (partab[3].FATType > 3)	*/
+	 if ((partab[3].FATType == FAT16) || (partab[3].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1))
