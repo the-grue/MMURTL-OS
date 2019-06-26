@@ -656,6 +656,29 @@ else
 }
 
 /************************************************
+ Checks for a valid FAT type
+************************************************/
+
+U8 validFAT(U8 check)
+{
+	switch(check) {
+		case FAT12:
+		case FAT16:
+		case EXTP:
+		case FAT16B:
+		case FAT32:
+		case FAT32L:
+		case FAT16L:
+		case EXTPL:
+				return 1;
+				break;
+		default:
+				return 0;
+				break;
+	}
+}
+
+/************************************************
  Reads the partition table entries from hard
  drives and sets up some of the the logical
  drive array variables for hard Disks.
@@ -707,7 +730,7 @@ for (j=2; j<nLDrvs; j++)
 
 	if (partsig != 0xAA55) return ErcNoParTable;
 
-    if (partab[0].nSectorsTotal > 0)
+    if ((partab[0].nSectorsTotal > 0) && validFAT(partab[0].FATType))
     {
      Ldrv[i].LBA0 =partab[0].nFirstSector;	/* lba for Start of LDrv (bootSect) */
      Ldrv[i].LBAMax =partab[0].nSectorsTotal;	/* Max lba for logical drive */
@@ -722,7 +745,7 @@ for (j=2; j<nLDrvs; j++)
        i++;					/* if valid partition go to next LDrv */
      }
 
-    if (partab[1].nSectorsTotal > 0)
+    if ((partab[1].nSectorsTotal > 0) && validFAT(partab[1].FATType))
     {
      Ldrv[i].LBA0   = partab[1].nFirstSector;
      Ldrv[i].LBAMax = partab[1].nSectorsTotal;
@@ -735,7 +758,7 @@ for (j=2; j<nLDrvs; j++)
      i++;					/* if we had a valid partition go to next */
     }
 
-    if (partab[2].nSectorsTotal > 0)
+    if ((partab[2].nSectorsTotal > 0) && validFAT(partab[2].FATType))
     {
      Ldrv[i].LBA0   = partab[2].nFirstSector;
      Ldrv[i].LBAMax = partab[2].nSectorsTotal;
@@ -748,7 +771,7 @@ for (j=2; j<nLDrvs; j++)
      i++;					/* if we had a valid partition go to next */
     }
 
-    if (partab[3].nSectorsTotal > 0)
+    if ((partab[3].nSectorsTotal > 0) && validFAT(partab[3].FATType))
     {
      Ldrv[i].LBA0   = partab[3].nFirstSector;
      Ldrv[i].LBAMax = partab[3].nSectorsTotal;
