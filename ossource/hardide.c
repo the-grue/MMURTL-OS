@@ -405,10 +405,10 @@ U32  erc;
 	hd1_type =	1;
 
 /* COMMENT OUT
-	hd0_type =	ReadCMOS(0x19);	/* read this but don't use it */
-	hd0_heads = 16;			/* Max */
-	hd0_secpertrk = 17;		/* most common */
-	hd0_cyls = 1024;		/* Max */
+	hd0_type =	ReadCMOS(0x19);	** read this but don't use it **
+	hd0_heads = 16;			** Max **
+	hd0_secpertrk = 17;		** most common **
+	hd0_cyls = 1024;		** Max **
 
 	hd1_type =	ReadCMOS(0x1A);
 	hd1_heads = 16;
