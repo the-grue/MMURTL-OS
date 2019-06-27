@@ -663,14 +663,36 @@ U8 validFAT(U8 check)
 {
 	switch(check) {
 		case FAT12:
-		case FAT16:
-		case EXTP:
-		case FAT16B:
-		case FAT32:
-		case FAT32L:
-		case FAT16L:
-		case EXTPL:
+				xprintf("Found FAT12 Partition\n\r");
 				return 1;
+				break;
+		case FAT16:
+				xprintf("Found FAT16 Partition\n\r");
+				return 1;
+				break;
+		case FAT16B:
+				xprintf("Found FAT16B Partition\n\r");
+				return 1;
+				break;
+		case FAT32:
+				xprintf("Found FAT32 Partition, not supported\n\r");
+				return 0;
+				break;
+		case FAT32L:
+				xprintf("Found FAT32L Partition, not supported\n\r");
+				return 0;
+				break;
+		case FAT16L:
+				xprintf("Found FAT16L Partition\n\r");
+				return 1;
+				break;
+		case EXTPL:
+				xprintf("Found EXTPL Partition, not supported\n\r");
+				return 0;
+				break;
+		case EXTP:
+				xprintf("Found EXTP Partition, not supported\n\r");
+				return 0;
 				break;
 		default:
 				return 0;
@@ -708,8 +730,8 @@ for (i=2; i< nLDrvs; i++)
 i = 2;		/* first Logical Number for hard drives "C" */
 
 /*for (j=2; j<4; j++)*/
-/* Why not use nLDrvs instead of hardcoded 4? */
-for (j=2; j<nLDrvs; j++)
+/* Why not use nPDrvs instead of hardcoded 4? */
+for (j=2; j<nPDrvs; j++)
 {	/* Array index Numbers for x2x 4 physical hard Disks */
 
   erc = DeviceOp(j+10, 1, 0, 1, abRawSector); /* add 10 for Disk device nums */

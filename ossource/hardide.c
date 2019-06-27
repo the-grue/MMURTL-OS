@@ -482,19 +482,19 @@ U32  erc;
 /* COMMENT -- set max heads, sectors and cylinders
 
   if (drive == 0)
-  {								/* Drive 0 */
-    hd_Cmd[2] = hd0_secpertrk;					/* sector count */
-    hd_Cmd[6] = (drive << 4) | ((hd0_heads-1) & 0x0f) | 0xa0; /* hds & drv */
+  {								** Drive 0 **
+    hd_Cmd[2] = hd0_secpertrk;					** sector count **
+    hd_Cmd[6] = (drive << 4) | ((hd0_heads-1) & 0x0f) | 0xa0; ** hds & drv **
   }
   else
-  {										/* Drive 1 */
-    hd_Cmd[2] = hd1_secpertrk;					/* sector count */
-    hd_Cmd[6] = (drive << 4) | ((hd1_heads-1) & 0x0f) | 0xa0; /* hds & drv */
+  {										** Drive 1 **
+    hd_Cmd[2] = hd1_secpertrk;					** sector count **
+    hd_Cmd[6] = (drive << 4) | ((hd1_heads-1) & 0x0f) | 0xa0; ** hds & drv **
   }
   hd_Cmd[1] = 0;
   hd_Cmd[3] = 0;
-  hd_Cmd[4] = 0;								/* cyl = 0 for init */
-  hd_Cmd[5] = 0;								/* cyl = 0 for init */
+  hd_Cmd[4] = 0;								** cyl = 0 for init **
+  hd_Cmd[5] = 0;								** cyl = 0 for init **
 */
 
 
