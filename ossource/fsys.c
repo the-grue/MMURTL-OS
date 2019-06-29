@@ -471,7 +471,8 @@ static struct ldrvtype {
 	U8  DevNum;			/* Device Number for this ldrv FF = NONE */
 	U8  SecPerClstr;	/* For each logical drive */
 	U8  nFATS;			/* number of FATs */
-	U8  fFAT16;			/* True for FAT16 else FAT12 */
+/*	U8  fFAT16;			** True for FAT16 else FAT12 */
+	U8  fFAT16;			/** FAT12=0, FAT16=1, FAT32=2 */
 	};
 
 static struct ldrvtype  Ldrv[nLDrvs];
@@ -748,7 +749,7 @@ for (j=2; j<nPDrvs; j++)
 
     CopyData(&abRawSector[0x01be], &partab[0].fBootable, 64);
 
-	Dump(&partab[0].fBootable, 64);
+/*	Dump(&partab[0].fBootable, 64); */
 
 	if (partsig != 0xAA55) return ErcNoParTable;
 
@@ -759,6 +760,8 @@ for (j=2; j<nPDrvs; j++)
 /*	 if (partab[0].FATType > 3)	*/
 	 if ((partab[0].FATType == FAT16) || (partab[0].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[0].FATType == FAT32) || (partab[0].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1))
      { GetBSInfo(2, 0); fFound1=1; }
@@ -774,6 +777,8 @@ for (j=2; j<nPDrvs; j++)
 /*	 if (partab[1].FATType > 3)	*/
 	 if ((partab[1].FATType == FAT16) || (partab[1].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[1].FATType == FAT32) || (partab[1].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1)) { GetBSInfo(2, 1); fFound1=1; }
      if ((j==3) && (!fFound2)) { GetBSInfo(3, 1); fFound2=1; }
@@ -787,6 +792,8 @@ for (j=2; j<nPDrvs; j++)
 /*	 if (partab[2].FATType > 3)	*/
 	 if ((partab[2].FATType == FAT16) || (partab[2].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[2].FATType == FAT32) || (partab[2].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1)) { GetBSInfo(2, 2); fFound1=1; }
      if ((j==3) && (!fFound2)) { GetBSInfo(3, 2); fFound2=1; }
@@ -800,6 +807,8 @@ for (j=2; j<nPDrvs; j++)
 /*	 if (partab[3].FATType > 3)	*/
 	 if ((partab[3].FATType == FAT16) || (partab[3].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[3].FATType == FAT32) || (partab[3].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1))
      {
@@ -1079,10 +1088,12 @@ U32 i, j, k;
 U32 first, oSector, erc, LRU, iLRU, iFound, Tick;
 U16 MaxClstr;
 
-  if (Ldrv[Drive].fFAT16)
+  if (Ldrv[Drive].fFAT16 == 1)
 	MaxClstr = 0xfff8;
-  else
+  else /*if (Ldrv[Drive].fFAT16 == 0) */
 	MaxClstr = 0xff8;	/* FAT12 */
+/*  else
+	MaxClstr = 0xfffffff8 */
 
  if (Clstr >= MaxClstr)
  	return(ErcEOF);
@@ -1101,7 +1112,7 @@ U16 MaxClstr;
     and 1024 in a FAT12 (3 sectors)
  */
 
- if (Ldrv[Drive].fFAT16)
+ if (Ldrv[Drive].fFAT16 == 1)
  {
 	oSector = Clstr/256;
 	first = Clstr-(Clstr%256);
