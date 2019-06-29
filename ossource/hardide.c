@@ -1144,6 +1144,7 @@ U32 erc, i;
 	 		hd0_heads = IDEid.nheads;
 		 	hd0_secpertrk = IDEid.nsectpertrk;
 
+			 xprintf("IDE Drive 0\r\n");
 			 xprintf("IDEid.ncyls:      %d\r\n",IDEid.ncyls);
 			 xprintf("IDEid.nheads:     %d\r\n",IDEid.nheads);
 			 xprintf("IDEid.nsectpertrk:%d\r\n",IDEid.nsectpertrk);
@@ -1152,6 +1153,7 @@ U32 erc, i;
 	 	else
 	 	{
 	        hd0_type = 0;
+			xprintf("IDE Drive 0 Invalid\r\n");
 	 		erc = ErcInvalidDrive;
 		}
 	}
@@ -1160,13 +1162,19 @@ U32 erc, i;
 		erc = hd_init(1);
 		if (!erc)
 		{
-			hd0_cyls  = IDEid.ncyls;
-	 		hd0_heads = IDEid.nheads;
-		 	hd0_secpertrk = IDEid.nsectpertrk;
+			hd1_cyls  = IDEid.ncyls;
+	 		hd1_heads = IDEid.nheads;
+		 	hd1_secpertrk = IDEid.nsectpertrk;
+
+			 xprintf("IDE Drive 1\r\n");
+			 xprintf("IDEid.ncyls:      %d\r\n",IDEid.ncyls);
+			 xprintf("IDEid.nheads:     %d\r\n",IDEid.nheads);
+			 xprintf("IDEid.nsectpertrk:%d\r\n",IDEid.nsectpertrk);
 		}
 		else
 		{
     	    hd1_type = 0;
+			xprintf("IDE Drive 1 Invalid\r\n");
 	 		erc = ErcInvalidDrive;
 		}
 	}
