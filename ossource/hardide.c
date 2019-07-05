@@ -185,6 +185,10 @@ When reading from the port+X (where X =):
 	7		Disable retries (same as six, either one set)
 */
 
+/* Ports for secondary ide controller  */
+#define HD_PORT_2	0x170
+#define HD_REG_PORT_2	0x376
+
 /* HDC Status Register Bit Masks (1F7h) */
 
 #define BUSY        0x80  /* busy.. can't talk now! */
@@ -221,14 +225,30 @@ When reading from the port+X (where X =):
 #define HDC_ID         0xEC   /* 1001 0001 */
 
 /* L O C A L   D A T A  */
+/* Might need to make all of these arrays to support
+ * multiple controllers!  */
 
 static U8  hd_Cmd[8];		/* For all 8 command bytes */
+/* static U8 hd_Cmd[2][8];	*/
 
 static U8  fDataReq;		/* Flag to indicate is fDataRequest is active */
+/* static U8 fDataReq[4];	*/
 static U8  statbyte;		/* From HDC status register last time it was read */
+/* Status byte to track second controller */
+/* static U8 statbyte[2];	*/
 
 static U8  hd_control;		/* Current control byte value */
-static U8  hd_command;		/* Current Command */
+/* static U8  hd_command;		** Current Command - not used */
+
+/* static U8 hd_control[4];	*/
+
+/*  These should be passed as a variable to avoid confusion
+ *  once we have two controllers  */
+/* static U8  hd_drive[4];		** Current Physical Drive, 0 or 1 **
+ * static U8  hd_head[4];		** Calculated from LBA - which head **
+ * static U8  hd_nsectors[4];	** Calculated from LBA - n sectors to read/write **
+ * static U8  hd_sector[4];		** Calculated from LBA - Starting sector **
+*/
 static U8  hd_drive;		/* Current Physical Drive, 0 or 1 */
 static U8  hd_head;		/* Calculated from LBA - which head */
 static U8  hd_nsectors;	/* Calculated from LBA - n sectors to read/write */
@@ -246,6 +266,13 @@ static U8  hd1_type;
 static U8  hd1_heads;
 static U8  hd1_secpertrk;
 static U16 hd1_cyls;
+
+/* Change these to arrays to support 4 drives */
+/* static U8	hd_type[4];
+ * static U8	hd_heads[4];
+ * static U8	hd_secpertrk[4];
+ * static U16	hd_cyls[4];
+ */
 
 #define sIDEid 512
 
@@ -292,6 +319,9 @@ static struct idestruct
   };
 static struct idestruct IDEid;
 
+/* One struct per disk instead of a single shared one  */
+/* static struct idestruct IDEid[4]; */
+
 #define sStatus 64
 
 static struct statstruct
@@ -325,7 +355,10 @@ static struct statstruct
   };
 
 static struct statstruct hdstatus;
-static struct statstruct HDStatTmp;
+/* One struct per disk instead of a single shared one  */
+/* static struct statstruct hdstatus[4]; */
+
+/*static struct statstruct HDStatTmp;		** Not Used now */
 
 static struct dcbtype
 {
@@ -350,15 +383,24 @@ static struct dcbtype
 	};
 
 static struct dcbtype hdcb[2];		/* two HD device control blocks */
+/* status struct dcbtype hdcb[4];	** four HD device control blocks */
 
 /* Exch and msgs space for HD ISR */
 
 static U32 hd_exch;
 
+/* May need second exchange for second controller */
+/* static U32 hd_exch[2]; */
+
 static U32 hd_msg;
-static U32 hd_msg2;
+/* static U32 hd_msg[2];		*/
+
+/* static U32 hd_msg2; 			** No longer used  */
 
 static long HDDInt;
+/* Second variable may be needed */
+/* static long HDDInt[2]; */
+
 
 /*======================================================*/
 /*=================== START OF CODE ====================*/
@@ -396,6 +438,31 @@ U32  erc;
 	hdcb[1].pDevInit = &hddev_init;
 	hdcb[1].pDevSt   = &hddev_stat;
 
+/* To support additional controller and two more drives  **
+	hdcb[2].Name[0]  = 'H';
+	hdcb[2].Name[1]  = 'D';
+	hdcb[2].Name[2]  = '2';
+	hdcb[2].sbName   = 3;
+	hdcb[2].type     = 1;			** Random **
+	hdcb[2].nBPB     = 512;
+	hdcb[2].nBlocks  = 524288;	** largest device handled - 2Gb disks**
+	hdcb[2].pDevOp   = &hddev_op;
+	hdcb[2].pDevInit = &hddev_init;
+	hdcb[2].pDevSt   = &hddev_stat;
+
+	hdcb[3].Name[0]  = 'H';
+	hdcb[3].Name[1]  = 'D';
+	hdcb[3].Name[2]  = '3';
+	hdcb[3].sbName   = 3;
+	hdcb[3].type     = 1;			** Random **
+	hdcb[3].nBPB     = 512;
+	hdcb[3].nBlocks  = 524288;	** largest device handled - 2Gb disks**
+	hdcb[3].pDevOp   = &hddev_op;
+	hdcb[3].pDevInit = &hddev_init;
+	hdcb[3].pDevSt   = &hddev_stat;
+
+*/
+
 /* These are defaulted to non zero values to
    ensure we don't get a divide by zero during initial calculations
    on the first read.
@@ -404,22 +471,30 @@ U32  erc;
 	hd0_type =	1;
 	hd1_type =	1;
 
-/* COMMENT OUT
-	hd0_type =	ReadCMOS(0x19);	** read this but don't use it **
-	hd0_heads = 16;			** Max **
-	hd0_secpertrk = 17;		** most common **
-	hd0_cyls = 1024;		** Max **
-
-	hd1_type =	ReadCMOS(0x1A);
-	hd1_heads = 16;
-	hd1_secpertrk = 17;
-	hd1_cyls = 1024;
-*/
+/* Add two additional disks and convert to array  */
+/* 
+ * hd_type[0] = 1;
+ * hd_type[1] = 1;
+ * hd_type[2] = 1;
+ * hd_type[3] = 1;
+ */
 
 	erc = AllocExch(&hd_exch);		/* Exhange for HD Task to use */
 
+/* Can we share the same exchange for both controllers??? */
+/* If we cannot  */
+/*	erc = AllocExch(&hd_exch[0]);	*/
+
 	SetIRQVector(14, &hdisk_isr);
 	UnMaskIRQ(14);
+
+/* IRQ Vector for second disk controller at IRQ 15 **
+ *
+ * 	erc = AllocExch(&hd_exch[1]);
+ *
+	SetIRQVector(15, &hdisk_isr2);
+	UnMaskIRQ(15);
+*/
 
 /* Documentation lists the fixed disk types at CMOS 11h and 12h,
    and also shows them at 19h and 1Ah.  We don't actually read them
@@ -478,35 +553,54 @@ U32  erc;
 
 }
 
-/* FROM OLD HD_INIT */
-/* COMMENT -- set max heads, sectors and cylinders
-
-  if (drive == 0)
-  {								** Drive 0 **
-    hd_Cmd[2] = hd0_secpertrk;					** sector count **
-    hd_Cmd[6] = (drive << 4) | ((hd0_heads-1) & 0x0f) | 0xa0; ** hds & drv **
-  }
-  else
-  {										** Drive 1 **
-    hd_Cmd[2] = hd1_secpertrk;					** sector count **
-    hd_Cmd[6] = (drive << 4) | ((hd1_heads-1) & 0x0f) | 0xa0; ** hds & drv **
-  }
-  hd_Cmd[1] = 0;
-  hd_Cmd[3] = 0;
-  hd_Cmd[4] = 0;								** cyl = 0 for init **
-  hd_Cmd[5] = 0;								** cyl = 0 for init **
-*/
-
-
 /*************************************************************
-  This reads the ID the 512 bytes of ID from the controller
+  This reads the 512 bytes of ID from the controller
   which determines drive geometry (nCyls, nHeads, nSectors, etc.).
 ****************************************************************/
 
 static U32  hd_init(U8 drive)
 {
 U32 erc;
+/*
+U8 hd_port;
+U8 drive_base = drive;
+U8 controller;
 
+  if (drive_base == 0 || drive_base == 1)
+  {
+	hd_port = HD_PORT;
+	controller = 0;
+  }
+  else if (drive_base == 2 || drive_base == 3)
+  {
+	hd_port = HD_PORT_2;
+	drive_base = drive_base & 0x01;
+	controller = 1;
+  }
+  else
+  {
+	erc = ErcInvalidDrive;
+	return(erc);
+  }
+
+  hd_Cmd[controller][1] = 0;
+  hd_Cmd[controller][2] = 0;
+  hd_Cmd[controller][3] = 0;
+  hd_Cmd[controller][4] = 0;
+  hd_Cmd[controller][5] = 0;
+  hd_Cmd[controller[]6] = (drive_base << 4);
+
+  erc = send_command(HDC_ID, controller);
+
+  erc = hd_wait(controller);
+  if (!erc)
+	erc = hd_status(HDC_READ, controller);
+  if (!erc)
+	InWords(hd_port, &IDEid[drive], 512);
+
+  return(erc);
+
+*/
   hd_Cmd[1] = 0;
   hd_Cmd[2] = 0;
   hd_Cmd[3] = 0;
@@ -532,9 +626,37 @@ U32 erc;
  IDEid structure.   This also attempts to recal them.
 *************************************************************/
 
+/* static void hd_reset(U8 controller)  */
 static void hd_reset(void)
 {
 U32 i;
+/*	U8 port;
+ * 	if (controller == 0)
+ *  	{
+ *  		port = HD_REG_PORT;
+ *  	}
+ *  	else (controller == 1)
+ *  	{
+ *  		port = HD_REG_PORT_2;
+ *  	}
+ *
+ *  	UnMaskIRQ(14 + controller);
+ *  	OutByte(4, port);
+ *  	MicroDelay(4);
+ *
+ * 	OutByte(hd_control[controller] & 0x0f, port);
+ *
+ * 	Sleep(20);
+ *
+ * 	i = CheckMsg(hd_exch[controller], &hd_msg[controller]);
+ *
+ * 	hdstatus[controller].ResetStatByte = statbyte[controller];
+ *
+ * 	if (i)
+ * 		hdstatus[controller * 2].fIntOnReset = 1;
+ * 	else
+ * 		hdstatus[controller * 2].fIntOnReset = 0;
+ */
 
 	UnMaskIRQ(14);      		/*  enable the IRQ */
 	OutByte(4, HD_REG_PORT); 	/*  reset the controller */
@@ -555,8 +677,6 @@ U32 i;
 		hdstatus.fIntOnReset = 1;
 	else
 		hdstatus.fIntOnReset = 0;
-
-
 }
 
 /*************************************************************
@@ -570,10 +690,20 @@ U32 i;
 static void interrupt hdisk_isr(void)
 {
 	statbyte = InByte(HD_PORT+7);
-    HDDInt = 1;
+    	HDDInt = 1;
 	ISendMsg(hd_exch, 0xfffffff0, 0xfffffff0);
 	EndOfIRQ(14);
 }
+
+/*  ISR for second disk controller
+static void interrupt hdisk_isr2(void)
+{
+	statbyte[1] = InByte(HD_PORT_2+7);
+    	HDDInt[1] = 1;
+	ISendMsg(hd_exch[1], 0xfffffff0, 0xfffffff0);
+	EndOfIRQ(15);
+}
+*/
 
 /*************************************************************
  This checks the HDC controller to see if it's busy so we can
@@ -585,13 +715,25 @@ static void interrupt hdisk_isr(void)
  It leaves the status byte in the global statbyte.
 ****************************************************************/
 
+/* static U32 check_busy(U8 controller)	*/
 static U32  check_busy(void)
 {
 S16 count;
 
+/* U8 port;
+ *
+ * if (controller == 0)
+ * 	port = HD_PORT;
+ * else
+ * 	port = HD_PORT_2;
+ */
+
   count = 0;
   while (count++ < 60) 
   {
+/*	statbyte[controller] = InByte(port+7);
+ *	if ((statbyte[controller] & BUSY) == 0) return(ok);
+ */
 	statbyte = InByte(HD_PORT+7);
 	if ((statbyte & BUSY) == 0) return(ok);
 	Sleep(5);  /* 50ms shots */
@@ -664,11 +806,12 @@ U32 erc;
     alarm or int messages before we
     send a command.
 *********************************************/
-
+/* static U32 send_command(U8 Cmd, U8 controller, U8 drive)  */
 static U32  send_command(U8  Cmd)
 {
 U32 erc, msg[2];
 
+/* while (CheckMsg(hd_exch[controller], &msg) == 0);  */
 	while (CheckMsg(hd_exch, &msg) == 0);	/* Empty it */
 
     /* bit 3 of HD_REG must be 1 for access to heads 8-15 */
