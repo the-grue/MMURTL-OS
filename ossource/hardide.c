@@ -747,10 +747,35 @@ Wait for the hardware interrupt to occur.
 Time-out and return if no interrupt.
 ********************************************/
 
+/* static U32 hd_wait(U8 controller)  */
 static U32  hd_wait(void)
 {
 U32  erc;
 
+/* HDDInt[controller] = 0;
+ * KillAlarm(hd_exch[controller]);
+ *
+ * erc = Alarm(hd_exch[controller], 300);
+ * if (erc)
+ * 	return(erc);
+ *
+ * erc = WaitMsg(hd_exch[controller], &hd_msg[controller]);
+ *
+ * KillAlarm(hd_exch[controller]);
+ *
+ * if (hd_msg[controller] != 0xfffffff0)
+ * {
+ *	if (HDDInt[controller])
+ *		return(ErcMissHDDInt);
+ *	else
+ *		return(ErcHDCTimeOut);
+ * }
+ * else
+ * {
+ *	KillAlarm(hd_exch[controller]);
+ *	return(ok);
+ * }
+ */
 	/* Set alarm for 3 seconds */
 
 	HDDInt = 0;
