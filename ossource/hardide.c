@@ -54,20 +54,33 @@ extern long xprintf(char *fmt, ...);
 
 U32  hdisk_setup(void);
 static void interrupt hdisk_isr(void); 	/* The HD interrupt function */
-static U32  hd_format_track(U32 dLBA, U32 dnBlocks);
-static void hd_reset(void);
-static U32  send_command(U8  parm);
-static U32  hd_wait (void);
-static U32  check_busy(void);
-static U32  hd_seek(U32 dLBA);
+static void interrupt hdisk_isr2(void); /* Second HD interrupt func  */
+static U32  hd_format_track(U32 dLBA, U32 dnBlocks, U8 hdrive);
+/* Old function prototypes
+  static void hd_reset(void);
+  static U32  send_command(U8  parm);
+  static U32  hd_wait (void);
+  static U32  hd_status(U8 LastCmd);
+  static U32  check_busy(void);
+  static U32  setupseek(U32 dLBA, U32 nBlks);
+  static U32  hd_seek(U32 dLBA);
+  static U32  hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataIn);
+  static U32  hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut);
+  static U32  hd_format_track(U32 dLBA, U32 dnBlocks);
+  static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet);
+*/
+static void hd_reset(U8 controller);
+static U32  send_command(U8  parm, U8 hdrive);
+static U32  hd_wait (U8 controller);
+static U32  check_busy(U8 controller);
+static U32  hd_seek(U32 dLBA, U8 hdrive);
 static U32  hd_recal(U8 drive);
-static U32  hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut);
-static U32  hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataIn);
-/* static U32 hd_status(U8 LastCmd, U8 hdrive);	*/
-static U32  hd_status(U8 LastCmd);
-static U32  setupseek(U32 dLBA, U32 nBlks);
+static U32  hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut, U8 hdrive);
+static U32  hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataIn, U8 hdrive);
+static U32 hd_status(U8 LastCmd, U8 hdrive);
+static U32  setupseek(U32 dLBA, U32 nBlks, U8 hdrive);
 static U32  hd_init(U8 drive);
-static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet);
+static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet, U8 hdrive);
 
 /* The following 3 calls are required in every MMURTL device driver */
 
@@ -229,35 +242,36 @@ When reading from the port+X (where X =):
 /* Might need to make all of these arrays to support
  * multiple controllers!  */
 
-static U8  hd_Cmd[8];		/* For all 8 command bytes */
-/* static U8 hd_Cmd[2][8];	*/
+/*static U8  hd_Cmd[8];		** For all 8 command bytes */
+static U8 hd_Cmd[2][8];
 
-static U8  fDataReq;		/* Flag to indicate is fDataRequest is active */
-/* static U8 fDataReq[4];	*/
-static U8  statbyte;		/* From HDC status register last time it was read */
+/*static U8  fDataReq;		** Flag to indicate is fDataRequest is active */
+static U8 fDataReq[4];
+/*static U8  statbyte;		** From HDC status register last time it was read */
 /* Status byte to track second controller */
-/* static U8 statbyte[2];	*/
+static U8 statbyte[2];
 
-static U8  hd_control;		/* Current control byte value */
+/*static U8  hd_control;		** Current control byte value */
 /* static U8  hd_command;		** Current Command - not used */
 
-/* static U8 hd_control[4];	*/
+static U8 hd_control[4];
 
 /*  These should be passed as a variable to avoid confusion
  *  once we have two controllers  */
-/* static U8  hd_drive[4];		** Current Physical Drive, 0 or 1 **
- * static U8  hd_head[4];		** Calculated from LBA - which head **
- * static U8  hd_nsectors[4];	** Calculated from LBA - n sectors to read/write **
- * static U8  hd_sector[4];		** Calculated from LBA - Starting sector **
+static U8  hd_drive[4];		/* Current Physical Drive, 0 or 1 */
+static U8  hd_head[4];		/* Calculated from LBA - which head */
+static U8  hd_nsectors[4];	/* Calculated from LBA - n sectors to read/write */
+static U8  hd_sector[4];		/* Calculated from LBA - Starting sector */
+/*
+static U8  hd_drive;		** Current Physical Drive, 0 or 1 **
+static U8  hd_head;		** Calculated from LBA - which head **
+static U8  hd_nsectors;	** Calculated from LBA - n sectors to read/write **
+static U8  hd_sector;		** Calculated from LBA - Starting sector **
 */
-static U8  hd_drive;		/* Current Physical Drive, 0 or 1 */
-static U8  hd_head;		/* Calculated from LBA - which head */
-static U8  hd_nsectors;	/* Calculated from LBA - n sectors to read/write */
-static U8  hd_sector;		/* Calculated from LBA - Starting sector */
 
 /* Current type drive 0 & 1 found in CMOS or Set by caller. */
 /* Current number of heads, cylinders, and sectors set by caller */
-
+/*
 static U8  hd0_type;
 static U8  hd0_heads;
 static U8  hd0_secpertrk;
@@ -267,13 +281,12 @@ static U8  hd1_type;
 static U8  hd1_heads;
 static U8  hd1_secpertrk;
 static U16 hd1_cyls;
-
+*/
 /* Change these to arrays to support 4 drives */
-/* static U8	hd_type[4];
- * static U8	hd_heads[4];
- * static U8	hd_secpertrk[4];
- * static U16	hd_cyls[4];
- */
+static U8	hd_type[4];
+static U8	hd_heads[4];
+static U8	hd_secpertrk[4];
+static U16	hd_cyls[4];
 
 #define sIDEid 512
 
@@ -318,10 +331,10 @@ static struct idestruct
   U16 rsvd9[159-128+1];	/* 128-159 */
   U16 rsvd9[255-160+1];	/* 160-255 */
   };
-static struct idestruct IDEid;
+/*static struct idestruct IDEid;*/
 
 /* One struct per disk instead of a single shared one  */
-/* static struct idestruct IDEid[4]; */
+static struct idestruct IDEid[4];
 
 #define sStatus 64
 
@@ -355,9 +368,9 @@ static struct statstruct
   U32 resvd1[2];	/* out to 64 bytes */
   };
 
-static struct statstruct hdstatus;
+/*static struct statstruct hdstatus;*/
 /* One struct per disk instead of a single shared one  */
-/* static struct statstruct hdstatus[4]; */
+static struct statstruct hdstatus[4];
 
 /*static struct statstruct HDStatTmp;		** Not Used now */
 
@@ -383,24 +396,24 @@ static struct dcbtype
 	U32  OS6;
 	};
 
-static struct dcbtype hdcb[2];		/* two HD device control blocks */
-/* status struct dcbtype hdcb[4];	** four HD device control blocks */
+/* static struct dcbtype hdcb[2];		** two HD device control blocks */
+static struct dcbtype hdcb[4];	/* four HD device control blocks */
 
 /* Exch and msgs space for HD ISR */
 
-static U32 hd_exch;
+/*static U32 hd_exch;*/
 
 /* May need second exchange for second controller */
-/* static U32 hd_exch[2]; */
+static U32 hd_exch[2]; 
 
-static U32 hd_msg;
-/* static U32 hd_msg[2];		*/
+/*static U32 hd_msg;*/
+static U32 hd_msg[2];
 
 /* static U32 hd_msg2; 			** No longer used  */
 
-static long HDDInt;
+/*static long HDDInt;*/
 /* Second variable may be needed */
-/* static long HDDInt[2]; */
+static long HDDInt[2]; 
 
 
 /*======================================================*/
@@ -414,6 +427,7 @@ static long HDDInt;
 U32  hdisk_setup(void)
 {
 U32  erc;
+U8 counter;
 
   /* first we set up the 2 DCBs in anticipation of calling InitDevDr */
 
@@ -439,14 +453,14 @@ U32  erc;
 	hdcb[1].pDevInit = &hddev_init;
 	hdcb[1].pDevSt   = &hddev_stat;
 
-/* To support additional controller and two more drives  **
+/* To support additional controller and two more drives  */
 	hdcb[2].Name[0]  = 'H';
 	hdcb[2].Name[1]  = 'D';
 	hdcb[2].Name[2]  = '2';
 	hdcb[2].sbName   = 3;
-	hdcb[2].type     = 1;			** Random **
+	hdcb[2].type     = 1;			/* Random */
 	hdcb[2].nBPB     = 512;
-	hdcb[2].nBlocks  = 524288;	** largest device handled - 2Gb disks**
+	hdcb[2].nBlocks  = 524288;	/* largest device handled - 2Gb disks*/
 	hdcb[2].pDevOp   = &hddev_op;
 	hdcb[2].pDevInit = &hddev_init;
 	hdcb[2].pDevSt   = &hddev_stat;
@@ -455,47 +469,43 @@ U32  erc;
 	hdcb[3].Name[1]  = 'D';
 	hdcb[3].Name[2]  = '3';
 	hdcb[3].sbName   = 3;
-	hdcb[3].type     = 1;			** Random **
+	hdcb[3].type     = 1;			/* Random */
 	hdcb[3].nBPB     = 512;
-	hdcb[3].nBlocks  = 524288;	** largest device handled - 2Gb disks**
+	hdcb[3].nBlocks  = 524288;	/* largest device handled - 2Gb disks*/
 	hdcb[3].pDevOp   = &hddev_op;
 	hdcb[3].pDevInit = &hddev_init;
 	hdcb[3].pDevSt   = &hddev_stat;
-
-*/
 
 /* These are defaulted to non zero values to
    ensure we don't get a divide by zero during initial calculations
    on the first read.
 */
 
-	hd0_type =	1;
+/*	hd0_type =	1;
 	hd1_type =	1;
-
+*/
 /* Add two additional disks and convert to array  */
-/* 
- * hd_type[0] = 1;
- * hd_type[1] = 1;
- * hd_type[2] = 1;
- * hd_type[3] = 1;
- */
+ 
+	hd_type[0] = 1;
+	hd_type[1] = 1;
+	hd_type[2] = 1;
+	hd_type[3] = 1;
 
-	erc = AllocExch(&hd_exch);		/* Exhange for HD Task to use */
+/*	erc = AllocExch(&hd_exch);		** Exhange for HD Task to use */
 
 /* Can we share the same exchange for both controllers??? */
 /* If we cannot  */
-/*	erc = AllocExch(&hd_exch[0]);	*/
+	erc = AllocExch(&hd_exch[0]);	
 
 	SetIRQVector(14, &hdisk_isr);
 	UnMaskIRQ(14);
 
-/* IRQ Vector for second disk controller at IRQ 15 **
- *
- * 	erc = AllocExch(&hd_exch[1]);
- *
+/* IRQ Vector for second disk controller at IRQ 15 */
+ 
+  	erc = AllocExch(&hd_exch[1]);
+ 
 	SetIRQVector(15, &hdisk_isr2);
 	UnMaskIRQ(15);
-*/
 
 /* Documentation lists the fixed disk types at CMOS 11h and 12h,
    and also shows them at 19h and 1Ah.  We don't actually read them
@@ -506,16 +516,16 @@ U32  erc;
 /* Reset the HDC - The reset is a hardware rest.
 */
 
-/*	hd_reset(0);
+	hd_reset(0);
 	hd_reset(1);
-*/
-	hd_reset();		/* no error is returned */
+
+/*	hd_reset();		** no error is returned */
 
 /* Now we attempt to select and recal both drives.
    The driver MUST be able to recal the first physical drive
    or the Driver won't install.
 */
-/*	for(counter = 0; counter < 4; counter++)
+	for(counter = 0; counter < 4; counter++)
 	{
 		erc = hd_recal(counter);
 		if (erc)
@@ -538,47 +548,47 @@ U32  erc;
 
 	return(erc = InitDevDr(12, &hdcb, 4, 1));
 
-*/
 
-	erc = hd_recal(0);			/* try to recal */
+/*
+	erc = hd_recal(0);			** try to recal **
 	if (erc)
-	{					/* try one more time! */
+	{					** try one more time! **
 		hd_reset();
-		erc = hd_recal(0);			/* try to recal */
+		erc = hd_recal(0);			** try to recal **
 		if (erc)
 		{
 	        hdcb[0].last_erc = erc;
-			hd0_type = 0;			/* Must not be a valid drive */
+			hd0_type = 0;			** Must not be a valid drive **
 			return(ErcNoDrive0);
 	 	}
     }
 
-	/* if we got here, drive 0 looks OK and the controller is
+	** if we got here, drive 0 looks OK and the controller is
 	   functioning.  Now we try drive 1 if type > 0.
-	*/
+	**
 
 	if (hd1_type)
 	{
-		erc = hd_recal(1);	/* try to recal if CMOS says it's there */
+		erc = hd_recal(1);	** try to recal if CMOS says it's there **
 		if (erc)
 		{
 	        hdcb[1].last_erc = erc;
-			hd1_type = 0;			/* Guess it's not a valid drive */
+			hd1_type = 0;			** Guess it's not a valid drive **
 
 			if (!erc)
 
-		/* We must redo drive 0 cause some cheap controllers lockup
+		** We must redo drive 0 cause some cheap controllers lockup
 		on us if drive 1 is not there.  They SHOULD simply return
-		a Bad Command bit set in the Error register, but they don't. */
+		a Bad Command bit set in the Error register, but they don't. **
 
 			hd_reset();
-			erc = hd_recal(0);			/* recal drive 0 */
+			erc = hd_recal(0);			** recal drive 0 **
    	     hdcb[0].last_erc = erc;
 		}
 	}
 
 	return(erc = InitDevDr(12, &hdcb, 2, 1));
-
+*/
 }
 
 /*************************************************************
@@ -589,11 +599,11 @@ U32  erc;
 static U32  hd_init(U8 drive)
 {
 U32 erc;
-/*
-U8 hd_port;
-U8 drive_base = drive;
+U16 hd_port;
+U8 drive_base;
 U8 controller;
 
+  drive_base = drive;
   if (drive_base == 0 || drive_base == 1)
   {
 	hd_port = HD_PORT;
@@ -616,35 +626,36 @@ U8 controller;
   hd_Cmd[controller][3] = 0;
   hd_Cmd[controller][4] = 0;
   hd_Cmd[controller][5] = 0;
-  hd_Cmd[controller[]6] = (drive_base << 4);
+  hd_Cmd[controller][6] = (drive_base << 4);
 
-  erc = send_command(HDC_ID, controller);
+  erc = send_command(HDC_ID, drive);
 
   erc = hd_wait(controller);
   if (!erc)
-	erc = hd_status(HDC_READ, hdrive);
+	erc = hd_status(HDC_READ, drive);
   if (!erc)
 	InWords(hd_port, &IDEid[drive], 512);
 
   return(erc);
 
-*/
+/*
   hd_Cmd[1] = 0;
   hd_Cmd[2] = 0;
   hd_Cmd[3] = 0;
   hd_Cmd[4] = 0;
   hd_Cmd[5] = 0;
-  hd_Cmd[6] = (drive << 4); 	/*  drive */
+  hd_Cmd[6] = (drive << 4); 	**  drive **
 
   erc = send_command(HDC_ID);
 
-  erc = hd_wait();					/* wait for interrupt */
+  erc = hd_wait();					** wait for interrupt **
   if (!erc)
   	erc = hd_status(HDC_READ);
-  if (!erc)		/* && (statbyte & DATA_REQ))  */
+  if (!erc)		** && (statbyte & DATA_REQ))  **
   	InWords(HD_PORT, &IDEid, 512);
 
   return(erc);
+*/
 }
 
 /************************************************************
@@ -654,57 +665,59 @@ U8 controller;
  IDEid structure.   This also attempts to recal them.
 *************************************************************/
 
-/* static void hd_reset(U8 controller)  */
-static void hd_reset(void)
+/*static void hd_reset(void)*/
+static void hd_reset(U8 controller)
 {
 U32 i;
-/*	U8 port;
- * 	if (controller == 0)
- *  	{
- *  		port = HD_REG_PORT;
- *  	}
- *  	else (controller == 1)
- *  	{
- *  		port = HD_REG_PORT_2;
- *  	}
- *
- *  	UnMaskIRQ(14 + controller);
- *  	OutByte(4, port);
- *  	MicroDelay(4);
- *
- * 	OutByte(hd_control[controller] & 0x0f, port);
- *
- * 	Sleep(20);
- *
- * 	i = CheckMsg(hd_exch[controller], &hd_msg[controller]);
- *
- * 	hdstatus[controller].ResetStatByte = statbyte[controller];
- *
- * 	if (i)
- * 		hdstatus[controller * 2].fIntOnReset = 1;
- * 	else
- * 		hdstatus[controller * 2].fIntOnReset = 0;
- */
+U16 port;
 
-	UnMaskIRQ(14);      		/*  enable the IRQ */
-	OutByte(4, HD_REG_PORT); 	/*  reset the controller */
-   	MicroDelay(4);  			/*  Delay 60us */
+	if (controller == 0)
+	{
+		port = HD_REG_PORT;
+	}
+ 	else /*(controller == 1)*/
+ 	{
+ 		port = HD_REG_PORT_2;
+ 	}
 
-    /* bit 3 of HD_REG must be 1 for access to heads 8-15 */
-    /* Clear "MUCHO" heads bit, and clear the reset bit */
+ 	UnMaskIRQ(14 + controller);
+ 	OutByte(4, port);
+ 	MicroDelay(4);
+
+	OutByte(hd_control[controller] & 0x0f, port);
+
+	Sleep(20);
+
+	i = CheckMsg(hd_exch[controller], &hd_msg[controller]);
+
+	hdstatus[controller].ResetStatByte = statbyte[controller];
+
+	if (i)
+		hdstatus[controller * 2].fIntOnReset = 1;
+	else
+		hdstatus[controller * 2].fIntOnReset = 0;
+ /*
+
+	UnMaskIRQ(14);      		**  enable the IRQ **
+	OutByte(4, HD_REG_PORT); 	**  reset the controller **
+   	MicroDelay(4);  			**  Delay 60us **
+
+    ** bit 3 of HD_REG must be 1 for access to heads 8-15 **
+    ** Clear "MUCHO" heads bit, and clear the reset bit **
 
     OutByte(hd_control & 0x0f, HD_REG_PORT);
 
-	Sleep(20);		/* 200ms - seems some controllers are SLOW!! */
-    i = CheckMsg(hd_exch, &hd_msg); 	/* Eat Int if one came back  */
+	Sleep(20);		** 200ms - seems some controllers are SLOW!! **
+    i = CheckMsg(hd_exch, &hd_msg); 	** Eat Int if one came back  **
 
-	hdstatus.ResetStatByte = statbyte;	/* The ISR gets statbyte */
+	hdstatus.ResetStatByte = statbyte;	** The ISR gets statbyte **
 
-	/* For my general knowledge */
+	** For my general knowledge **
 	if (i)
 		hdstatus.fIntOnReset = 1;
 	else
 		hdstatus.fIntOnReset = 0;
+		*/
 }
 
 /*************************************************************
@@ -717,13 +730,17 @@ U32 i;
 ****************************************************************/
 static void interrupt hdisk_isr(void)
 {
-	statbyte = InByte(HD_PORT+7);
-    	HDDInt = 1;
+/*	statbyte = InByte(HD_PORT+7);
+    	HDDInt = 1; 
 	ISendMsg(hd_exch, 0xfffffff0, 0xfffffff0);
+*/
+	statbyte[0] = InByte(HD_PORT+7);
+    	HDDInt[0] = 1;
+	ISendMsg(hd_exch[0], 0xfffffff0, 0xfffffff0);
 	EndOfIRQ(14);
 }
 
-/*  ISR for second disk controller
+/*  ISR for second disk controller */
 static void interrupt hdisk_isr2(void)
 {
 	statbyte[1] = InByte(HD_PORT_2+7);
@@ -731,7 +748,6 @@ static void interrupt hdisk_isr2(void)
 	ISendMsg(hd_exch[1], 0xfffffff0, 0xfffffff0);
 	EndOfIRQ(15);
 }
-*/
 
 /*************************************************************
  This checks the HDC controller to see if it's busy so we can
@@ -743,12 +759,11 @@ static void interrupt hdisk_isr2(void)
  It leaves the status byte in the global statbyte.
 ****************************************************************/
 
-/* static U32 check_busy(U8 controller)	*/
-static U32  check_busy(void)
+/* static U32  check_busy(void) */
+static U32 check_busy(U8 controller)
 {
 S16 count;
-
-/*	U8 port;
+U16 port;
  
 	if (controller == 0)
   		port = HD_PORT;
@@ -764,17 +779,18 @@ S16 count;
 		Sleep(5);
 	}
 	return(ErcNotReady);
-}
- */
+
+/*
 
   count = 0;
   while (count++ < 60) 
   {
 	statbyte = InByte(HD_PORT+7);
 	if ((statbyte & BUSY) == 0) return(ok);
-	Sleep(5);  /* 50ms shots */
+	Sleep(5);  ** 50ms shots **
   }
-  return(ErcNotReady);	 /* controller out to lunch! */
+  return(ErcNotReady);	 ** controller out to lunch! **
+*/
 }
 
 
@@ -783,61 +799,61 @@ Wait for the hardware interrupt to occur.
 Time-out and return if no interrupt.
 ********************************************/
 
-/* static U32 hd_wait(U8 controller)  */
-static U32  hd_wait(void)
+/*static U32  hd_wait(void) */
+static U32 hd_wait(U8 controller)
 {
 U32  erc;
 
-/* HDDInt[controller] = 0;
- * KillAlarm(hd_exch[controller]);
- *
- * erc = Alarm(hd_exch[controller], 300);
- * if (erc)
- * 	return(erc);
- *
- * erc = WaitMsg(hd_exch[controller], &hd_msg[controller]);
- *
- * KillAlarm(hd_exch[controller]);
- *
- * if (hd_msg[controller] != 0xfffffff0)
- * {
- *	if (HDDInt[controller])
- *		return(ErcMissHDDInt);
- *	else
- *		return(ErcHDCTimeOut);
- * }
- * else
- * {
- *	KillAlarm(hd_exch[controller]);
- *	return(ok);
- * }
-}
- */
-	/* Set alarm for 3 seconds */
+	HDDInt[controller] = 0;
+	KillAlarm(hd_exch[controller]);
+
+	erc = Alarm(hd_exch[controller], 300);
+	if (erc)
+		return(erc);
+
+	erc = WaitMsg(hd_exch[controller], &hd_msg[controller]);
+
+	KillAlarm(hd_exch[controller]);
+
+	if (hd_msg[controller] != 0xfffffff0)
+	{
+		if (HDDInt[controller])
+			return(ErcMissHDDInt);
+		else
+			return(ErcHDCTimeOut);
+	}
+	else
+	{
+		KillAlarm(hd_exch[controller]);
+		return(ok);
+	}
+/*
+	** Set alarm for 3 seconds **
 
 	HDDInt = 0;
-	KillAlarm(hd_exch);			/* kill any pending alarm */
+	KillAlarm(hd_exch);			** kill any pending alarm **
 
-	erc = Alarm(hd_exch, 300);	/* Set it up again */
+	erc = Alarm(hd_exch, 300);	** Set it up again **
 	if (erc)
-		return(erc);		/* bad problem */
+		return(erc);		** bad problem **
 
 	erc = WaitMsg(hd_exch, &hd_msg);
 
 	KillAlarm(hd_exch);
 
 	if (hd_msg != 0xfffffff0)
-	{        /* HD interrupt sends fffffff0 */
+	{        ** HD interrupt sends fffffff0 **
 	    if (HDDInt)
 	      return(ErcMissHDDInt);
 		else
-			return(ErcHDCTimeOut);		/* Alarm sends 0xffffffff      */
+			return(ErcHDCTimeOut);		** Alarm sends 0xffffffff      **
 	}
 	else
 	{
 		KillAlarm(hd_exch);
 		return(ok);
 	}
+*/
 }
 
 /********************************************
@@ -847,8 +863,12 @@ U32  erc;
 static U32  hd_recal(U8 drive)
 {
 U32 erc;
-/*	U8 controller = (drive & 0x02) >> 1;
-	U8 drive_base = drive & 0x01;
+U8 controller;
+U8 drive_base;
+
+	
+	controller = (drive & 0x02) >> 1;
+	drive_base = drive & 0x01;
 
 	hd_Cmd[controller][6] = (drive_base << 4) | (hd_head[drive] & 0x0f) | 0xa0;
 	erc = send_command(HDC_RECAL, drive);
@@ -859,12 +879,13 @@ U32 erc;
 	hdstatus[drive].LastRecalErc0 = erc;
 
 	return(erc);
-*/
+
+/*
 
   hd_Cmd[6] = (drive << 4) | (hd_head & 0x0f) | 0xa0;
   erc = send_command(HDC_RECAL);
   if (!erc)
-    erc = hd_wait();						/* wait for interrupt */
+    erc = hd_wait();						** wait for interrupt **
   if (!erc)
       erc = hd_status(HDC_RECAL);
   if (drive)
@@ -872,6 +893,7 @@ U32 erc;
   else
     hdstatus.LastRecalErc0 = erc;
   return(erc);
+*/
 }
 
 
@@ -881,14 +903,14 @@ U32 erc;
     alarm or int messages before we
     send a command.
 *********************************************/
-/* static U32 send_command(U8 Cmd, U8 drive)  */
-static U32  send_command(U8  Cmd)
+/*static U32  send_command(U8  Cmd) */
+static U32 send_command(U8 Cmd, U8 hdrive)
 {
 U32 erc, msg[2];
+U16 port, regport;
+U8 controller;
 
-/* 	U8 controller = (hdrive & 0x02) >> 1;
-	U8 port, regport;
-
+	controller = (hdrive & 0x02) >> 1;
 	if (controller == 0)
 	{
 		port = HD_PORT;
@@ -908,7 +930,7 @@ U32 erc, msg[2];
 		OutByte(hd_control[controller], regport);
 		hd_control[controller] &= 0xf7;
 	}
-	erc = check_busy(hdrive);
+	erc = check_busy(controller);
 
     	if (!erc) 
 		OutByte(hd_Cmd[controller][1], port+1);
@@ -938,15 +960,14 @@ U32 erc, msg[2];
 		OutByte(Cmd, port+7);
 
     	return(erc);
-}
-*/
-	while (CheckMsg(hd_exch, &msg) == 0);	/* Empty it */
+/*
+	while (CheckMsg(hd_exch, &msg) == 0);	** Empty it **
 
-    /* bit 3 of HD_REG must be 1 for access to heads 8-15 */
+    ** bit 3 of HD_REG must be 1 for access to heads 8-15 **
     if (hd_head > 7)
     {
       hd_control |= 0x08;
-      OutByte(hd_control, HD_REG_PORT); 	/*  set bit for head > 7 */
+      OutByte(hd_control, HD_REG_PORT); 	**  set bit for head > 7 **
       hd_control &= 0xf7;
     }
     erc = check_busy();
@@ -964,6 +985,7 @@ U32 erc, msg[2];
     if (!erc) erc = check_busy();
     if (!erc) OutByte(Cmd, HD_PORT+7);
     return(erc);
+*/
 }
 
 /*************************************************************
@@ -975,15 +997,15 @@ U32 erc, msg[2];
  in anticipation of the command being sent.
 *************************************************************/
 
-/* static U32 setupseek(U32 dLBA, U32 nBlks, U8 hdrive)	*/
-static U32  setupseek(U32 dLBA, U32 nBlks)
+/*static U32  setupseek(U32 dLBA, U32 nBlks)*/
+static U32 setupseek(U32 dLBA, U32 nBlks, U8 hdrive)
 {
  U32  j;
- U16  cyl;
-
-/*	U8 controller = (hdrive & 0x02) >> 1;
-	U8 drive_base = (hdrive & 0x01);
-	U8 port
+ U16  cyl, port;
+ U8 controller, drive_base;
+ 
+	controller = (hdrive & 0x02) >> 1;
+	drive_base = (hdrive & 0x01);
 
 	if (controller == 0)
 		port = HD_PORT;
@@ -997,7 +1019,7 @@ static U32  setupseek(U32 dLBA, U32 nBlks)
 
 	hd_nsectors[hdrive] = nBlks;
   	if (hd_nsectors[hdrive] == 256) 
-		hd_nsectors[hdrive] = 0;   ** 0==256 for controller **
+		hd_nsectors[hdrive] = 0;   /* 0==256 for controller */
 
 	cyl = dLBA / (hd_heads[hdrive] * hd_secpertrk[hdrive]);
 	j = dLBA % (hd_heads[hdrive] * hd_secpertrk[hdrive]);	
@@ -1005,53 +1027,54 @@ static U32  setupseek(U32 dLBA, U32 nBlks)
 	hd_head[hdrive] = j / hd_secpertrk[hdrive];
 	hd_sector[hdrive] = j % hd_secpertrk[hdrive] + 1;
 
-  hd_Cmd[controller][2] = nBlks;			** How many sectors **
-  hd_Cmd[controller][3] = hd_sector[hdrive];		** Which sector to start on **
-  hd_Cmd[controller][4] = cyl & 0xff;		** cylinder lobyte **
-  hd_Cmd[controller][5] = (cyl >> 8) & 0xff;	** cylinder hibyte **
+  hd_Cmd[controller][2] = nBlks;		/* How many sectors */
+  hd_Cmd[controller][3] = hd_sector[hdrive];	/* Which sector to start on */
+  hd_Cmd[controller][4] = cyl & 0xff;		/* cylinder lobyte */
+  hd_Cmd[controller][5] = (cyl >> 8) & 0xff;	/* cylinder hibyte */
   hd_Cmd[controller][6] = (drive_base << 4) | (hd_head[hdrive] & 0x0f) | 0xa0;
 
   return ok;
-}
-*/
+  
+/*
 
   if (nBlks > 256) return ErcTooManyBlks;
   if (nBlks == 0) return ErcZeroBlks;
 
   hd_nsectors = nBlks;
-  if (hd_nsectors == 256) hd_nsectors = 0;   /* 0==256 for controller */
+  if (hd_nsectors == 256) hd_nsectors = 0;   ** 0==256 for controller **
 
   if (hd_drive == 0)
-  {		/* drive 0 */
+  {		** drive 0 **
 
 	cyl = dLBA / (hd0_heads * hd0_secpertrk);
- 	j = dLBA % (hd0_heads * hd0_secpertrk);		/* remainder */
+ 	j = dLBA % (hd0_heads * hd0_secpertrk);		** remainder **
 
-    /* we now know what cylinder, calculate head and sector */
+    ** we now know what cylinder, calculate head and sector **
 
     hd_head = j / hd0_secpertrk;
-    hd_sector = j % hd0_secpertrk + 1; /* sector number start at 1 !!! */
+    hd_sector = j % hd0_secpertrk + 1; ** sector number start at 1 !!! **
 
   }
   else
-  {						/* drive 1 */
+  {						** drive 1 **
 
 	cyl = dLBA / (hd1_heads * hd1_secpertrk);
- 	j = dLBA % (hd1_heads * hd1_secpertrk);		/* remainder */
+ 	j = dLBA % (hd1_heads * hd1_secpertrk);		** remainder **
 
-    /* We now know what cylinder. Calculate head and sector */
+    ** We now know what cylinder. Calculate head and sector **
 
     hd_head = j / hd1_secpertrk;
-    hd_sector = j % hd1_secpertrk + 1; /* sector number start at 1 !!! */
+    hd_sector = j % hd1_secpertrk + 1; ** sector number start at 1 !!! **
   }
 
-  hd_Cmd[2] = nBlks;					/* How many sectors */
-  hd_Cmd[3] = hd_sector;				/* Which sector to start on */
-  hd_Cmd[4] = cyl & 0xff;				/* cylinder lobyte */
-  hd_Cmd[5] = (cyl >> 8) & 0xff;		/* cylinder hibyte */
+  hd_Cmd[2] = nBlks;					** How many sectors **
+  hd_Cmd[3] = hd_sector;				** Which sector to start on **
+  hd_Cmd[4] = cyl & 0xff;				** cylinder lobyte **
+  hd_Cmd[5] = (cyl >> 8) & 0xff;		** cylinder hibyte **
   hd_Cmd[6] = (hd_drive << 4) | (hd_head & 0x0f) | 0xa0;
 
   return ok;
+*/
 }
 
 
@@ -1059,11 +1082,13 @@ static U32  setupseek(U32 dLBA, U32 nBlks)
   Move the head to the selected track (cylinder).
 *********************************************************/
 
-/* static U32 hd_seek(U32 dLBA, U8 hdrive)	*/
-static U32  hd_seek(U32 dLBA)
+/*static U32  hd_seek(U32 dLBA)*/
+static U32 hd_seek(U32 dLBA, U8 hdrive)
 {
 U32 erc;
-/*	U8 controller = (hdrive & 0x02) >> 1;
+U8 controller;
+
+	controller = (hdrive & 0x02) >> 1;
 
 	erc = setupseek(dLBA, 1, hdrive);
 	if (!erc)
@@ -1072,18 +1097,20 @@ U32 erc;
 		erc = hd_wait(controller);
 	if (!erc)
 		erc = hd_status(HDC_SEEK, hdrive);
-	hdstatus[hdisk].LastSeekErc0 = erc;
+
+	hdstatus[hdrive].LastSeekErc0 = erc;
 
 	return(erc);
-}
-*/
+	
+/*
 
-  erc = setupseek(dLBA, 1);					/* sets up for implied seek */
-  if (!erc) erc = send_command(HDC_SEEK);	/* Not implied anymore... */
-  if (!erc) erc = hd_wait();				/* wait for interrupt */
+  erc = setupseek(dLBA, 1);					** sets up for implied seek **
+  if (!erc) erc = send_command(HDC_SEEK);	** Not implied anymore... **
+  if (!erc) erc = hd_wait();				** wait for interrupt **
   if (!erc) erc = hd_status(HDC_SEEK);
   hdstatus.LastSeekErc0 = erc;
   return(erc);
+*/
 }
 
 
@@ -1098,18 +1125,19 @@ U32 erc;
  we are checking.
 *********************************************************/
 
-/* static U32 hd_status(U8 LastCmd, U8 hdrive)	*/
-static U32  hd_status(U8  LastCmd)
+/*static U32  hd_status(U8  LastCmd)*/
+static U32 hd_status(U8 LastCmd, U8 hdrive)
 {
 U32 erc;
-U8  statbyte, errbyte;
+U16 port;
+U8 statbyte, errbyte;
+U8 controller;
 
   /* We shouldn't see the controller busy. After all,
      he interrupted us with status.
   */
 
-/*	U8 controller = (hdrive & 0x02) >> 1;
-	U8 port;
+	controller = (hdrive & 0x02) >> 1;
 
 	if (controller == 0)
 		port = HD_PORT;
@@ -1118,13 +1146,16 @@ U8  statbyte, errbyte;
 
 	erc = check_busy(controller);
 	if (!erc)
-		statbyte[controller] = InByte(port+7);
+		/*statbyte[controller] = InByte(port+7);*/
+		statbyte = InByte(port+7);
 	else
 		return(erc);
 
-	hdstatus[hdrive].LastStatByte0 = statbyte[controller];
+	/*hdstatus[hdrive].LastStatByte0 = statbyte[controller];*/
+	hdstatus[hdrive].LastStatByte0 = statbyte;
 
-	if((statbyte[controller] & ERROR) == 0)
+	/*if((statbyte[controller] & ERROR) == 0)*/
+	if((statbyte & ERROR) == 0)
 	{
     		erc = ok;  
 
@@ -1136,9 +1167,11 @@ U8  statbyte, errbyte;
 	  		case HDC_WRITE_LONG:
 	  		case HDC_SEEK:
 	  		case HDC_RECAL:
-				if (statbyte[controller] & WRITE_FAULT) 
+		/*		if (statbyte[controller] & WRITE_FAULT) */
+				if (statbyte & WRITE_FAULT)
 					erc = ErcWriteFault;
-				else if ((statbyte[controller] & SEEKOK) == 0) 
+		/*		else if ((statbyte[controller] & SEEKOK) == 0)*/
+				else if ((statbyte & SEEKOK) == 0) 
 					erc =	ErcBadSeek;
 				break;
 	  		case HDC_SET_PARAMS:
@@ -1152,7 +1185,7 @@ U8  statbyte, errbyte;
     		return(erc);
 	}
 	else
-	}
+	{
 		erc = check_busy(controller);
 		if (!erc)
 	  		errbyte = InByte(port+1);
@@ -1173,12 +1206,12 @@ U8  statbyte, errbyte;
 		erc = ErcBadECC;
 	else if (errbyte & BAD_SECTOR) 
 		erc = ErcBadBlock;
-	else erc = ErcBadHDC; ** no error bits found but should have been! **
+	else erc = ErcBadHDC; /* no error bits found but should have been! */
   }
  return erc;
-}
-*/
-  erc = check_busy();		/* puts status byte into global StatByte */
+ 
+/*
+  erc = check_busy();		** puts status byte into global StatByte **
   if (!erc)
     statbyte = InByte(HD_PORT+7);
   else return(erc);
@@ -1189,8 +1222,8 @@ U8  statbyte, errbyte;
 	  hdstatus.LastStatByte0 = statbyte;
 
   if ((statbyte & ERROR) == 0)
-  {		/* Error bit not set in status reg */
-    erc = ok;  /* default */
+  {		** Error bit not set in status reg **
+    erc = ok;  ** default **
 
 	switch (LastCmd)
 	{
@@ -1232,9 +1265,10 @@ U8  statbyte, errbyte;
 	else if (errbyte & BAD_IDMARK) erc = ErcSectNotFound;
 	else if (errbyte & BAD_ECC) erc = ErcBadECC;
 	else if (errbyte & BAD_SECTOR) erc = ErcBadBlock;
-	else erc = ErcBadHDC; /* no error bits found but should have been! */
+	else erc = ErcBadHDC; ** no error bits found but should have been! **
   }
  return erc;
+*/
 }
 
 /*************************************************************
@@ -1243,13 +1277,14 @@ U8  statbyte, errbyte;
  in hd_head, hd_sector, and hd_cyl
 *************************************************************/
 
-/* static U32 hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataRet, U8 hdrive)  */
-static U32  hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataRet)
+/*static U32  hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataRet)*/
+static U32 hd_read(U32 dLBA, U32 dnBlocks, U8 *pDataRet, U8 hdrive)
 {
 U32 erc, nleft, nBPS;
+U16 port;
+U8 controller;
 
-/*	U8 controller = (hdrive & 0x02) >> 1;
-	U8 port;
+	controller = (hdrive & 0x02) >> 1;
 
 	if (controller == 0)
 		port = HD_PORT;
@@ -1276,19 +1311,19 @@ U32 erc, nleft, nBPS;
 		}
 	}
 	return(erc);
-}
-*/
-  nBPS = hdcb[hd_drive].nBPB;			/* From nBytesPerBlock in DCB */
+ 
+/*
+  nBPS = hdcb[hd_drive].nBPB;			** From nBytesPerBlock in DCB **
   nleft = dnBlocks;
-  erc = setupseek(dLBA, dnBlocks);		/* sets up for implied seek */
+  erc = setupseek(dLBA, dnBlocks);		** sets up for implied seek **
   if (!erc) erc = send_command(HDC_READ);
 
   while ((nleft) && (!erc))
   {
-	  erc = hd_wait();					/* wait for interrupt */
+	  erc = hd_wait();					** wait for interrupt **
 	  if (!erc)
 	  	erc = hd_status(HDC_READ);
-	  if (!erc)		/* && (statbyte & DATA_REQ))  */
+	  if (!erc)		** && (statbyte & DATA_REQ))  **
 	  {
 	  	InWords(HD_PORT, pDataRet, nBPS);
 	  	pDataRet+=nBPS;
@@ -1296,6 +1331,7 @@ U32 erc, nleft, nBPS;
 	  }
   }
   return(erc);
+*/
 }
 
 /*************************************************************
@@ -1304,13 +1340,14 @@ U32 erc, nleft, nBPS;
  in hd_head, hd_sector, and hd_cyl
 *************************************************************/
 
-/* static U32 hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut, U8 hdrive)  */
-static U32  hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut)
+/*static U32  hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut)*/
+static U32 hd_write(U32 dLBA, U32 dnBlocks, U8 *pDataOut, U8 hdrive)
 {
 U32 erc, nSoFar, nBPS;
+U16 port;
+U8 controller;
 
-/*	U8 controller = (hdrive & 0x02) >> 1;
-	U8 port;
+	controller = (hdrive & 0x02) >> 1;
 
 	if (controller == 0)
 		port = HD_PORT;
@@ -1351,15 +1388,14 @@ U32 erc, nSoFar, nBPS;
 		erc = hd_status(HDC_WRITE, hdrive);
 
 	return(erc);
-}
 
-*/
+/*
 
-  nBPS = hdcb[hd_drive].nBPB;			/* From n BytesPerBlock in DCB */
+  nBPS = hdcb[hd_drive].nBPB;			** From n BytesPerBlock in DCB **
   nSoFar = 0;
-  erc = setupseek(dLBA, dnBlocks);		/* sets up for implied seek */
+  erc = setupseek(dLBA, dnBlocks);		** sets up for implied seek **
   erc = send_command(HDC_WRITE);
-  erc = check_busy();			/* No INT occurs for first sector of write */
+  erc = check_busy();			** No INT occurs for first sector of write **
 
   if ((!erc) && (statbyte & DATA_REQ)) 
   {
@@ -1370,7 +1406,7 @@ U32 erc, nSoFar, nBPS;
 
   while ((nSoFar < dnBlocks ) && (erc==ok))
   {
-	  erc = hd_wait();					/* wait for interrupt */
+	  erc = hd_wait();					** wait for interrupt **
       if (erc==ok) erc = hd_status(HDC_WRITE);
 	  if ((erc==ok) && (statbyte & DATA_REQ)) 
 	  {
@@ -1379,10 +1415,11 @@ U32 erc, nSoFar, nBPS;
 		  nSoFar++;
 	  }
   }
-  if (!erc) erc = hd_wait();			/* wait for final interrupt */
+  if (!erc) erc = hd_wait();			** wait for final interrupt **
   if (!erc) erc = hd_status(HDC_WRITE);
 
   return(erc);
+*/
 }
 
 
@@ -1392,12 +1429,13 @@ U32 erc, nSoFar, nBPS;
  sectors per track minus 1 for the disk type.
 *************************************************************/
 
-/* static U32 hd_format_track(U32 dLBA, U32 dnBlocks, U8 hdrive)  */
-static U32  hd_format_track(U32 dLBA, U32 dnBlocks)
+/*static U32  hd_format_track(U32 dLBA, U32 dnBlocks)*/
+static U32 hd_format_track(U32 dLBA, U32 dnBlocks, U8 hdrive)
 {
 U32  erc;
+U8 controller;
 
-/*	U8 controller = (hdrive & 0x02) >> 1;
+	controller = (hdrive & 0x02) >> 1;
 		
 	erc = setupseek(dLBA, dnBlocks, hdrive);
 	erc = send_command(HDC_FORMAT, controller);
@@ -1406,13 +1444,15 @@ U32  erc;
 	if (erc == ok)
 		erc = hd_status(HDC_FORMAT, hdrive);
 	return(erc);
-*/
-  erc = setupseek(dLBA, dnBlocks);		/* sets up for implied seek */
+
+/*
+  erc = setupseek(dLBA, dnBlocks);		** sets up for implied seek **
   erc = send_command(HDC_FORMAT);
-  erc = hd_wait();						/* wait for interrupt */
+  erc = hd_wait();				** wait for interrupt **
   if (erc==ok)
       erc = hd_status(HDC_FORMAT);
   return(erc);
+*/
 }
 
 /******************************************************************
@@ -1423,16 +1463,14 @@ U32  erc;
    Head is LoWord of dnBlocks in DeviceOp call, and
    Sector number is HiWord in dnBlocks.
 *******************************************************************/
-/* static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet, U8 hdrive) */
-static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet)
+/*static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet)*/
+static U32 ReadSector(U32 Cylinder, U32 HdSect, U8 *pDataRet, U8 hdrive)
 {
 U32 erc;
 U16  cyl;
-
-/*
-	U8 hd_port;
-	U8 drive_base;
-	U8 controller;
+U16 hd_port;
+U8 drive_base;
+U8 controller;
 
 	controller = ((hdrive & 0x02) >> 1);
 
@@ -1463,29 +1501,29 @@ U16  cyl;
 		InWords(hd_port, pDataRet, 512);
 
 	return(erc);
-}
-*/
+/*
 
   cyl = Cylinder;
   hd_head = HdSect & 0xffff;
   hd_sector = (HdSect >> 16) & 0xffff;
 
-/*	For testing
+**	For testing
  xprintf("\r\nCYL %d, HD %d, SEC %d\r\n", cyl, hd_head, hd_sector);
-*/
+**
 
-  hd_Cmd[2] = 1;						/* How many sectors */
-  hd_Cmd[3] = hd_sector;				/* Which sector to start on */
-  hd_Cmd[4] = cyl & 0xff;				/* cylinder lobyte */
-  hd_Cmd[5] = (cyl >> 8) & 0xff;		/* cylinder hibyte */
+  hd_Cmd[2] = 1;		** How many sectors **
+  hd_Cmd[3] = hd_sector;	** Which sector to start on **
+  hd_Cmd[4] = cyl & 0xff;	** cylinder lobyte **
+  hd_Cmd[5] = (cyl >> 8) & 0xff;		** cylinder hibyte **
   hd_Cmd[6] = (hd_drive << 4) | (hd_head & 0x0f) | 0xa0;
 
   erc = send_command(HDC_READ);
-  erc = hd_wait();					/* wait for interrupt */
+  erc = hd_wait();					** wait for interrupt **
   if (!erc) erc = hd_status(HDC_READ);
   if (!erc)
   	InWords(HD_PORT, pDataRet, 512);
   return(erc);
+*/
 }
 
 /***************************************************************************
@@ -1508,8 +1546,7 @@ static U32  hddev_op(U32  dDevice,
 		      U8  *pData)
 {
 U32  erc;
-
-/*	U8 hdrive
+U8 hdrive;
 
 	erc = 0;
 	hdrive = dDevice - 12;
@@ -1559,11 +1596,11 @@ U32  erc;
 			case(CmdVerify):
 				erc = ErcNotSupported;
 
-				** hd_verify is not supported in this version
+				/** hd_verify is not supported in this version
 				 * of the driver.
 				 * erc = hd_verify(dLBA, dnBlocks, pData,
 				 *                 hdrive);
-				 **
+				 */
 				break;
 
 			case(CmdSeekTrk):
@@ -1591,23 +1628,23 @@ U32  erc;
 	hdcb[hdrive].last_erc = erc;
 
 	return(erc);
-*/
+/*
 
- hdstatus.blocks_done = 0;	/* Reset values in Status record */
+ hdstatus.blocks_done = 0;	** Reset values in Status record **
 
  erc = 0;
 
- /* Set drive internal drive number */
+ ** Set drive internal drive number **
 
  if (dDevice == 12)
  	hd_drive = 0;
  else
  	hd_drive = 1;
 
- /* Check to see if we have a leftover interrupt message from last
-    command.  If so then we eat it (and do nothing) */
+ ** Check to see if we have a leftover interrupt message from last
+    command.  If so then we eat it (and do nothing) **
 
-  CheckMsg(hd_exch, &hd_msg);		/* Ignore error */
+  CheckMsg(hd_exch, &hd_msg);		** Ignore error **
 
  if (hd_drive==0)
  {
@@ -1620,7 +1657,7 @@ U32  erc;
 		erc = ErcInvalidDrive;
  }
 
- /* make sure they don't exceed max blocks */
+ ** make sure they don't exceed max blocks **
 
  if (!erc)
    if (dLBA > hdcb[hd_drive].nBlocks) erc = ErcBadLBA;
@@ -1631,31 +1668,31 @@ U32  erc;
    switch(dOpNum)
    {
  	  case(CmdNull):
-		erc = ok;					/* Null Command */
+		erc = ok;		** Null Command **
 		break;
-	  case(CmdRead): 									/* Read */
+	  case(CmdRead): 		** Read **
 		erc = hd_read(dLBA, dnBlocks, pData);
 		break;
-	  case(CmdWrite): 									/* Write */
+	  case(CmdWrite): 		** Write **
 		erc = hd_write(dLBA, dnBlocks, pData);
 		break;
-	  case(CmdVerify): 									/* Verify */
+	  case(CmdVerify): 		** Verify **
 		erc = ErcNotSupported;
 
-		/* hd_verify is not supported in this version of the driver */
-		/*		erc = hd_verify(dLBA, dnBlocks, pData); */
+		** hd_verify is not supported in this version of the driver **
+		**		erc = hd_verify(dLBA, dnBlocks, pData); **
 		break;
-	  case(CmdSeekTrk): 								/* Seek Track */
+	  case(CmdSeekTrk): 		** Seek Track **
 		erc = hd_seek(dLBA);
 		break;
-	  case(CmdFmtTrk):                                  /* Format Track */
+	  case(CmdFmtTrk):              ** Format Track **
 		erc = hd_format_track(dLBA, dnBlocks);
 		break;
-	  case(CmdResetHdw): 								/* Reset Ctrlr */
+	  case(CmdResetHdw): 		** Reset Ctrlr **
 		hd_reset();
 		erc = 0;
 		break;
-	  case(CmdReadSect): 								/* Read Sector(s) */
+	  case(CmdReadSect): 		** Read Sector(s) **
 		erc = ReadSector(dLBA, dnBlocks, pData);
 		break;
 	  default:
@@ -1663,8 +1700,9 @@ U32  erc;
 		break;
 	}
  }
- hdcb[hd_drive].last_erc = erc;			/* update DCB erc */
+ hdcb[hd_drive].last_erc = erc;			** update DCB erc **
  return(erc);
+*/
 }
 
 /******************************************
@@ -1680,8 +1718,8 @@ static U32 hddev_stat(U32  dDevice,
 			   U32  *pdStatusRet)
 {
 U32 i;
+U8 hdrive;
 
-/*	U8 hdrive;
 	hdrive = dDevice - 12;
 
 	hdstatus[hdrive].erc = hdcb[hdrive].last_erc;
@@ -1689,7 +1727,7 @@ U32 i;
 	hdstatus[hdrive].nCyl = hd_cyls[hdrive];
 	hdstatus[hdrive].nHead = hd_heads[hdrive];
 	hdstatus[hdrive].nSectors = hd_secpertrk[hdrive];
-	hdstatus[nBPS = hdcb[hdrive].nBPB;
+	hdstatus[hdrive].nBPS = hdcb[hdrive].nBPB;
 
 	if (dStatusMax <= sStatus)
 		i = dStatusMax;
@@ -1701,9 +1739,9 @@ U32 i;
 	*pdStatusRet = i;
 
 	return ok;
-*/
+/*
 
- /* Set status for proper device */
+ ** Set status for proper device **
 
  if (dDevice == 12)
  {
@@ -1724,16 +1762,17 @@ U32 i;
 	hdstatus.nBPS = hdcb[1].nBPB;
  }
 
- /* Calculate size of status to return. Return no more than asked for! */
+ ** Calculate size of status to return. Return no more than asked for! **
 
  if (dStatusMax <= sStatus) i = dStatusMax;
  else i = sStatus;
 
- CopyData(&hdstatus, pStatRet, i);		/* copy to their status block */
+ CopyData(&hdstatus, pStatRet, i);	** copy to their status block **
 
- *pdStatusRet = i;						/* tell em how much it was */
+ *pdStatusRet = i;			** tell em how much it was **
 
  return ok;
+*/
 }
 
 /******************************************
@@ -1751,8 +1790,8 @@ static U32  hddev_init(U32  dDevice,
 
 {
 U32 erc, i;
+U8 hdrive;
 
-/*	U8 hdrive;
  	hdrive = dDevice - 12;
 
 	erc = hd_init(hdrive);
@@ -1763,9 +1802,9 @@ U32 erc, i;
 		hd_secpertrk[hdrive] = IDEid[hdrive].nsectpertrk;
 
 		xprintf("IDE Drive %d stats:\r\n", hdrive);
-		xprintf("IDEid.ncyls:		%d\r\n", IDEid[hdrive].ncyls);
-		xprintf("IDEid.nheads:		%d\r\n", IDEid[hdrive].nheads);
-		xprintf("IDEid.nsectpertrk:	%d\r\n", IDEid[hdrive].nsectpertrk);
+		xprintf("IDEid.ncyls:       %d\r\n", IDEid[hdrive].ncyls);
+		xprintf("IDEid.nheads:      %d\r\n", IDEid[hdrive].nheads);
+		xprintf("IDEid.nsectpertrk: %d\r\n", IDEid[hdrive].nsectpertrk);
 	}
 	else
 	{
@@ -1784,12 +1823,12 @@ U32 erc, i;
 	hdcb[hdrive].last_erc = 0;
 
 	return(erc);
-*/
+/*
 	erc = 0;
 
- /* Read the init status block in */
+ ** Read the init status block in **
 
- /* Set internal drive number */
+ ** Set internal drive number **
 	if (dDevice == 12) hd_drive=0;
 	else hd_drive = 1;
 
@@ -1837,7 +1876,7 @@ U32 erc, i;
 		}
 	}
 
-	/* If no error, update corresponding DCB values */
+	** If no error, update corresponding DCB values **
 
 	if (!erc)
 	{
@@ -1846,9 +1885,10 @@ U32 erc, i;
 				IDEid.ncyls * IDEid.nheads * IDEid.nsectpertrk;
 	}
 
-	hdcb[hd_drive].last_erc = erc;			/* update DCB erc */
+	hdcb[hd_drive].last_erc = erc;			** update DCB erc **
 
 	return(erc);
+*/
 }
 
 /*===========  THE END  =========================================*/

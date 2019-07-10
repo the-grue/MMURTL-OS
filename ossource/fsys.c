@@ -442,7 +442,7 @@ static U8  abDirSectBuf[516];
 /* These arrays keep track of physical drive data (0-4). */
 /* #define nPDrvs 4 */
 /* Update setting to include up to 4 physical drives */
-#define nPDrvs 6
+#define nPDrvs 4
 
 static struct phydrv {
 	U32 nHeads;     	/* heads per drives   */
