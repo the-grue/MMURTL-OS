@@ -440,8 +440,8 @@ static U8  abTmpSector[516];
 static U8  abDirSectBuf[516];
 
 /* These arrays keep track of physical drive data (0-4). */
-/* #define nPDrvs 4 */
 /* Update setting to include up to 4 physical drives */
+/* #define nPDrvs 6 */
 #define nPDrvs 4
 
 static struct phydrv {
@@ -471,7 +471,6 @@ static struct ldrvtype {
 	U8  DevNum;			/* Device Number for this ldrv FF = NONE */
 	U8  SecPerClstr;	/* For each logical drive */
 	U8  nFATS;			/* number of FATs */
-/*	U8  fFAT16;			** True for FAT16 else FAT12 */
 	U8  fFAT16;			/** FAT12=0, FAT16=1, FAT32=2 */
 	};
 
@@ -719,7 +718,7 @@ U8 fFound1, fFound2;
 fFound1 = 0;		/* Have we found first valid partition on drive */
 fFound2 = 0;
 
-/* Set defaults for x4x 6 physical drives. This info will be set
+/* Set defaults for 6 physical drives. This info will be set
    correctly when the partition table and boot sectors are read.
 */
 
@@ -730,10 +729,8 @@ for (i=2; i< nLDrvs; i++)
 
 i = 2;		/* first Logical Number for hard drives "C" */
 
-/*for (j=2; j<4; j++)*/
-/* Why not use nPDrvs instead of hardcoded 4? */
 for (j=2; j<nPDrvs; j++)
-{	/* Array index Numbers for x2x 4 physical hard Disks */
+{	/* Array index Numbers for 4 physical hard Disks */
 
   erc = DeviceOp(j+10, 1, 0, 1, abRawSector); /* add 10 for Disk device nums */
   if (j==2)
