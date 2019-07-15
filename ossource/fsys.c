@@ -218,6 +218,16 @@ extern long xprintf(char *fmt, ...);
 
 #define ErcNewMedia		 605	/* for floppy mounting from FDD */
 
+/****************  FAT Filesystem Type Codes   **********************/
+#define FAT12	0x01
+#define FAT16	0x04
+#define EXTP	0x05
+#define FAT16B	0x06
+#define FAT32	0x0B
+#define FAT32L	0x0C
+#define FAT16L	0x0E
+#define EXTPL	0x0F
+
 /**************** FAT Buffer control structure **********************/
 
 /*
@@ -430,6 +440,8 @@ static U8  abTmpSector[516];
 static U8  abDirSectBuf[516];
 
 /* These arrays keep track of physical drive data (0-4). */
+/* Update setting to include up to 4 physical drives */
+/* #define nPDrvs 6 */
 #define nPDrvs 4
 
 static struct phydrv {
@@ -459,7 +471,7 @@ static struct ldrvtype {
 	U8  DevNum;			/* Device Number for this ldrv FF = NONE */
 	U8  SecPerClstr;	/* For each logical drive */
 	U8  nFATS;			/* number of FATs */
-	U8  fFAT16;			/* True for FAT16 else FAT12 */
+	U8  fFAT16;			/** FAT12=0, FAT16=1, FAT32=2 */
 	};
 
 static struct ldrvtype  Ldrv[nLDrvs];
@@ -644,6 +656,51 @@ else
 }
 
 /************************************************
+ Checks for a valid FAT type
+************************************************/
+
+U8 validFAT(U8 check)
+{
+	switch(check) {
+		case FAT12:
+				xprintf("Found FAT12 Partition\n\r");
+				return 1;
+				break;
+		case FAT16:
+				xprintf("Found FAT16 Partition\n\r");
+				return 1;
+				break;
+		case FAT16B:
+				xprintf("Found FAT16B Partition\n\r");
+				return 1;
+				break;
+		case FAT32:
+				xprintf("Found FAT32 Partition, not supported\n\r");
+				return 0;
+				break;
+		case FAT32L:
+				xprintf("Found FAT32L Partition, not supported\n\r");
+				return 0;
+				break;
+		case FAT16L:
+				xprintf("Found FAT16L Partition\n\r");
+				return 1;
+				break;
+		case EXTPL:
+				xprintf("Found EXTPL Partition, not supported\n\r");
+				return 0;
+				break;
+		case EXTP:
+				xprintf("Found EXTP Partition, not supported\n\r");
+				return 0;
+				break;
+		default:
+				return 0;
+				break;
+	}
+}
+
+/************************************************
  Reads the partition table entries from hard
  drives and sets up some of the the logical
  drive array variables for hard Disks.
@@ -661,7 +718,7 @@ U8 fFound1, fFound2;
 fFound1 = 0;		/* Have we found first valid partition on drive */
 fFound2 = 0;
 
-/* Set defaults for 4 physical drives. This info will be set
+/* Set defaults for 6 physical drives. This info will be set
    correctly when the partition table and boot sectors are read.
 */
 
@@ -672,8 +729,8 @@ for (i=2; i< nLDrvs; i++)
 
 i = 2;		/* first Logical Number for hard drives "C" */
 
-for (j=2; j<4; j++)
-{	/* Array index Numbers for 2 physical hard Disks */
+for (j=2; j<nPDrvs; j++)
+{	/* Array index Numbers for 4 physical hard Disks */
 
   erc = DeviceOp(j+10, 1, 0, 1, abRawSector); /* add 10 for Disk device nums */
   if (j==2)
@@ -689,16 +746,19 @@ for (j=2; j<4; j++)
 
     CopyData(&abRawSector[0x01be], &partab[0].fBootable, 64);
 
-	Dump(&partab[0].fBootable, 64);
+/*	Dump(&partab[0].fBootable, 64); */
 
 	if (partsig != 0xAA55) return ErcNoParTable;
 
-    if (partab[0].nSectorsTotal > 0)
+    if ((partab[0].nSectorsTotal > 0) && validFAT(partab[0].FATType))
     {
      Ldrv[i].LBA0 =partab[0].nFirstSector;	/* lba for Start of LDrv (bootSect) */
      Ldrv[i].LBAMax =partab[0].nSectorsTotal;	/* Max lba for logical drive */
-	 if (partab[0].FATType > 3)
+/*	 if (partab[0].FATType > 3)	*/
+	 if ((partab[0].FATType == FAT16) || (partab[0].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[0].FATType == FAT32) || (partab[0].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1))
      { GetBSInfo(2, 0); fFound1=1; }
@@ -707,36 +767,45 @@ for (j=2; j<4; j++)
        i++;					/* if valid partition go to next LDrv */
      }
 
-    if (partab[1].nSectorsTotal > 0)
+    if ((partab[1].nSectorsTotal > 0) && validFAT(partab[1].FATType))
     {
      Ldrv[i].LBA0   = partab[1].nFirstSector;
      Ldrv[i].LBAMax = partab[1].nSectorsTotal;
-	 if (partab[1].FATType > 3)
+/*	 if (partab[1].FATType > 3)	*/
+	 if ((partab[1].FATType == FAT16) || (partab[1].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[1].FATType == FAT32) || (partab[1].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1)) { GetBSInfo(2, 1); fFound1=1; }
      if ((j==3) && (!fFound2)) { GetBSInfo(3, 1); fFound2=1; }
      i++;					/* if we had a valid partition go to next */
     }
 
-    if (partab[2].nSectorsTotal > 0)
+    if ((partab[2].nSectorsTotal > 0) && validFAT(partab[2].FATType))
     {
      Ldrv[i].LBA0   = partab[2].nFirstSector;
      Ldrv[i].LBAMax = partab[2].nSectorsTotal;
-	 if (partab[2].FATType > 3)
+/*	 if (partab[2].FATType > 3)	*/
+	 if ((partab[2].FATType == FAT16) || (partab[2].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[2].FATType == FAT32) || (partab[2].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1)) { GetBSInfo(2, 2); fFound1=1; }
      if ((j==3) && (!fFound2)) { GetBSInfo(3, 2); fFound2=1; }
      i++;					/* if we had a valid partition go to next */
     }
 
-    if (partab[3].nSectorsTotal > 0)
+    if ((partab[3].nSectorsTotal > 0) && validFAT(partab[3].FATType))
     {
      Ldrv[i].LBA0   = partab[3].nFirstSector;
      Ldrv[i].LBAMax = partab[3].nSectorsTotal;
-	 if (partab[3].FATType > 3)
+/*	 if (partab[3].FATType > 3)	*/
+	 if ((partab[3].FATType == FAT16) || (partab[3].FATType == FAT16B))	
         Ldrv[i].fFAT16 = 1;
+	 else if ((partab[3].FATType == FAT32) || (partab[3].FATType == FAT32L))
+	Ldrv[i].fFAT16 = 2;
      Ldrv[i].DevNum = j+10;
      if ((j==2) && (!fFound1))
      {
@@ -1016,10 +1085,12 @@ U32 i, j, k;
 U32 first, oSector, erc, LRU, iLRU, iFound, Tick;
 U16 MaxClstr;
 
-  if (Ldrv[Drive].fFAT16)
+  if (Ldrv[Drive].fFAT16 == 1)
 	MaxClstr = 0xfff8;
-  else
+  else /*if (Ldrv[Drive].fFAT16 == 0) */
 	MaxClstr = 0xff8;	/* FAT12 */
+/*  else
+	MaxClstr = 0xfffffff8 */
 
  if (Clstr >= MaxClstr)
  	return(ErcEOF);
@@ -1038,7 +1109,7 @@ U16 MaxClstr;
     and 1024 in a FAT12 (3 sectors)
  */
 
- if (Ldrv[Drive].fFAT16)
+ if (Ldrv[Drive].fFAT16 == 1)
  {
 	oSector = Clstr/256;
 	first = Clstr-(Clstr%256);
