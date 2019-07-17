@@ -479,7 +479,6 @@ U8 counter;
 	/* We must redo drive 0 cause some cheap controllers lockup
 	   on us if drive 1 is not there.  They SHOULD simply return
 	   a Bad Command bit set in the Error register, but they don't. */
-
 	hd_reset(0);
 	erc = hd_recal(0);
 	hdcb[0].last_erc = erc;
@@ -951,12 +950,11 @@ U8 controller;
 	nleft = dnBlocks;
 	erc = setupseek(dLBA, dnBlocks, hdrive);/* sets up for implied seek */
 	if (!erc)
-		erc = send_command(HDC_READ, controller);
+		erc = send_command(HDC_READ, hdrive);
 
 	while ((nleft) && (!erc))
 	{
 		erc = hd_wait(controller);	/* wait for interrupt */
-
 		if (!erc)
 			erc = hd_status(HDC_READ, hdrive);
 		if (!erc)
@@ -993,7 +991,7 @@ U8 controller;
 	nSoFar = 0;
 
 	erc = setupseek(dLBA, dnBlocks, hdrive);/* sets up for implied seek */
-	erc = send_command(HDC_WRITE, controller);
+	erc = send_command(HDC_WRITE, hdrive);
 	erc = check_busy(controller);		/* No INT occurs for first sector of write */
 
 	if((!erc) && (statbyte[controller] & DATA_REQ))
@@ -1039,7 +1037,7 @@ U8 controller;
 	controller = (hdrive & 0x02) >> 1;	/* select appropriate controller */
 		
 	erc = setupseek(dLBA, dnBlocks, hdrive);/* sets up for implied seek */
-	erc = send_command(HDC_FORMAT, controller);
+	erc = send_command(HDC_FORMAT, hdrive);
 	erc = hd_wait(controller);		/* wait for interrupt */
 
 	if (erc == ok)
@@ -1088,7 +1086,7 @@ U8 controller;
 	hd_Cmd[controller][5] = (cyl >> 8) & 0xff;	/* cylinder hibyte */
 	hd_Cmd[controller][6] = (drive_base << 4) | (hd_head[hdrive] & 0x0f) | 0xa0;
 
-	erc = send_command(HDC_READ, controller);
+	erc = send_command(HDC_READ, hdrive);
 
 	erc = hd_wait(controller);		/* wait for interrupt */
 	if (!erc)

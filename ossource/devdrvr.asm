@@ -69,8 +69,8 @@ rgReDIR		DD nDevices DUP (0)		;For redirection of devices
 ;11		Floppy					FD1 	(OS built-in)
 ;12		Hard disk				HD0 	(OS built-in)
 ;13		Hard disk				HD1 	(OS built-in)
-;14
-;15
+;14		Hard disk				HD2	(OS built-in)
+;15		Hard disk				HD3	(OS built-in)
 ;16
 ;17
 ;18

@@ -439,10 +439,9 @@ static U8  abRawSector[516];
 static U8  abTmpSector[516];
 static U8  abDirSectBuf[516];
 
-/* These arrays keep track of physical drive data (0-4). */
-/* Update setting to include up to 4 physical drives */
-/* #define nPDrvs 6 */
-#define nPDrvs 4
+/* These arrays keep track of physical drive data (0-6). */
+/* Update setting to include up to 6 physical drives */
+#define nPDrvs 6
 
 static struct phydrv {
 	U32 nHeads;     	/* heads per drives   */
@@ -456,7 +455,7 @@ static struct phydrv  PDrvs[nPDrvs];
 
 /* This array of structures keeps track of logical drive data (A-J). */
 
-#define nLDrvs 10
+#define nLDrvs 18
 
 static struct ldrvtype {
 	U32 LBA0;			/* lba for Start of LDrive (bootSect) */
@@ -505,7 +504,7 @@ struct hddevtype{
   U32 resvd1[2];	/* out to 64 bytes */
   };
 
-static struct hddevtype   HDDevStat;
+static struct hddevtype   HDDevStat[4];
 
 /* This is the Floppy Device Status record.
    It is peculiar to the FD Drvr */
@@ -712,11 +711,13 @@ U8 validFAT(U8 check)
 
 static U32 read_PE(void)
 {
-U32 erc, ercD12, ercD13, i, j, keycode;
-U8 fFound1, fFound2;
+U32 erc, i, j, keycode;
+U32 ercD[4];
+U8 fFound[4];		/* Have we found first valid partition on drive */
+U8 counter;
 
-fFound1 = 0;		/* Have we found first valid partition on drive */
-fFound2 = 0;
+for (counter=0; counter<4; counter++)
+	fFound[counter]=0;
 
 /* Set defaults for 6 physical drives. This info will be set
    correctly when the partition table and boot sectors are read.
@@ -731,12 +732,9 @@ i = 2;		/* first Logical Number for hard drives "C" */
 
 for (j=2; j<nPDrvs; j++)
 {	/* Array index Numbers for 4 physical hard Disks */
-
   erc = DeviceOp(j+10, 1, 0, 1, abRawSector); /* add 10 for Disk device nums */
-  if (j==2)
-  	ercD12 = erc;
-  else
-  	ercD13 = erc;
+
+	ercD[j-2] = erc;
 
   if (!erc)
   {
@@ -746,84 +744,34 @@ for (j=2; j<nPDrvs; j++)
 
     CopyData(&abRawSector[0x01be], &partab[0].fBootable, 64);
 
-/*	Dump(&partab[0].fBootable, 64); */
-
 	if (partsig != 0xAA55) return ErcNoParTable;
 
-    if ((partab[0].nSectorsTotal > 0) && validFAT(partab[0].FATType))
-    {
-     Ldrv[i].LBA0 =partab[0].nFirstSector;	/* lba for Start of LDrv (bootSect) */
-     Ldrv[i].LBAMax =partab[0].nSectorsTotal;	/* Max lba for logical drive */
-/*	 if (partab[0].FATType > 3)	*/
-	 if ((partab[0].FATType == FAT16) || (partab[0].FATType == FAT16B))	
-        Ldrv[i].fFAT16 = 1;
-	 else if ((partab[0].FATType == FAT32) || (partab[0].FATType == FAT32L))
-	Ldrv[i].fFAT16 = 2;
-     Ldrv[i].DevNum = j+10;
-     if ((j==2) && (!fFound1))
-     { GetBSInfo(2, 0); fFound1=1; }
-       if ((j==3) && (!fFound2))
-     { GetBSInfo(3, 0); fFound2=1; }
-       i++;					/* if valid partition go to next LDrv */
-     }
+ 	for(counter = 0; counter < 4; counter++)
+ 	{
+		if ((partab[counter].nSectorsTotal > 0) && validFAT(partab[counter].FATType))
+    		{
+     			Ldrv[i].LBA0 =partab[counter].nFirstSector;	/* lba for Start of LDrv (bootSect) */
+     			Ldrv[i].LBAMax =partab[counter].nSectorsTotal;	/* Max lba for logical drive */
+	 		if ((partab[counter].FATType == FAT16) || (partab[counter].FATType == FAT16B))	
+        			Ldrv[i].fFAT16 = 1;
+	 		else if ((partab[counter].FATType == FAT32) || (partab[counter].FATType == FAT32L))
+				Ldrv[i].fFAT16 = 2;
+     			Ldrv[i].DevNum = j+10;
+			if (!fFound[counter])
+			{
+				GetBSInfo(j, counter);
+				fFound[counter]=1;
+			}
 
-    if ((partab[1].nSectorsTotal > 0) && validFAT(partab[1].FATType))
-    {
-     Ldrv[i].LBA0   = partab[1].nFirstSector;
-     Ldrv[i].LBAMax = partab[1].nSectorsTotal;
-/*	 if (partab[1].FATType > 3)	*/
-	 if ((partab[1].FATType == FAT16) || (partab[1].FATType == FAT16B))	
-        Ldrv[i].fFAT16 = 1;
-	 else if ((partab[1].FATType == FAT32) || (partab[1].FATType == FAT32L))
-	Ldrv[i].fFAT16 = 2;
-     Ldrv[i].DevNum = j+10;
-     if ((j==2) && (!fFound1)) { GetBSInfo(2, 1); fFound1=1; }
-     if ((j==3) && (!fFound2)) { GetBSInfo(3, 1); fFound2=1; }
-     i++;					/* if we had a valid partition go to next */
-    }
-
-    if ((partab[2].nSectorsTotal > 0) && validFAT(partab[2].FATType))
-    {
-     Ldrv[i].LBA0   = partab[2].nFirstSector;
-     Ldrv[i].LBAMax = partab[2].nSectorsTotal;
-/*	 if (partab[2].FATType > 3)	*/
-	 if ((partab[2].FATType == FAT16) || (partab[2].FATType == FAT16B))	
-        Ldrv[i].fFAT16 = 1;
-	 else if ((partab[2].FATType == FAT32) || (partab[2].FATType == FAT32L))
-	Ldrv[i].fFAT16 = 2;
-     Ldrv[i].DevNum = j+10;
-     if ((j==2) && (!fFound1)) { GetBSInfo(2, 2); fFound1=1; }
-     if ((j==3) && (!fFound2)) { GetBSInfo(3, 2); fFound2=1; }
-     i++;					/* if we had a valid partition go to next */
-    }
-
-    if ((partab[3].nSectorsTotal > 0) && validFAT(partab[3].FATType))
-    {
-     Ldrv[i].LBA0   = partab[3].nFirstSector;
-     Ldrv[i].LBAMax = partab[3].nSectorsTotal;
-/*	 if (partab[3].FATType > 3)	*/
-	 if ((partab[3].FATType == FAT16) || (partab[3].FATType == FAT16B))	
-        Ldrv[i].fFAT16 = 1;
-	 else if ((partab[3].FATType == FAT32) || (partab[3].FATType == FAT32L))
-	Ldrv[i].fFAT16 = 2;
-     Ldrv[i].DevNum = j+10;
-     if ((j==2) && (!fFound1))
-     {
-     	GetBSInfo(2, 3);
-     	fFound1=1;
-     }
-     if ((j==3) && (!fFound2))
-     {
-     	GetBSInfo(3, 3);
-     	fFound2=1;
-     }
-     i++;					/* if we had a valid partition go to next */
-     }
-    }
-  }
-
- if (ercD12) return ercD12;		/* there may be no Device 13 */
- else return 0;
+       			i++;		/* if valid partition go to next LDrv */
+     		}
+ 	}	
+  } 
+}
+ if (ercD[0]) 
+	return ercD[0];				/* there may be no Device 13 */
+ else 
+	return 0;
 }
 
 /********************************************************************
@@ -838,27 +786,14 @@ static U32 GetDriveGeometry(U32 d)		/* d is the device number (12 or 13) */
 {
 U32 erc, i;
 
-  if (d==12)
-  {
-	erc = DeviceStat(12, &HDDevStat, 64, &i);
+	erc = DeviceStat(d, &HDDevStat[d-12], 64, &i);
 	if (!erc)
 	{
-	  PDrvs[2].nHeads = HDDevStat.nHead;
-	  PDrvs[2].nSecPerTrk = HDDevStat.nSectors;
-    }
-  }
-
-  if (d==13)
-  {
-	erc = DeviceStat(13, &HDDevStat, 64, &i);
-	if (!erc)
-	{
-	  PDrvs[3].nHeads = HDDevStat.nHead;
-	  PDrvs[3].nSecPerTrk = HDDevStat.nSectors;
-    }
-  }
-  return erc;
-
+		PDrvs[d-10].nHeads = HDDevStat[d-12].nHead;
+		PDrvs[d-10].nSecPerTrk = HDDevStat[d-12].nSectors;
+	}
+	
+	return erc;
 }
 
 /********************************************************************
@@ -3988,6 +3923,9 @@ U32 InitFS(void)
 {
 U32 erc, i, j;
 U8 *pMem;
+U8 counter;
+
+	counter = 0;
 
   /* Allocate FAT buffers and initialize FAT related structures.
      We will allocate 24Kb worth of buffers (6 Pages, 16 buffers).
@@ -4017,24 +3955,30 @@ U8 *pMem;
   if (!erc)
 	  FillData(paFUB, 4096, 0);
 
-    erc = DeviceInit(12, &HDDevStat, 64); /* Get drive geometry */
+	/* checking all four hard drives */
+	for(counter = 0; counter < 4; counter++)
+	{	/* Must process at least first one fully */
+		if((counter == 0) || (!erc))
+		{
+			/* Reset drive */
+			erc = DeviceInit(counter+12, &HDDevStat[counter], 64);
 
-	if (!erc)
-		erc = GetDriveGeometry(12);
+			if (!erc)
+				erc = GetDriveGeometry(counter+12);
 
-	if (!erc)
-	{
-	    erc = DeviceInit(13, &HDDevStat, 64); /* Reset drive */
-	  	erc = GetDriveGeometry(13);
-	    if (erc == 663) erc = 0;		/* may be invalid drive */
+			/* In case of invalid drive other than 0 */
+			if ((erc == 663) && (counter != 0))
+				erc = 0;
+		}
 	}
 
-	for (i=2; i< 4; i++)
+	for (i=2; i< nPDrvs; i++)
 	{
   	  xprintf("Physical drive %d: Heads %d, Sec/Trk %d\r\n",
 	  			i,
 	  			PDrvs[i].nHeads,
 	  			PDrvs[i].nSecPerTrk);
+
   	}
 
 	if (!erc)
@@ -4070,6 +4014,7 @@ U8 *pMem;
   			Ldrv[i].DevNum,
   			j);
   	}
+
 
   if (!erc)
 	  erc = AllocExch(&FSysExch);
