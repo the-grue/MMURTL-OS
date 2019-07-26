@@ -702,7 +702,7 @@ U8 validFAT(U8 check)
 				return 1;
 				break;
 		case FAT16B:
-				xprintf("Found FAT16B Partition\n\r");
+/*				xprintf("Found FAT16B Partition\n\r");*/
 				return 1;
 				break;
 		case FAT32:
@@ -710,7 +710,7 @@ U8 validFAT(U8 check)
 				return 1;
 				break;
 		case FAT32L:
-				xprintf("Found FAT32L Partition, not supported\n\r");
+/*				xprintf("Found FAT32L Partition, not supported\n\r");*/
 				return 1;
 				break;
 		case FAT16L:
@@ -789,12 +789,12 @@ for (j=2; j<nPDrvs; j++)
 	 		else if ((partab[counter].FATType == FAT32) || (partab[counter].FATType == FAT32L))
 				Ldrv[i].fFAT16 = 2;
      			Ldrv[i].DevNum = j+10;
-			if (!fFound[counter])
-			{
+/*			if (!fFound[counter])
+			{*/
 				GetBSInfo(j, counter);
-				fFound[counter]=1;
+/*				fFound[counter]=1;
 			}
-
+*/
        			i++;		/* if valid partition go to next LDrv */
      		}
  	}	
@@ -897,10 +897,11 @@ if (Ldrv[i].DevNum != 0xff)
          Ldrv[i].fFAT16 = 0;
 */
 	}
-	xprintf("%d %d %d %d %d %d %d %d %d %d\r\n", i, Ldrv[i].LBARoot, Ldrv[i].nRootDirEnt,
+/*	xprintf("%d %d %d %d %d %d %d %d %d %d", i, Ldrv[i].LBARoot, Ldrv[i].nRootDirEnt,
 		Ldrv[i].SecPerClstr, Ldrv[i].nHeads, Ldrv[i].nSecPerTrk, Ldrv[i].sFAT,
-		Ldrv[i].nFATS, Ldrv[i].LBAFAT, Ldrv[i].LBAData);	
+		Ldrv[i].nFATS, Ldrv[i].LBAFAT, Ldrv[i].LBAData);	*/
     } /* if erc */
+/*	xprintf("%d erc is %d\r\n", i, erc);*/
 } /* if valid logical device */
 return 0;
 }
@@ -4075,7 +4076,7 @@ U8 counter;
   for (i=0; i<nLDrvs; i++)
   	if (Ldrv[i].DevNum != 0xff)
   	{
-	j=12;
+		  j=12;
   	  if (Ldrv[i].fFAT16 == 1)
 	  	  j=16;
 	  if (Ldrv[i].fFAT16 == 2)
