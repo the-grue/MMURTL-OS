@@ -361,7 +361,7 @@ struct fsbtype {
 	  U8  VolLabel[11];
 	  U8  FileSysType[8];		/* 62 bytes */
 	  };
-static struct fsbtype  fsb;
+/*static struct fsbtype  fsb;*/
 
 struct fsb32type {
 	  U8  Jmp[3];
@@ -373,23 +373,26 @@ struct fsb32type {
 	  U16 RootDirEnts;
 	  U16 Sectors;
 	  U8  Media;
-	  U16 SecPerFAT16;	/* moved to SecPerFAT below */
+	  U16 SecPerFATOld;	/* moved to SecPerFAT below */
 	  U16 SecPerTrack;
 	  U16 Heads;
 	  U32 HiddenSecs;
 	  U32 HugeSecs;		/* End same as FAT12/FAT16 */
-	U32 SecPerFAT;
-	U16 ExtFlags;
-
-/*
-	  U8  DriveNum;
-	  U8  Rsvd1;
-	  U8  BootSig;
-	  U32 VolID;
-	  U8  VolLabel[11];
-	  U8  FileSysType[8];
-*/
+	  U32 SecPerFAT;	/* 32bits for FAT32 */
+	  U16 ExtFlags;		/* Unique to FAT32 */
+	  U16 FSVer;		/* Unique to FAT32 */
+	  U32 RootClus;		/* Unique to FAT32 */
+	  U16 FSInfo;		/* Unique to FAT32 */
+	  U16 BkBootSec;	/* Unique to FAT32 */
+	  U8  Rsvd2[12];	/* Unique to FAT32 */
+	  U8  DriveNum;		/* Relocated for FAT32 */
+	  U8  Rsvd1;		/* Relocated for FAT32 */
+	  U8  BootSig;		/* Relocated for FAT32 */
+	  U32 VolID;		/* Relocated for FAT32 */
+	  U8  VolLabel[11];	/* Relocated for FAT32 */
+	  U8  FileSysType[8];	/* Relocated for FAT32 */
 	  };
+/*static struct fsb32type fsb32;*/
 
 /* Partition Table Entry info. 16 bytes */
 struct partent {
@@ -493,7 +496,8 @@ static struct ldrvtype {
 	U16 nHeads;     	/* Setup after boot sector is read */
 	U16 nSecPerTrk; 	/* Setup after boot sector is read */
 	U16 nRootDirEnt;	/* Number of Root directory entries */
-	U16 sFAT;		/* nSectors in a FAT */
+/*	U16 sFAT;		** nSectors in a FAT */
+	U32 sFAT;		/* nSectors in a FAT */
 	U8  DevNum;		/* Device Number for this ldrv FF = NONE */
 	U8  SecPerClstr;	/* For each logical drive */
 	U8  nFATS;		/* number of FATs */
@@ -592,7 +596,7 @@ static unsigned long keycode;	/* for testing */
  This does a hex dump to the screen of a
  memory area passed in by "pb"
 **********************************************/
-
+/*
 void Dump(unsigned char *pb, long cb)
 {
 U32 erc, i, j;
@@ -621,6 +625,7 @@ unsigned char buff[17];
 	return erc;
 }
 
+*/
 
 /************************************************
  Called from read_PE, this gets the starting
@@ -702,11 +707,11 @@ U8 validFAT(U8 check)
 				break;
 		case FAT32:
 				xprintf("Found FAT32 Partition, not supported\n\r");
-				return 0;
+				return 1;
 				break;
 		case FAT32L:
 				xprintf("Found FAT32L Partition, not supported\n\r");
-				return 0;
+				return 1;
 				break;
 		case FAT16L:
 				xprintf("Found FAT16L Partition\n\r");
@@ -832,6 +837,9 @@ U32 erc, i;
 static U32 read_BS(U32 i)
 {
 U32 erc, j;
+U8 bsbuff[100];
+struct fsbtype *fsb;
+struct fsb32type *fsb32;
 
 if (Ldrv[i].DevNum != 0xff)
 {
@@ -844,24 +852,54 @@ if (Ldrv[i].DevNum != 0xff)
 	{
 		erc = DeviceOp(j, 1, Ldrv[i].LBA0, 1, abRawSector);
 	}
-
-	CopyData(abRawSector, &fsb.Jmp, 62);
+	if(Ldrv[i].fFAT16 < 2)
+	{
+		CopyData(abRawSector, &bsbuff, 62);
+		fsb = &bsbuff;
+	}
+	else 
+	{
+		CopyData(abRawSector, &bsbuff, 90);	/* FAT32 */
+		fsb32 = &bsbuff;
+	}
 
     if (erc==0) 
     {
-       Ldrv[i].LBARoot     = fsb.ResSectors + Ldrv[i].LBA0 +
-                            (fsb.FATs * fsb.SecPerFAT);
-       Ldrv[i].nRootDirEnt = fsb.RootDirEnts;	/* n Root dir entries */
-       Ldrv[i].SecPerClstr = fsb.SecPerClstr;
-       Ldrv[i].nHeads      = fsb.Heads;
-       Ldrv[i].nSecPerTrk  = fsb.SecPerTrack;
-       Ldrv[i].sFAT        = fsb.SecPerFAT;		/* nSectors in a FAT */
-       Ldrv[i].nFATS       = fsb.FATs;			/* number of FATs */
-       Ldrv[i].LBAFAT      = Ldrv[i].LBA0 + fsb.ResSectors;
-       Ldrv[i].LBAData     = Ldrv[i].LBARoot + (fsb.RootDirEnts / 16);
-	   if (fsb.FileSysType[4] == '2')
+	if(Ldrv[i].fFAT16 < 2)
+	{
+       Ldrv[i].LBARoot     = fsb->ResSectors + Ldrv[i].LBA0 +
+                            (fsb->FATs * fsb->SecPerFAT);
+       Ldrv[i].nRootDirEnt = fsb->RootDirEnts;	/* n Root dir entries */
+       Ldrv[i].SecPerClstr = fsb->SecPerClstr;
+       Ldrv[i].nHeads      = fsb->Heads;
+       Ldrv[i].nSecPerTrk  = fsb->SecPerTrack;
+       Ldrv[i].sFAT        = fsb->SecPerFAT;	/* nSectors in a FAT */
+       Ldrv[i].nFATS       = fsb->FATs;		/* number of FATs */
+       Ldrv[i].LBAFAT      = Ldrv[i].LBA0 + fsb->ResSectors;
+       Ldrv[i].LBAData     = Ldrv[i].LBARoot + (fsb->RootDirEnts / 16);
+/*	   if (fsb.FileSysType[4] == '2')
          Ldrv[i].fFAT16 = 0;
-
+*/
+	}
+	else
+	{
+       Ldrv[i].LBARoot     = fsb32->ResSectors + Ldrv[i].LBA0 +
+                            (fsb32->FATs * fsb32->SecPerFAT);
+       Ldrv[i].nRootDirEnt = fsb32->RootDirEnts;	/* n Root dir entries */
+       Ldrv[i].SecPerClstr = fsb32->SecPerClstr;
+       Ldrv[i].nHeads      = fsb32->Heads;
+       Ldrv[i].nSecPerTrk  = fsb32->SecPerTrack;
+       Ldrv[i].sFAT        = fsb32->SecPerFAT;	/* nSectors in a FAT */
+       Ldrv[i].nFATS       = fsb32->FATs;	/* number of FATs */
+       Ldrv[i].LBAFAT      = Ldrv[i].LBA0 + fsb32->ResSectors;
+       Ldrv[i].LBAData     = Ldrv[i].LBARoot + (fsb32->RootDirEnts / 16);
+/*	   if (fsb.FileSysType[4] == '2')
+         Ldrv[i].fFAT16 = 0;
+*/
+	}
+	xprintf("%d %d %d %d %d %d %d %d %d %d\r\n", i, Ldrv[i].LBARoot, Ldrv[i].nRootDirEnt,
+		Ldrv[i].SecPerClstr, Ldrv[i].nHeads, Ldrv[i].nSecPerTrk, Ldrv[i].sFAT,
+		Ldrv[i].nFATS, Ldrv[i].LBAFAT, Ldrv[i].LBAData);	
     } /* if erc */
 } /* if valid logical device */
 return 0;
@@ -4038,8 +4076,10 @@ U8 counter;
   	if (Ldrv[i].DevNum != 0xff)
   	{
 	j=12;
-  	  if (Ldrv[i].fFAT16)
+  	  if (Ldrv[i].fFAT16 == 1)
 	  	  j=16;
+	  if (Ldrv[i].fFAT16 == 2)
+		  j=32;
   	  xprintf("%c: Heads %d, Sec/Trk %d, Sec/Clstr %d, Dev %d, FAT%d \r\n",
   			i+0x41,
   			Ldrv[i].nHeads,
