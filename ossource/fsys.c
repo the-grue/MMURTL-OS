@@ -291,7 +291,9 @@ static struct FCB {
 	U8  Mode;		/* 0 or 1 (Read or Modify). */
 	U8  nUsers;		/* Active FUBs for this file (255 MAX). 0= Free FCB */
 	U8  fMod;		/* This file was modified! */
-	U8  Resvd[22];		/* Out to 64 bytes */
+/*	U8  Resvd[22];		** Out to 64 bytes */
+	U16 StartClstrHi;	/* For FAT32 */
+	U8  Resvd[20];		/* Out to 64 bytes */
 	};
 
 static struct FCB *paFCB;	/* a pointer to array of allocated FCBs. */
@@ -332,7 +334,9 @@ struct FUB {
 	U16 Clstr;		/* Last Cluster read */
 	U8  fModified;		/* Data in buffer was modified */
 	U8  fStream;		/* NonZero for STREAM mode */
-	U8  Rsvd[4];		/* Pad to 32 bytes */
+/*	U8  Rsvd[4];		** Pad to 32 bytes */
+	U16 ClstrHi;		/* For FAT32 */
+	U8  Rsvd[2];		/* Pad to 32 bytes */
 	};
 
 static struct FUB *paFUB;	/* a pointer to allocated FUBs. Set up at init. */
@@ -427,7 +431,13 @@ struct dirstruct {
 	U8  Name[8];
 	U8  Ext[3];
 	U8  Attr;
-	U8  Rsvd[10];
+/*	U8  Rsvd[10];*/
+	U8  NTRsvd;		/* Break out the Rsvd block for FAT32 */
+	U8  CrtTimeTenth;	/* Creation time 2 second granularity */
+	U16 CrtTime;		/* Creation time */
+	U16 CrtDate;		/* Creation date */
+	U16 LastAccessDate;	/* Last acess date (no time) */
+	U16 StartClstrHi;	/* Hi word of FAT32 cluster number */
 	U16 Time;
 	U16 Date;
 	U16 StartClstr;
@@ -596,7 +606,7 @@ static unsigned long keycode;	/* for testing */
  This does a hex dump to the screen of a
  memory area passed in by "pb"
 **********************************************/
-/*
+
 void Dump(unsigned char *pb, long cb)
 {
 U32 erc, i, j;
@@ -624,8 +634,6 @@ unsigned char buff[17];
 	}
 	return erc;
 }
-
-*/
 
 /************************************************
  Called from read_PE, this gets the starting
@@ -789,12 +797,12 @@ for (j=2; j<nPDrvs; j++)
 	 		else if ((partab[counter].FATType == FAT32) || (partab[counter].FATType == FAT32L))
 				Ldrv[i].fFAT16 = 2;
      			Ldrv[i].DevNum = j+10;
-/*			if (!fFound[counter])
-			{*/
+			if (!fFound[counter])
+			{
 				GetBSInfo(j, counter);
-/*				fFound[counter]=1;
+				fFound[counter]=1;
 			}
-*/
+
        			i++;		/* if valid partition go to next LDrv */
      		}
  	}	
@@ -2983,6 +2991,7 @@ U8 fFound, *pMem, Drive;
 	paFUB[iFUB]->LFAClstr = 0;		/* Rel LFA to 0 */
 	paFUB[iFUB]->LFABuf = 0;		/* First LFA in Buffer */
 	paFUB[iFUB]->sBuf = 0;			/* Default to No Buf */
+	paFUB[iFUB]->ClstrHi = pDirEnt->StartClstrHi;	/* FAT32 cluster */
 
 	if (fStream) 
 	{		/* allocate/fill buffer and set rest of FUB */
