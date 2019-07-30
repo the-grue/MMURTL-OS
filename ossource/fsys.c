@@ -493,7 +493,7 @@ static struct phydrv {
 
 static struct phydrv  PDrvs[nPDrvs];
 
-/* This array of structures keeps track of logical drive data (A-J). */
+/* This array of structures keeps track of logical drive data (A-R). */
 
 #define nLDrvs 18
 
@@ -512,6 +512,7 @@ static struct ldrvtype {
 	U8  SecPerClstr;	/* For each logical drive */
 	U8  nFATS;		/* number of FATs */
 	U8  fFAT16;		/** FAT12=0, FAT16=1, FAT32=2 */
+	U32 MaxClust;		/* To speed up, this is compared a lot */
 	};
 
 static struct ldrvtype  Ldrv[nLDrvs];
@@ -685,6 +686,8 @@ if (!erc)
 
 	Ldrv[ld].nHeads = FDDevStat.nHead;
 	Ldrv[ld].nSecPerTrk = FDDevStat.nSectors;
+	Ldrv[ld].fFAT16 = 0;
+	Ldrv[ld].MaxClust = 0x00000ff8;
 
     erc = 0;
 }
@@ -710,7 +713,7 @@ U8 validFAT(U8 check)
 				return 1;
 				break;
 		case FAT16B:
-/*				xprintf("Found FAT16B Partition\n\r");*/
+				xprintf("Found FAT16B Partition\n\r");
 				return 1;
 				break;
 		case FAT32:
@@ -718,7 +721,7 @@ U8 validFAT(U8 check)
 				return 1;
 				break;
 		case FAT32L:
-/*				xprintf("Found FAT32L Partition, not supported\n\r");*/
+				xprintf("Found FAT32L Partition, not supported\n\r");
 				return 1;
 				break;
 		case FAT16L:
@@ -737,6 +740,38 @@ U8 validFAT(U8 check)
 				return 0;
 				break;
 	}
+}
+
+/************************************************
+ Returns the maximum cluster number based on
+ passed in partition type number
+*************************************************/
+
+static U32 getMaxCluster(U8 FatType)
+{
+	if (FatType == 1)
+		return 0x0000fff8;	/* FAT16 */
+	else if (FatType == 2)
+		return 0x00000ff8;	/* FAT12 */
+	else
+		return 0x0ffffff8;	/* FAT32 */
+}
+
+
+/************************************************
+ Returns the 32 bit cluster number based on
+ passed in Low/Hi words for FAT32
+*************************************************/
+
+static U32 getCluster32(U16 Clstr, U16 ClstrHi)
+{
+	U32 Clstr32;
+
+	Clstr32 = ClstrHi;
+	Clstr32 = Clstr32 << 16;
+	Clstr32 = Clstr32 | Clstr;
+	
+	return Clstr32;
 }
 
 /************************************************
@@ -793,9 +828,15 @@ for (j=2; j<nPDrvs; j++)
      			Ldrv[i].LBA0 =partab[counter].nFirstSector;	/* lba for Start of LDrv (bootSect) */
      			Ldrv[i].LBAMax =partab[counter].nSectorsTotal;	/* Max lba for logical drive */
 	 		if ((partab[counter].FATType == FAT16) || (partab[counter].FATType == FAT16B))	
+			{
         			Ldrv[i].fFAT16 = 1;
+				Ldrv[i].MaxClust = 0x0000fff8;
+			}
 	 		else if ((partab[counter].FATType == FAT32) || (partab[counter].FATType == FAT32L))
+			{
 				Ldrv[i].fFAT16 = 2;
+				Ldrv[i].MaxClust = 0x0ffffff8;
+			}
      			Ldrv[i].DevNum = j+10;
 			if (!fFound[counter])
 			{
@@ -1115,6 +1156,7 @@ U16 MaxClstr;
 
  /* Set oSector to offset of sector in FAT
     There are 256 cluster entries in 1 sector of a FAT16,
+    128 cluster entries in 1 sector of a FAT32,
     and 1024 in a FAT12 (3 sectors)
  */
 
