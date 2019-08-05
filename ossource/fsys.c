@@ -252,6 +252,7 @@ static struct fattype {		/* */
 	U32 LastUsed;		/* Tick when last used (0 = Never) */
 	U32 LBASect;		/* LBA of first FAT sect in buf (where it came from) */
 	U16 iClstrStart;	/* Starting cluster for each buf  */
+	U16 iClstrStartHi;	/* FAT32 has bigger clusters */
 	U8  Drive;		/* LDrive this FAT sector is from */
 	U8  fModLock;		/* Bit 0 = Modified, bit 1 = Locked  */
 	};
@@ -607,7 +608,7 @@ static unsigned long keycode;	/* for testing */
  This does a hex dump to the screen of a
  memory area passed in by "pb"
 **********************************************/
-
+/*
 void Dump(unsigned char *pb, long cb)
 {
 U32 erc, i, j;
@@ -635,7 +636,7 @@ unsigned char buff[17];
 	}
 	return erc;
 }
-
+*/
 /************************************************
  Called from read_PE, this gets the starting
  cylinder, head and sector for the first boot
@@ -717,11 +718,11 @@ U8 validFAT(U8 check)
 				return 1;
 				break;
 		case FAT32:
-				xprintf("Found FAT32 Partition, not supported\n\r");
+				xprintf("Found FAT32 Partition, limited support (pre-BETA)\n\r");
 				return 1;
 				break;
 		case FAT32L:
-				xprintf("Found FAT32L Partition, not supported\n\r");
+				xprintf("Found FAT32L Partition, limited support (pre-BETA)\n\r");
 				return 1;
 				break;
 		case FAT16L:
@@ -751,7 +752,7 @@ static U32 getMaxCluster(U8 FatType)
 {
 	if (FatType == 1)
 		return 0x0000fff8;	/* FAT16 */
-	else if (FatType == 2)
+	else if (FatType == 0)
 		return 0x00000ff8;	/* FAT12 */
 	else
 		return 0x0ffffff8;	/* FAT32 */
@@ -934,7 +935,8 @@ if (Ldrv[i].DevNum != 0xff)
 	{
        Ldrv[i].LBARoot     = fsb32->ResSectors + Ldrv[i].LBA0 +
                             (fsb32->FATs * fsb32->SecPerFAT);
-       Ldrv[i].nRootDirEnt = fsb32->RootDirEnts;	/* n Root dir entries */
+/*       Ldrv[i].nRootDirEnt = fsb32->RootDirEnts;	** n Root dir entries */
+       Ldrv[i].nRootDirEnt = 0xFFFF;	/* FAT32 is 0 */
        Ldrv[i].SecPerClstr = fsb32->SecPerClstr;
        Ldrv[i].nHeads      = fsb32->Heads;
        Ldrv[i].nSecPerTrk  = fsb32->SecPerTrack;
@@ -1009,6 +1011,8 @@ U8 Drive;
 	    CopyData(&paFCB[iFCB], &abDirSectBuf[j], 32);
 		erc = DeviceOp(Ldrv[Drive].DevNum, 2, i, 1, abDirSectBuf);
 	}
+
+	xprintf("DirEntry Updated %X %X\r\n", i, j);
   return erc;
 }
 
@@ -1052,6 +1056,17 @@ U32 LBA;
  return LBA;
 }
 
+/* FAT32 version */
+
+static U32 ClsToLBA32(U32 Clstr32, U8 Drive)
+{
+U32 LBA;
+
+ Clstr32-=2;		/* Minus 2 cause 0 and 1 are reserved clusters */
+ LBA = Ldrv[Drive].SecPerClstr * Clstr32;
+ LBA += Ldrv[Drive].LBAData;
+ return LBA;
+}
 
 /*******************************************************
   This writes out the specified FAT sector back into
@@ -1100,6 +1115,7 @@ U8 Drive;
 		}
 	}
   }
+/*	xprintf("UpdateFAT %d Drive %d LBASect %X\r\n", iFAT, Drive, Fat[iFAT].LBASect);*/
   return erc;
 }
 
@@ -1147,6 +1163,7 @@ U16 MaxClstr;
 
  if (Clstr < 2)
  {
+	xprintf("Failed in FindFatSect check < 2\r\n");
  	return (ErcBadFATClstr);
  }
 
@@ -1175,6 +1192,8 @@ U16 MaxClstr;
 
 	if (i >= Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT)
 	{
+		xprintf("Failed in FindFatSect32 check %X >= %X\r\n",
+			Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT);
 	 	return (ErcBadFATClstr);
 	}
 	else
@@ -1311,6 +1330,113 @@ U16 MaxClstr;
  return (erc);		/* Disk error Bad news */
 }
 
+/* FAT32 Version */
+
+static U32 FindFatSect32(U8 Drive, U32 Clstr32, U32 *piFatRecRet, U8 fLock)
+{
+U32 i, j, k;
+U32 first, oSector, erc, LRU, iLRU, iFound, Tick;
+U32 MaxClstr;
+
+	MaxClstr = 0x0ffffff8; 
+
+ if (Clstr32 >= MaxClstr)
+ 	return(ErcEOF);
+
+ if (Clstr32 < 2)
+ {
+	xprintf("Failed in FindFatSect32 check < 2\r\n");
+ 	return (ErcBadFATClstr);
+ }
+
+ GetTimerTick(&Tick);
+
+ erc = 0;		/* default to no error */
+
+ /* Set oSector to offset of sector in FAT
+    There are 128 cluster entries in 1 sector of a FAT32
+ */
+
+	oSector = Clstr32/128;
+	first = Clstr32-(Clstr32%128);
+
+	/* Set i to LBA of FAT sector we need by adding
+	   offset to beginning of FAT
+	*/
+
+	i = oSector + Ldrv[Drive].LBAFAT;
+
+	/* If FAT sector is out of range there's a BAD problem... */
+
+	if (i >= Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT)
+	{
+		xprintf("Failed in FindFatSect32 check %X >= %X\r\n",
+			Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT);
+	 	return (ErcBadFATClstr);
+	}
+	else
+	{   /* Else we get it for them */
+
+		/* Loop through the Fat bufs and see if its in one already. */
+		/* Save the index of the LRU in case it's not there. */
+		/* Set iFound to index of FatBuf (if found). */
+		/* Otherwise, Set up iLRU to indicate what the oldest buffer is  */
+
+		iFound = 0xffffffff;
+		LRU = 0xffffffff;	/* saves tick of oldest one so far */
+		iLRU = 1;			/* default */
+		for (j=1; j<nFATBufs; j++)
+		{
+			if (Fat[j].LastUsed > 0)
+			{		/* Valid ? (ever been used) */
+				if ((first == Fat[j].iClstrStart) &&
+					(Drive == Fat[j].Drive))
+					{
+						iFound = j;
+						if (fLock)
+		                    Fat[j].fModLock |= FATLOCK;
+						break;		/* Already IN! */
+					}
+			}
+			if (Fat[j].LastUsed < LRU)
+			{
+				LRU = Fat[j].LastUsed;
+				iLRU = j;
+			}
+		}
+
+		if (iFound != 0xffffffff)
+		{								/* Its already in memory */
+	        Fat[j].LastUsed = Tick;		/* update LRU */
+		}
+		else
+		{       			   		/* else put into oldest buffer */
+			j = iLRU;
+
+			/* Check to see if Fat[iLRU] is valid and has been
+			   modified. If it is, write it out before we read
+			   the next one into this buffer. This done by
+			   calling UpdateFAT(iFatRec).
+			*/
+	        if (Fat[j].fModLock & FATMOD)
+		        erc = UpdateFAT(j);
+
+			if (!erc)
+			{
+				erc = DeviceOp(Ldrv[Drive].DevNum, 1, i, 1, Fat[j].pBuf);
+				Fat[j].Drive = Drive;		/* Update Drive */
+	    	    		Fat[j].LastUsed = Tick;		/* update LRU */
+	        		Fat[j].iClstrStart = first;	/* update first cluster num*/
+		        	Fat[j].LBASect = i;		/* LBA this FAt sect came from */
+			}
+		}
+ 	}
+
+ *piFatRecRet = j;  /* Buffer that holds the sector(s) */
+
+ return (erc);		/* Disk error Bad news */
+}
+
 /***************************************************************
   Returns the value found for this cluster
   entry in a fat sector buffer.  Values can be:
@@ -1363,6 +1489,33 @@ U16 ClstrVal, *pClstr;
 	return(erc);
 }
 
+/* FAT32 Version */
+
+static U32 GetClstrValue32(U32 Clstr32, U8 Drive, U8 fLock,
+                         U32 *pValRet, U32 *iFatBufRet)
+{
+U32 erc, oClstr, iFat;
+U32 ClstrVal, *pClstr;
+
+	erc = FindFatSect32(Drive, Clstr32, &iFat, fLock);
+
+	if (erc)
+	{
+		*pValRet= 0;
+		return(erc);
+	}
+
+	pClstr = Fat[iFat].pBuf;
+	oClstr = Clstr32 - Fat[iFat].iClstrStart;	/* offset into FatBuf */
+
+	pClstr += oClstr * 4;			/* DWORDS in */
+	ClstrVal = *pClstr;
+
+	*pValRet= ClstrVal;
+	*iFatBufRet = iFat;
+
+	return(erc);
+}
 
 /***************************************************************
   Sets the value in Clstr to the value in
@@ -1428,6 +1581,32 @@ U16 ClstrVal, *pClstr, ClstrSave;
 	return(erc);
 }
 
+/* FAT32 Version */
+
+static U32 SetClstrValue32(U32 Clstr32, U32 NewClstrVal, U8 Drive, U32 *iFatBufRet)
+{
+U32 erc, oClstr, iFat;
+U32 ClstrVal, *pClstr, ClstrSave;
+
+	erc = FindFatSect32(Drive, Clstr32, &iFat, 0);
+	if (erc)
+	{
+		*iFatBufRet = 0;
+		return(erc);
+	}
+
+	pClstr = Fat[iFat].pBuf;
+	oClstr = Clstr32 - Fat[iFat].iClstrStart;	/* offset into FatBuf*/
+
+	pClstr += oClstr * 4;		/* DWORDS in */
+	*pClstr = NewClstrVal;
+	
+	Fat[iFat].fModLock |= FATMOD;
+	*iFatBufRet = iFat;
+	return(erc);
+}
+
+
 
 /*************************************************
  Read the FAT and get the cluster number for the
@@ -1453,6 +1632,26 @@ U16 NextClstr;
 	*pNextClstrRet = NextClstr;
 	return(0);
 }
+
+/* FAT32 version */
+
+static U32 NextFATClstr32(U8 Drive, U32 Clstr32, U32 *pNextClstrRet)
+{
+U32 erc, i;
+U32 NextClstr;
+
+	erc = GetClstrValue32(Clstr32, Drive, 0, &NextClstr, &i);
+
+	if (erc)
+	{
+		*pNextClstrRet = 0;
+		return(erc);
+	}
+	*pNextClstrRet = NextClstr;
+	xprintf("Assigning next cluster %X\r\n", NextClstr);
+	return(0);
+}
+
 
 /*************************************************
  This allocates the next empty cluster on the disk
@@ -1541,6 +1740,77 @@ U8 fFound;
 	return(erc);
 }
 
+/* FAT32 Version */
+
+static U32 ExtendClstrChain32(U8 Drive, U32 LastClstr, U32 *pNextClstrRet)
+{
+U32 erc, i, j, k;
+U32 ClstrValue, MaxClstr, CrntClstr;
+U8 fFound;
+
+	MaxClstr = 0x0ffffff8;
+
+	/* i is index to Fat with last sector of current chain */
+
+	erc = GetClstrValue32(LastClstr, Drive, 1, &ClstrValue, &i);
+	if (erc) 
+	{
+		*pNextClstrRet = 0;
+		return(erc);
+	}
+
+	if (ClstrValue < MaxClstr) 
+	{		/* no need to extend it */
+    	*pNextClstrRet = ClstrValue;
+        Fat[i].fModLock &= ~FATLOCK;	/* unlock it */
+		return(0);
+	}
+
+	/* OK... now we have the Fat sector and the offset in the Fat
+	buf of the last	cluster allocated to this file.  Let's go
+	further into the buffer and try to get an empty one.
+	*/
+
+	CrntClstr = LastClstr;
+	fFound = 0;
+	while (!fFound) 
+	{
+		++CrntClstr;			/* next cluster */
+		erc = GetClstrValue32(CrntClstr, Drive, 0, &ClstrValue, &j);
+		if (erc) 
+		{
+			*pNextClstrRet = 0;
+	        Fat[i].fModLock &= ~FATLOCK;	/* unlock previous lastclstr */
+			return(erc);
+		}
+		if (!ClstrValue) 
+		{
+			fFound = 1; 		/* found an empty one */
+		}
+	}
+
+	if (fFound) 
+	{	/* CrntClstr is index to empty one */
+
+		/* Set the LastCluster to point to the new cluster found */
+
+		erc = SetClstrValue32(LastClstr, CrntClstr, Drive, &k);
+		if (erc) 
+		{
+			*pNextClstrRet = 0;
+	        Fat[i].fModLock &= ~FATLOCK;	/* unlock previous lastclstr */
+			return(erc);
+		}
+        Fat[k].fModLock &= ~FATLOCK;		/* unlock it */
+
+		/* Set the newcluster to "end Cluster" chain value */
+
+		erc = SetClstrValue32(CrntClstr, 0xFFFFFFFF, Drive, &j);
+	}
+	*pNextClstrRet = CrntClstr;
+	xprintf("Extending to Cluster %X\r\n", CrntClstr);
+	return(erc);
+}
 /*************************************************
  This truncates the file chain to the cluster
  specified (makes it the last cluster).
@@ -1597,6 +1867,52 @@ U16 MaxClstr, NextClstr, CrntClstr;
 	return(0);
 }
 
+/* FAT32 Version */
+
+static U32 TruncClstrChain32(U8 Drive, U32 Clstr32)
+{
+U32 erc, i;
+U32 MaxClstr, NextClstr, CrntClstr;
+
+	MaxClstr = 0x0ffffff8;
+
+	/* i will be index to FatRec with last sector of current chain */
+
+	erc = GetClstrValue32(Clstr32, Drive, 0, &NextClstr, &i);
+	if (erc)
+		return(erc);
+
+	if (NextClstr >= MaxClstr)
+	{				/* no need to truncate it */
+		return(0);		/* It's already the end. */
+	}
+
+	/* OK... now we cut it off all the way down the chain.
+	We start by placing MaxClstr in the last sector and
+	then 0 in all entries to the end of the chain.
+	*/
+
+	erc = GetClstrValue32(Clstr32, Drive, 0, &NextClstr, &i);
+	if (erc)
+		return(erc);
+	erc = SetClstrValue32(Clstr32, 0xFFFFFFFF, Drive, &i);  /* new end of chain */
+	if (erc)
+		return(erc);
+
+	while ((NextClstr) && (NextClstr < MaxClstr)) 
+	{
+		CrntClstr = NextClstr;
+		erc = GetClstrValue32(CrntClstr, Drive, 0, &NextClstr, &i);
+		if (erc)
+			return(erc);
+		erc = SetClstrValue32(CrntClstr, 0, Drive, &i);  /* Free it up */
+		if (erc)
+			return(erc);
+	}
+
+	/* DONE! */
+	return(0);
+}
 /********************************************************
   This finds the absolute cluster you want from the
   LFA in a particular file. The file handle must already
@@ -1605,7 +1921,7 @@ U16 MaxClstr, NextClstr, CrntClstr;
 *********************************************************/
 
 static U32 GetAbsoluteClstr(U32 dHandle, U32 dLFA,
-							U16 *pClstrRet, U32 *prLFARet)
+			U16 *pClstrRet, U32 *prLFARet)
 {
 U32 erc, iFCB, spc, bpc, rLFA;
 U16 rClstrWant, rClstrNow, Clstr, MaxClstr;
@@ -1674,6 +1990,76 @@ U8 Drive;
   return(0);
 }
 
+/* FAT32 Version */
+
+static U32 GetAbsoluteClstr32(U32 dHandle, U32 dLFA,
+			U32 *pClstrRet, U32 *prLFARet)
+{
+U32 erc, iFCB, spc, bpc, rLFA;
+U32 rClstrWant, rClstrNow, Clstr32, MaxClstr;
+U8 Drive;
+
+  iFCB = paFUB[dHandle]->iFCB;
+  Drive = paFCB[iFCB]->Ldrv;		/* What logical drive are we on? */
+  spc = Ldrv[Drive].SecPerClstr;	/* sectors per cluster */
+  bpc = spc * 512;			/* bytes per cluster */
+
+	MaxClstr = 0x0ffffff8;
+
+/*
+  Calculate relative by dividing cluster size in bytes by dLFA.
+  If zero, we want the 1st cluster which is listed in the FCB.
+  If it is greater than zero, we have to "walk the FAT cluster
+  chain" until we reach the one we want, then read it in.
+
+  The FUB fields LFAClstr and Clstr store the file LFA of the last
+  cluster in this file that was read or written.  This means if the
+  LFA is higher than the last read or written, we don't waste the
+  time reading the whole chain. We start from where we are.
+
+  The major difference is we may not be reading the first sector
+  in the cluster. We figure this out from the dLFA as compared to
+  LFAClstr.
+
+*/
+
+  rClstrWant = dLFA / bpc;  			/* Relative clstr they want */
+  rClstrNow = paFUB[dHandle]->LFAClstr / bpc;	/* Rel 'Clstr' in FUB */
+
+  if (rClstrWant < rClstrNow)
+  {						/* Is it earlier in the file? */
+	Clstr32 = getCluster32(paFCB[iFCB]->StartClstr,
+			paFCB[iFCB]->StartClstrHi);	/* Yes, start at the beginning */
+	rClstrNow = 0;
+	rLFA = 0;
+  }
+  else
+  {
+	Clstr32 = getCluster32(paFUB[dHandle]->Clstr,
+			paFUB[dHandle]->ClstrHi);	/* No, start at current cluster */
+	rLFA = paFUB[dHandle]->LFAClstr;	/* LFA of this cluster */
+  }
+
+  /* We need to run the cluster chain if rClstrNow < ClstrWant */
+
+  while ((rClstrNow < rClstrWant) &&	/* haven't reach it yet */
+         (Clstr32 < MaxClstr) &&	/* Not last cluster */
+         (Clstr32))
+ {					/* A valid cluster */
+	  erc = NextFATClstr32(Drive, Clstr32, &Clstr32);
+	  if (erc)
+	  	return(erc);
+	  ++rClstrNow;
+	  rLFA += bpc;
+  }
+
+  if (rClstrNow != rClstrWant)		/* Cluster chain appears broken... */
+    return ErcBrokenFile;
+
+  *pClstrRet = Clstr32;
+  *prLFARet = rLFA;
+  return(0);
+}
 
 /*******************************************************
   SetFileSize sets the FileSize entry in the FCB for
@@ -1689,6 +2075,7 @@ static U32 SetFileSizeM(U32 dHandle, U32 dSize)
 U32 erc, i, iFCB, rLFA, lfaEOF;
 U32 CrntSize, nCrntClstrs, spc, bpc, nClstrsWant;
 U16 Clstr;
+U32 Clstr32;
 U8 Drive;
 
   erc = ValidateHandle(dHandle, &iFCB);
@@ -1734,10 +2121,16 @@ U8 Drive;
   {	/* Need to extend allocation */
 
 	/* get the last cluster in the file */
-	erc = GetAbsoluteClstr(dHandle, lfaEOF, &Clstr, &rLFA);
+	if (Ldrv[Drive].fFAT16 == 2)
+		erc = GetAbsoluteClstr32(dHandle, lfaEOF, &Clstr32, &rLFA);
+	else
+		erc = GetAbsoluteClstr(dHandle, lfaEOF, &Clstr, &rLFA);
 	i = nCrntClstrs;
 	while ((!erc) && (i < nClstrsWant))
 	{
+		if (Ldrv[Drive].fFAT16 == 2)
+			erc = ExtendClstrChain32(Drive, Clstr32, &Clstr32);
+		else
 			erc = ExtendClstrChain(Drive, Clstr, &Clstr);
 			i++;
 	}
@@ -1753,10 +2146,18 @@ U8 Drive;
 	else
   	  lfaEOF = 0;
 
+if (Ldrv[Drive].fFAT16 == 2)
+{
+	erc = GetAbsoluteClstr32(dHandle, lfaEOF, &Clstr32, &rLFA);
+	if (!erc)
+		erc = TruncClstrChain32(Drive, Clstr32);
+}
+else
+{
 	erc = GetAbsoluteClstr(dHandle, lfaEOF, &Clstr, &rLFA);
 	if (!erc)
 		erc = TruncClstrChain(Drive, Clstr);
-
+}
 	/* Now we must ensure that the cluster helper is NOT
 	beyond EOF!
 	*/
@@ -1764,7 +2165,8 @@ U8 Drive;
     {
         paFUB->LFAClstr = 0;
         paFUB[dHandle]->Clstr = paFCB[iFCB]->StartClstr;
-	}
+	paFUB[dHandle]->ClstrHi = paFCB[iFCB]->StartClstrHi;
+    }
 
   }
   if (!erc)
@@ -1775,8 +2177,6 @@ U8 Drive;
 
   return erc;
 }
-
-
 
 /*******************************************************************
  This searches a directory beginning at Clstr for pName and returns
@@ -1861,6 +2261,82 @@ U16 MaxClstr;
   else return (ErcNoSuchFile);
 }
 
+/* FAT32 Version */
+
+static U32 GetDirEnt32(U8  *pName,
+              U8  Drive,
+              U32 Clstr32,
+              U32 *pLBARet,
+              U32 *poEntRet,
+              U8  **pEntRet)
+{
+U32 sector, i, j, k, erc;
+U8 fFound, fEnd, *pEnt, *pStart;
+U32 MaxClstr;
+
+ j = Ldrv[Drive].SecPerClstr;		/* How many sectors per cluster */
+ sector = ClsToLBA32(Clstr32, Drive);	/* absolute sector of first dir sector */
+
+ 	MaxClstr = 0x0ffffff8;
+
+ i = 0;
+ fEnd=0;
+ fFound=0;
+
+  fFound= 0;
+  while ((!fFound) && (!fEnd)) 
+  {		/* while there are valid entries */
+	if (i==j) 
+	{		/* reached last dir sector of this cluster */
+		erc = NextFATClstr32(Drive, Clstr32, &Clstr32);
+		if (!erc) 
+		{
+			if (Clstr32 >= MaxClstr)		/* last sector */
+				return(ErcNoSuchFile);		/* not found */
+			sector = ClsToLBA32(Clstr32, Drive);	/* LBA of next dir sector */
+			i=0;
+		}
+		else 
+		{
+			*pEntRet = 0;
+			return(erc);
+		}
+	}
+
+	erc = DeviceOp(Ldrv[Drive].DevNum, 1, sector++, 1, abDirSectBuf);
+	if (erc)
+		return(erc);
+
+	++i;		/* next sector in cluster */
+
+    pEnt = &abDirSectBuf[0];
+    pStart = pEnt;
+
+	for (k=0; k<16; k++) 
+	{		/* 16 entries per sector */
+		if (*pEnt==0) 
+		{	/* 0 in a DirEnt stops search */
+			fEnd=1;
+			break;
+		}
+
+		if (CompareNCS(pEnt, pName, 11) == -1)
+		{
+			fFound=1;
+            *pLBARet = sector-1;	/* tell em what LBA of DirEnt */
+            *poEntRet = pEnt-pStart;	/* Tell em offset in LBA */
+			break;
+		}
+		pEnt+=32;		/* 32 byte per entry */
+		}
+	}
+  if (fFound) 
+  {
+  	*pEntRet = pEnt;
+  	return(0);
+  }
+  else return (ErcNoSuchFile);
+}
 
 /*****************************************************
  This searches the ROOT directory for pName
@@ -1882,6 +2358,8 @@ U8 fFound, fEnd, *pEnt, *pStart;
  i = Ldrv[Drive].LBARoot;
  j = Ldrv[Drive].nRootDirEnt;
 
+xprintf("Drive %d LBARoot %X nRootDirEnt %x\r\n", Drive,
+		i, j);
  fFound = 0;
  fEnd = 0;
  while ((j) && (!fFound) && (!fEnd)) 
@@ -2244,6 +2722,179 @@ U8  fFound, *pEnt, Drive;
 return (erc);
 }
 
+/* FAT32 Version */
+
+static U32 GetDirSectorM32(char *pPath,
+				 long cbPath,
+				 char *pSectRet,
+				 long cbRetMax,
+				 long SectNum,
+				 long *LBARet,
+				 U32  *ClstrRet,
+				 long iJob)
+{
+U32 sector, i, j, k, erc, spc, level, iSect;
+U32 MaxClstr, Clstr, rClstr;
+U8  fFound, *pEnt, Drive;
+
+  if (cbRetMax > 512)	/* WHOA Bub, 1 Sector at a time! */
+  	cbRetMax = 512;
+
+  erc = ParseName(pPath, cbPath, iJob);
+
+	/* The entire path has now been parsed out into an array of
+	   arrays, each 11 bytes long that contain each directory name
+	   in the path for the sector they want.
+	   The first is always the root (entry 0).
+	   The drive will be a letter in FDrive.
+	*/
+
+  if ((FDrive > 0x40) && (FDrive < 0x52))	 	/* A to R */
+  	Drive = FDrive - 0x41;				/* Make it 0-17 */
+  else
+  	return(ErcNoSuchDrive);
+
+  if (Drive < 2)
+  {
+	StatFloppy(Drive);
+	erc= read_BS(Drive);
+  }
+
+  if (Ldrv[Drive].DevNum == 0xff)
+	return(ErcNoSuchDrive);
+
+  i = Ldrv[Drive].LBARoot;
+  j = Ldrv[Drive].nRootDirEnt;
+
+  if (FileSpec[0][0] == ' ')
+  {		/* They want sector in root */
+  	if (SectNum > j/32)				/* Beyond Root entries! */
+		return(ErcNoMatch);
+
+	/* Else we can give them the sector NOW */
+	erc = DeviceOp(Ldrv[Drive].DevNum, 1, i+SectNum, 1, abRawSector);
+	if (!erc) 
+	{
+		*LBARet = i+SectNum;
+	  	CopyData(abRawSector, pSectRet, cbRetMax);
+	}
+	return(erc);
+  }
+
+	/* We have to run the root for a dir name... */
+
+  fFound = 0;
+  while ((j) && (!fFound))
+  {	/* while there are valid entries */
+	erc = DeviceOp(Ldrv[Drive].DevNum, 1, i++, 1, abRawSector);
+	if (erc)
+		return(erc);
+    pEnt = abRawSector;		/* Point to first entry */
+	for (k=0; k<16; k++) 
+	{
+		if (CompareNCS(pEnt, FileSpec[0], 11) == -1)
+		{
+			fFound=1;
+			break;
+		}
+		--j;		/* one less dir ent */
+		pEnt+=32;	/* 32 byte per entry */
+	}
+ }
+ if (!fFound)
+	return (ErcNoMatch);
+
+  pDirEnt = pEnt;		/* Entry we just found in root was dir */
+
+  if (!(pDirEnt->Attr & DIRECTORY))
+  {
+	return(ErcNoSuchDir);
+  }
+
+ 	MaxClstr = 0x0ffffff8;
+
+  spc = Ldrv[Drive].SecPerClstr;	/* How many sectors per cluster */
+  Clstr = getCluster32(pDirEnt->StartClstr, pDirEnt->StartClstrHi);
+
+  level = 1;	/* start at this directory+1, compare to FileSpec */
+
+  while (!erc) 
+  {	/* looking for Dir */
+
+	if (FileSpec[level][0] == ' ')
+	{ /* They want sector in this dir */
+
+		if (!(pDirEnt->Attr & DIRECTORY))  
+		{
+			return(ErcNoSuchDir);
+		}
+		rClstr = SectNum /spc;	/* calc relative cluster from start clstr */
+		iSect  = SectNum % spc;  /* Add this to cluster start for sector */
+		sector = ClsToLBA32(Clstr, Drive);	/* sector of first dir sector */
+		while ((rClstr--) && (!erc))
+			erc = NextFATClstr32(Drive, Clstr, &Clstr);
+		if (erc)
+			return(erc);
+		sector = ClsToLBA32(Clstr, Drive);  /* LBA of this clstr */
+		sector += iSect;
+		erc = DeviceOp(Ldrv[Drive].DevNum, 1, sector, 1, abRawSector);
+		if (!erc) 
+		{
+		  	CopyData(abRawSector, pSectRet, cbRetMax);
+			*LBARet = sector;
+			*ClstrRet = Clstr;
+		}
+		return(erc);
+	}
+	else 
+	{  /* Else we must find this sub dir name */
+
+		sector = ClsToLBA32(Clstr, Drive);	/* sector of first dir sector */
+		fFound=0;
+		i = 0;
+
+		while (!fFound)
+		{		/* while there are valid entries */
+
+			if (i==spc) 
+			{		/* reached last dir sector of this cluster */
+				erc = NextFATClstr32(Drive, Clstr, &Clstr);
+				if (!erc) 
+				{
+					if (Clstr >= MaxClstr)			 /* last sector */
+						return(ErcNoSuchFile);		 /* not found */
+					sector = ClsToLBA32(Clstr, Drive); /* LBA of next sector */
+					i=0;
+				}
+				else
+					return(erc);
+			}
+
+			erc = DeviceOp(Ldrv[Drive].DevNum, 1, sector++, 1, abRawSector);
+			if (erc)
+				return(erc);
+			i++;	/* Next sector in this cluster */
+
+		    pEnt = &abRawSector[0];
+			for (k=0; k<16; k++)
+			{		/* 16 entries per sector */
+				if (CompareNCS(pEnt, FileSpec[level], 11) == -1)
+				{
+					fFound=1;
+					break;
+				}
+				pEnt+=32;	/* 32 byte per entry */
+			}
+		}
+		pDirEnt = pEnt;				  /* Entry we just found */
+	    Clstr = getCluster32(pDirEnt->StartClstr,
+				pDirEnt->StartClstrHi);  /* Clstr @ start of dir entry */
+	}
+	++level;		/* next level of parsed filespec */
+  }
+return (erc);
+}
+
 /*******************************************************
  This is the BLOCK read for the MMURTL DOS file system.
  It reads whole sectors and returns them to pBytesRet.
@@ -2261,7 +2912,8 @@ static U32 ReadBlockM(U32 dHandle,
                U8  fFill)			/* TRUE if filling a stream buffer */
 {
 U32 erc, j, LBA, iFCB, bpc, spc, nDone, rLFA, nLeft, nBlks;
-U16 Clstr, MaxClstr, ClstrSav;
+U16 Clstr, /*MaxClstr,*/ ClstrSav;
+U32 Clstr32, MaxClstr, ClstrSav32;
 U8 Drive;
 
   erc = ValidateHandle(dHandle, &iFCB);		/* Sets iFCB if OK */
@@ -2281,19 +2933,29 @@ U8 Drive;
   Drive = paFCB[iFCB]->Ldrv;		/* What logical drive are we on? */
   spc = Ldrv[Drive].SecPerClstr;	/* sectors per cluster */
   bpc = 512 * spc;                  	/* Bytes per cluster */
-  if (Ldrv[Drive].fFAT16)
+
+  MaxClstr = getMaxCluster(Ldrv[Drive].fFAT16);
+
+/*  if (Ldrv[Drive].fFAT16)
   	MaxClstr = 0xfff8;
   else
- 	MaxClstr = 0xff8;	/* FAT12 */
-
+ 	MaxClstr = 0xff8;	** FAT12 **
+*/
 
   /* Call to find the absolute cluster on the the logical disk,
      and also the relative LFA of the cluster in question.
   */
 
+if (Ldrv[Drive].fFAT16 == 2)
+{
+  erc = GetAbsoluteClstr32(dHandle, dLFA, &Clstr32, &rLFA);
+  LBA = ClsToLBA32(Clstr32, Drive);	/* Get LBA of the target cluster */
+}
+else
+{
   erc = GetAbsoluteClstr(dHandle, dLFA, &Clstr, &rLFA);
-
   LBA = ClsToLBA(Clstr, Drive);		/* Get LBA of the target cluster */
+}
 
   /* Now LBA equals beginning of cluster that dLFA resides in.
      We must see which sector in Clstr is the starting LBA.  To do this
@@ -2317,7 +2979,14 @@ U8 Drive;
 		j = nLeft;
 	else j = nBlks;
 
+if (Ldrv[Drive].fFAT16 == 2)
+{
+	paFUB[dHandle]->Clstr = Clstr32 & 0xFFFF;
+	paFUB[dHandle]->ClstrHi = ((Clstr32 >> 16) & 0xFFFF);
+}
+else
 	paFUB[dHandle]->Clstr = Clstr;		/* Save Current cluster */
+
 	paFUB[dHandle]->LFAClstr = rLFA; 	/* Save LFA for Clstr in FUB */
 
 	erc = DeviceOp(Ldrv[Drive].DevNum, 1, LBA, j, pBytesRet);
@@ -2332,25 +3001,39 @@ U8 Drive;
 	{ 		/* current cluster has none left */
 		nLeft = spc;
 		ClstrSav = Clstr;
-		erc = NextFATClstr(Drive, Clstr, &Clstr);	/* next FAT cluster */
+		ClstrSav32 = Clstr32;
+		if (Ldrv[Drive].fFAT16 == 2)
+			erc = NextFATClstr32(Drive, Clstr32, &Clstr32);/* next FAT cluster */
+		else
+			erc = NextFATClstr(Drive, Clstr, &Clstr);/* next FAT cluster */
 		if (erc)
 		{
 			*pdBytesRet = nDone*512;
 			return(erc);
 		}
-		rLFA += bpc;					 /* Update rel LFA of new cluster*/
+		rLFA += bpc;			 /* Update rel LFA of new cluster*/
+	if(Ldrv[Drive].fFAT16 == 2)
+	{
+	    if (Clstr32 >= MaxClstr)
+	    	erc = ErcEOF; /* Last cluster */
+	    if (!Clstr32)
+	    	erc = ErcBrokenFile;	 /* No good next cluster! */
+		LBA = ClsToLBA32(Clstr32, Drive); /* Get LBA of the target cluster*/
+	}
+	else
+	{
 	    if (Clstr >= MaxClstr)
 	    	erc = ErcEOF; /* Last cluster */
 	    if (!Clstr)
 	    	erc = ErcBrokenFile;	 /* No good next cluster! */
 		LBA = ClsToLBA(Clstr, Drive);		 /* Get LBA of the target cluster*/
 	}
+	}
   }
   *pdBytesRet = nDone*512;
 
   return erc;		/* WE'RE DONE, return the error (if any) */
 }
-
 
 /*** Write Block ***************************************
  This is the BLOCK write for the MMURTL FAT file system.
@@ -2367,7 +3050,8 @@ static U32 WriteBlockM(U32 dHandle, char *pData, U32 nBytes,
 {
 U32 erc, i, j, LBA, iFCB, bpc, spc, nDone, rLFA, nLeft, nBlks;
 U32 nLeft1, LBA1, nBlks1;
-U16 Clstr, MaxClstr;
+U16 Clstr/*, MaxClstr*/;
+U32 Clstr32, MaxClstr;
 U8 Drive;
 
   erc = ValidateHandle(dHandle, &iFCB);		/* Sets iFCB if OK */
@@ -2393,16 +3077,30 @@ U8 Drive;
   Drive = paFCB[iFCB]->Ldrv;		/* What logical drive are we on? */
   spc = Ldrv[Drive].SecPerClstr;	/* sectors per cluster */
   bpc = 512 * spc;                  	/* Bytes per cluster */
+	MaxClstr = getMaxCluster(Ldrv[Drive].fFAT16);
+/*
   if (Ldrv[Drive].fFAT16)
   	MaxClstr = 0xfff8;
   else
- 	MaxClstr = 0xff8;	/* FAT12 */
+ 	MaxClstr = 0xff8;	** FAT12 **
+*/
 
+if (Ldrv[Drive].fFAT16 == 2)
+{
+  erc = GetAbsoluteClstr32(dHandle, dLFA, &Clstr32, &rLFA);
+  if (erc)
+  	return(erc);
+
+  LBA = ClsToLBA32(Clstr32, Drive);	/* Get LBA of the target cluster */
+}
+else
+{
   erc = GetAbsoluteClstr(dHandle, dLFA, &Clstr, &rLFA);
   if (erc)
   	return(erc);
 
   LBA = ClsToLBA(Clstr, Drive);		/* Get LBA of the target cluster */
+}
 
   /* Now LBA equals beginning of cluster that dLFA resides in.
      We must see which sector in Clstr is the starting LBA.  To do this
@@ -2429,7 +3127,14 @@ U8 Drive;
 		j = nLeft;
 	else j = nBlks;
 
+if (Ldrv[Drive].fFAT16 == 2)
+{
+	paFUB[dHandle]->Clstr = Clstr32 & 0xFFFF;
+	paFUB[dHandle]->ClstrHi = ((Clstr32 >> 16) & 0xFFFF);
+}
+else
 	paFUB[dHandle]->Clstr = Clstr;		/* Save Current cluster */
+
 	paFUB[dHandle]->LFAClstr = rLFA; 	/* Save LFA for Clstr in FUB */
 
 	erc = DeviceOp(Ldrv[Drive].DevNum, 2, LBA, j, pData);
@@ -2443,10 +3148,24 @@ U8 Drive;
 	if ((nBlks) && (!nLeft))
 	{ 		/* done with current cluster */
 		nLeft = spc;
-		erc = NextFATClstr(Drive, Clstr, &Clstr);	/* next FAT cluster */
+		if (Ldrv[Drive].fFAT16 == 2)
+			erc = NextFATClstr32(Drive, Clstr32, &Clstr32);/* next FAT cluster */
+		else
+			erc = NextFATClstr(Drive, Clstr, &Clstr);/* next FAT cluster */
 		if (erc)
 			return(erc);
 		rLFA += bpc;			 /* Update rel LFA of new cluster*/
+	if (Ldrv[Drive].fFAT16 == 2)
+	{
+	    if ((Clstr32 >= MaxClstr) && (nBlks))	 /* Problem! */
+	    {
+	    	erc = ErcBeyondEOF; 		 /* Last cluster & they want more*/
+		}
+	    if (!Clstr32) erc = ErcBrokenFile;	 /* No good next cluster! */
+		LBA = ClsToLBA32(Clstr32, Drive); /* Get LBA of the target cluster*/
+	}
+	else
+	{
 	    if ((Clstr >= MaxClstr) && (nBlks))	 /* Problem! */
 	    {
 	    	erc = ErcBeyondEOF; 		 /* Last cluster & they want more*/
@@ -2454,11 +3173,11 @@ U8 Drive;
 	    if (!Clstr) erc = ErcBrokenFile;	 /* No good next cluster! */
 		LBA = ClsToLBA(Clstr, Drive);	 /* Get LBA of the target cluster*/
 	}
+	}
   }
   *pdnBytesRet = nDone * 512;
   return erc;		/* WE'RE DONE, return the error (if any) */
 }
-
 
 /*********************************************************
  Fills the stream buffer for the Current LFA in the FUB.
@@ -2638,7 +3357,6 @@ U8  *pBuf;
   }
   return erc;
 }
-
 
 /*** Write Bytes (Stream) ******************************
  This is the STREAM write for the MMURTL FAT file system.
@@ -2820,7 +3538,6 @@ U32 erc, iFCB;
   return erc;
 }
 
-
 /*******************************************************
   GetFileLFA gets a Stream mode file pointer for caller
   returning it to pdLFARet.
@@ -2859,6 +3576,7 @@ static U32 OpenFileM(U8 *pName,
 {
 U32 erc, level, i, iFCB, iFUB, LBADirEnt, EntOffset;
 U16 Clstr;
+U32 Clstr32;
 U8 fFound, *pMem, Drive;
 
   if (Mode > 1)
@@ -2880,7 +3598,7 @@ U8 fFound, *pMem, Drive;
 	   the root (entry 0). The drive will be a letter in FDrive.
 	*/
 
-  if ((FDrive > 0x40) && (FDrive < 0x52)) 	/* A to J */
+  if ((FDrive > 0x40) && (FDrive < 0x52)) 	/* A to R */
   	Drive = FDrive - 0x41;			/* Make it 0-9 */
   else erc = ErcNoSuchDrive;
 
@@ -2910,14 +3628,27 @@ U8 fFound, *pMem, Drive;
 		return(erc);
 
 	if (!erc)
-	    Clstr = pDirEnt->StartClstr;  /* Clstr = beginning of file or dir */
+		if (Ldrv[Drive].fFAT16 == 2)
+			Clstr32 = getCluster32(pDirEnt->StartClstr,
+				pDirEnt->StartClstrHi);
+		else
+			Clstr = pDirEnt->StartClstr;  /* Clstr = beginning of file or dir */
 
+	xprintf("Clstr %X, Clstr32 %X\r\n", Clstr, Clstr32);
 	while ((level < SpecDepth) && (!erc))
 	{	/* looking for Dir, not file yet */
 
 		++level;		/* next level of parsed filespec */
 
-		erc = GetDirEnt(FileSpec[level],
+		if (Ldrv[Drive].fFAT16 == 2)
+			erc = GetDirEnt32(FileSpec[level],
+						Drive,
+						Clstr32,
+						&LBADirEnt,
+						&EntOffset,
+						&pDirEnt);
+		else
+			erc = GetDirEnt(FileSpec[level],
 						Drive,
 						Clstr,
 						&LBADirEnt,
@@ -2932,9 +3663,14 @@ U8 fFound, *pMem, Drive;
 		else if (erc)
 			return(erc);
 		else
-		    Clstr = pDirEnt->StartClstr;  /* Clstr @ start of dir entry */
+			if (Ldrv[Drive].fFAT16 == 2)
+				Clstr32 = getCluster32(pDirEnt->StartClstr,
+					pDirEnt->StartClstrHi);
+			else
+		    		Clstr = pDirEnt->StartClstr;  /* Clstr @start of dir entry */
 	}
 
+	xprintf("Clstr %X, Clstr32 %X\r\n", Clstr, Clstr32);
 	/* if we got here with no error we've got a file or a DIR.
 	   If it's DIR then it's an error.
 	   pDirEnt points to its directory entry, and Clstr
@@ -2963,13 +3699,20 @@ U8 fFound, *pMem, Drive;
 	i=0;
 	while ((i<nFCBs) && (!fFound)) 
 	{
-
-		if ((paFCB[i]->nUsers) &&
-			(paFCB[i]->Ldrv == Drive) &&
-		    (paFCB[i]->StartClstr == pDirEnt->StartClstr) &&
-		    (CompareNCS(&paFCB[i],
+		if ((Ldrv[Drive].fFAT16 == 2) &&
+		   (paFCB[i]->nUsers) &&
+		   (paFCB[i]->Ldrv == Drive) &&
+		   (paFCB[i]->StartClstr == pDirEnt->StartClstr) &&
+		   (paFCB[i]->StartClstrHi == pDirEnt->StartClstrHi) &&
+		   (CompareNCS(&paFCB[i],
 		    			FileSpec[SpecDepth], 11) == 0xffffffff))
-			 fFound = 1;
+			fFound = 1;
+		else if ((paFCB[i]->nUsers) &&
+			(paFCB[i]->Ldrv == Drive) &&
+		    	(paFCB[i]->StartClstr == pDirEnt->StartClstr) &&
+		    	(CompareNCS(&paFCB[i],
+		    			FileSpec[SpecDepth], 11) == 0xffffffff))
+				fFound = 1;
 		else
 		    ++i;
 	}
@@ -3069,7 +3812,6 @@ return erc;
 
 }
 
-
 /*******************************************************
   CLOSE FILE for the MMURTL DOS file system. This finds
   the FUB, checks to see if the buffer should be flushed
@@ -3116,7 +3858,6 @@ U32 erc, iFCB, i;
   return erc;
 }
 
-
 /*** Create File ***************************************
  This is Create File for the MMURTL FAT file system.
  This is also used internally to create directories.
@@ -3132,6 +3873,7 @@ char Path[70];
 long cbPath;
 char filename[12];
 U16 CrntClstr, ClstrValue, iStart, DirClstr;
+U32 CrntClstr32, ClstrValue32, iStart32, DirClstr32;
 U8 fFound, Drive, fDir;
 
 	/* First we try to open it to see if it exists. If we get back
@@ -3201,8 +3943,12 @@ U8 fFound, Drive, fDir;
 		i = 0;				/* i = sectornum */
 		while ((!fFound) && (!erc)) 
 		{
-			erc = GetDirSectorM(Path, cbPath, abTmpSector,
-								512, i++, &LBA, &DirClstr, iJob);
+			if(Ldrv[Drive].fFAT16 == 2)
+				erc = GetDirSectorM32(Path, cbPath, abTmpSector,
+						512, i++, &LBA, &DirClstr32, iJob);
+			else
+				erc = GetDirSectorM(Path, cbPath, abTmpSector,
+						512, i++, &LBA, &DirClstr, iJob);
 			if (!erc) 
 			{
 				k = 0;
@@ -3239,10 +3985,20 @@ U8 fFound, Drive, fDir;
 
 		  FillData(abTmpSector, 512, 0);
 		  spc = Ldrv[Drive].SecPerClstr;	/* sectors per cluster */
+		if (Ldrv[Drive].fFAT16 == 2)
+		{
+		  erc = ExtendClstrChain32(Drive, DirClstr32, &DirClstr32);
+		  if (erc)
+		  	return(erc);
+		  LBA = ClsToLBA32(DirClstr32, Drive);
+		}
+		else
+		{
 		  erc = ExtendClstrChain(Drive, DirClstr, &DirClstr);
 		  if (erc)
 		  	return(erc);
 		  LBA = ClsToLBA(DirClstr, Drive);
+		}
 		  j = LBA;
 		  i = spc;
 		  erc = 0;
@@ -3277,6 +4033,52 @@ U8 fFound, Drive, fDir;
 
 			k = 0;
 			CrntClstr = 0;
+			CrntClstr32 = 0;
+		if (Ldrv[Drive].fFAT16 == 2)
+		{
+			while ((k<nFATBufs) && (!CrntClstr32)) 
+			{
+				if ((Drive == Fat[k].Drive) && (Fat[k].LastUsed))
+                    			CrntClstr32 = getCluster32(Fat[k].iClstrStart,
+					Fat[k].iClstrStartHi);	/* valid cluster */
+				k++;
+			}
+
+			if (!CrntClstr32)
+				CrntClstr32 = 2;	/* Can't find it so start at beginning */
+
+			iStart32 = CrntClstr32;		/* where we started looking for empties */
+
+			fFound = 0;
+			while (!fFound) 
+			{
+				++CrntClstr32;		/* next cluster */
+				if (CrntClstr32 == iStart32)
+					return(ErcDiskFull);
+
+				erc = GetClstrValue32(CrntClstr32, Drive, 0, &ClstrValue32, &j);
+
+				if ((!erc) && (!ClstrValue32))
+						fFound = 1; 	/* found an empty one */
+
+				else if (erc == ErcBadFATClstr) 
+				{ /* off the end */
+						/* we started AFTER beginning of disk so
+						  we will go back and look for empties
+						  from beginning to where we started.
+						*/
+
+					if (iStart32 > 2)
+						CrntClstr32 = 2;
+					else
+						return(ErcDiskFull);
+				}
+				else if (erc)
+						return(erc);
+			}
+		}
+		else
+		{
 			while ((k<nFATBufs) && (!CrntClstr)) 
 			{
 				if ((Drive == Fat[k].Drive) && (Fat[k].LastUsed))
@@ -3316,6 +4118,7 @@ U8 fFound, Drive, fDir;
 				else if (erc)
 						return(erc);
 			}
+		}
 
 			/* If we got here, we found an empty cluster */
 
@@ -3324,11 +4127,21 @@ U8 fFound, Drive, fDir;
 				pDirEnt->Attr =
 					attrib & (READONLY | HIDDEN | SYSTEM | ARCHIVE);
 			else
-                pDirEnt->Attr = attrib;
+                	pDirEnt->Attr = attrib;
 			GetFATTime(&pDirEnt->Time, &pDirEnt->Date);
+		if (Ldrv[Drive].fFAT16 == 2)
+		{
+			pDirEnt->StartClstr = CrntClstr32 & 0xFFFF;
+			pDirEnt->StartClstrHi = ((CrntClstr32 >> 16) & 0xFFFF);
+			pDirEnt->FileSize = 0;
+			erc = SetClstrValue32(CrntClstr32, 0xFFFFFFFF, Drive, &i);
+		}
+		else
+		{
 			pDirEnt->StartClstr = CrntClstr;
 			pDirEnt->FileSize = 0;
 			erc = SetClstrValue(CrntClstr, 0xFFFF, Drive, &i);
+		}
 			/* Now we write the dir sector back to disk */
 			if (!erc)
 				erc = DeviceOp(Ldrv[Drive].DevNum, 2, LBA,
@@ -3353,7 +4166,14 @@ U8 fFound, Drive, fDir;
 			  CopyData(".          ", pDirEnt, 11);
 			  pDirEnt->Attr = DIRECTORY;
 			  GetFATTime(&pDirEnt->Time, &pDirEnt->Date);
+			if (Ldrv[Drive].fFAT16 == 2)
+			{
+				pDirEnt->StartClstr = CrntClstr32 & 0xFFFF;
+				pDirEnt->StartClstrHi = ((CrntClstr32 >> 16) & 0xFFFF);
+			}
+			else
 			  pDirEnt->StartClstr = CrntClstr;
+
 			  pDirEnt->FileSize = 0;
 
 				/* do the previous current dir entry (.) */
@@ -3362,10 +4182,20 @@ U8 fFound, Drive, fDir;
 			  CopyData("..         ", pDirEnt, 11);
 			  pDirEnt->Attr = DIRECTORY;
 			  GetFATTime(&pDirEnt->Time, &pDirEnt->Date);
+			if (Ldrv[Drive].fFAT16 == 2)
+			{
+			  pDirEnt->StartClstr = (DirClstr32 & 0xFFFF);
+			  pDirEnt->StartClstrHi = ((DirClstr32 >> 16) & 0xFFFF);
+			}
+			else
 			  pDirEnt->StartClstr = DirClstr;
+
 			  pDirEnt->FileSize = 0;
 
 			  spc = Ldrv[Drive].SecPerClstr;	/* sectors per cluster */
+			if (Ldrv[Drive].fFAT16 == 2)
+			  LBA = ClsToLBA32(CrntClstr32, Drive);
+			else
 			  LBA = ClsToLBA(CrntClstr, Drive);
 			  j = LBA;
 
@@ -3412,6 +4242,7 @@ static U32 DeleteFileM(long *dHandle)
 {
 U32 erc, iFCB, i;
 U16 iStart;
+U32 iStart32;
 U8 Drive;
 
 	erc = ValidateHandle(dHandle, &iFCB);
@@ -3427,12 +4258,26 @@ U8 Drive;
 	if (paFUB[dHandle]->fStream)
 		DeAllocPage(paFUB[dHandle]->pBuf, 1);	/* Free buffer */
 
-	iStart = paFCB[iFCB]->StartClstr;
-	if (iStart) 
+	if (Ldrv[Drive].fFAT16 == 2)
 	{
-		erc = TruncClstrChain(Drive, iStart);
-		if (!erc)
-			erc = SetClstrValue(iStart, 0, Drive, &i);
+		iStart32 = getCluster32(paFCB[iFCB]->StartClstr,
+			paFCB[iFCB]->StartClstrHi);
+		if (iStart32) 
+		{
+			erc = TruncClstrChain32(Drive, iStart32);
+			if (!erc)
+				erc = SetClstrValue32(iStart32, 0, Drive, &i);
+		}
+	}
+	else
+	{
+		iStart = paFCB[iFCB]->StartClstr;
+		if (iStart) 
+		{
+			erc = TruncClstrChain(Drive, iStart);
+			if (!erc)
+				erc = SetClstrValue(iStart, 0, Drive, &i);
+		}
 	}
 
 	paFCB[iFCB]->Name[0] = 0xE5;
@@ -3494,6 +4339,7 @@ U32 dHandle, erc, erc1, iFCB;
 	return (erc);
 }
 
+
 /*** Create Dir ***************************************
  This is Create Directory for the MMURTL FAT file system.
 ********************************************************/
@@ -3506,6 +4352,7 @@ long erc;
   return(erc);
 
 }
+
 /*** Delete Directory ***********************************
  This is Delete Directory for the MMURTL FAT file system.
 ********************************************************/
@@ -3517,7 +4364,6 @@ static U32	DeleteDirM(char *pPath, long cbPath, long fAllFiles, long iJob)
 	fAllFiles = 0;
 	iJob = 0;
 }
-
 
 /*******************************************************
  This is the File system task. All file system requests
