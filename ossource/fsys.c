@@ -426,6 +426,11 @@ static U16 partsig;
 #define DIRECTORY 0x10
 #define ARCHIVE   0x20
 
+/* FAT32 specific attribute masks for long file names */
+
+#define ATTR_LONG_NAME	READONLY | HIDDEN | SYSTEM | VOLNAME
+#define ATTR_LONG_NAME_MASK ATTR_LONG_NAME | DIRECTORY | ARCHIVE
+
 /* Directory Entry Record, 32 bytes */
 
 struct dirstruct {
@@ -448,6 +453,19 @@ struct dirstruct {
 static struct dirstruct  dirent;
 
 static struct dirstruct *pDirEnt;		/* a pointer to a dir entry */
+
+/* FAT32 Long Directory Entry Structure */
+
+struct longdirstruct {
+	U8 LDIR_Ord;		/* Order in longfilename sequence */
+	U8 LDIR_Name1[10];	/* Characters 1-5 */
+	U8 LDIR_Attr;		/* Attributes - must be ATTR_LONG_NAME */
+	U8 LDIR_Type;		/* Directory entry type, 0 for LFN */
+	U8 LDIR_Chksum;		/* Chksum */
+	U8 LDIR_Name2[12];	/* Characters 6-11 */
+	U16 LDIR_FstClusLO;	/* Must be 0 */
+	U8 LDIR_Name3[4];	/* Characters 12-13 */
+};
 
 /* When a file is opened, the filename is parsed into an array
    to facilitate searching the directory tree.  IN MS-DOS all
@@ -601,6 +619,19 @@ static struct reqtype *pRQB;
 static char *fsysname = "FILESYSM";
 
 static unsigned long keycode;	/* for testing */
+
+/* Definition of the FAT32 FSInfo structure as per specification */
+/* 512 bytes = 1 sector - FSInfo sector is located at BPB_FSInfo */
+
+static struct fsinfo {
+	U32 FSI_LeadSig;	/* Should be 0x41615252 */
+	U8 FSI_Reserved1[480];	/* Should be initialized to zeroes and ignored on read */
+	U32 FSI_StrucSig;	/* Should be 0x61417272 */
+	U32 FSI_Free_Count;	/* Last known free cluster count, 0xFFFFFFFF is unknown */
+	U32 FSI_Nxt_Free;	/* Hint to help look for free clusters */
+	U8 FSI_Reserved2[12];	/* Should be initialized to zeroes and ignored on read */
+	U32 FSI_TrailSig;	/* Should be AA550000 */
+};
 
 /*========================== BEGIN CODE ============================*/
 
