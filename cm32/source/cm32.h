@@ -21,7 +21,8 @@
 #define LBUFFSIZE   300		/* n bytes in Local symbol name pool */
 #define SYMBOL_SIZE	31		/* Max chars in symbol name */
 #define EXPR_DEPTH	20		/* maximum depth of expression stack */
-#define MAX_SYMBOLS	300		/* maximum # active symbols */
+/*#define MAX_SYMBOLS	300		** maximum # active symbols */
+#define MAX_SYMBOLS	500		/* maximum # active symbols */
 #define MAX_ARGS	20		/* maximum # arguments to a function */
 #define MAX_PROTOS	700		/* maximum # params for all functions */
 #define LOOP_DEPTH	10		/* maximum # nested loops */

@@ -1151,8 +1151,10 @@ U8 hdrive;
  	/* make sure they don't exceed max blocks */
 
 	if (!erc)
+	{
 		if (dLBA > hdcb[hdrive].nBlocks)
 			erc = ErcBadLBA;
+	}
 
 	if (!erc)
 	{
@@ -1277,6 +1279,7 @@ U8 hdrive;
 		xprintf("IDEid.ncyls:       %d\r\n", IDEid[hdrive].ncyls);
 		xprintf("IDEid.nheads:      %d\r\n", IDEid[hdrive].nheads);
 		xprintf("IDEid.nsectpertrk: %d\r\n", IDEid[hdrive].nsectpertrk);
+		xprintf("IDEid.totalsectlba:%d\r\n", IDEid[hdrive].totalsectlba);
 	}
 	else
 	{
@@ -1288,9 +1291,11 @@ U8 hdrive;
 	/* If no error, update corresponding DCB values */
 	if (!erc)
 	{
-		hdcb[hdrive].nBlocks =	IDEid[hdrive].ncyls *
+/*		hdcb[hdrive].nBlocks =	IDEid[hdrive].ncyls *
 					IDEid[hdrive].nheads *
 					IDEid[hdrive].nsectpertrk;
+*/
+		hdcb[hdrive].nBlocks = IDEid[hdrive].totalsectlba;
 	}
 
 	hdcb[hdrive].last_erc = 0;	/* update DCB erc */
