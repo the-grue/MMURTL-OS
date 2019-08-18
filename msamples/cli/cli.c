@@ -134,12 +134,16 @@ struct dirstruct {
 	U8  Name[8];
 	U8  Ext[3];
 	U8  Attr;
-	U8  Rsvd[10];
+	U8  Rsvd[8];
+	U16 StartClstrHi;
 	U16 Time;
 	U16 Date;
 	U16 StartClstr;
 	U32 FileSize;
 	} dirent[16];
+
+/* To avoid displaying LFN and volume ID as file/dir */
+#define ATTR_VOLUME_ID 0x08
 
 /************************* BEGIN CODE ********************/
 
@@ -549,13 +553,14 @@ while (!fDone)
 				erc = 1;
 				fDone = 1;
 			}
-			if ((dirent[i].Name[0]) && (dirent[i].Name[0] != 0xE5))
+			if ((dirent[i].Name[0]) && (dirent[i].Name[0] != 0xE5) && !(dirent[i].Attr & ATTR_VOLUME_ID))
 			{
-				sprintf(st, "%8s %3s  %8d  xx/xx/xx xx/xx/xx  %2x   %04x\r\n",
+				sprintf(st, "%8s %3s  %8d  xx/xx/xx xx/xx/xx  %2x   %04x%04x\r\n",
 			 			dirent[i].Name,
 			 			dirent[i].Ext,
 			 			dirent[i].FileSize,
 			 			dirent[i].Attr,
+						dirent[i].StartClstrHi,
 						dirent[i].StartClstr);
 				CnvrtFATTime(dirent[i].Time, dirent[i].Date, &st[33], &st[24]);
 				printf("%s", st);
