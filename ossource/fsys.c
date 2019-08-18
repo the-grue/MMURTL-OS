@@ -749,11 +749,11 @@ U8 validFAT(U8 check)
 				return 1;
 				break;
 		case FAT32:
-				xprintf("Found FAT32 Partition, limited support (pre-BETA)\n\r");
+				xprintf("Found FAT32 Partition, limited support\n\r");
 				return 1;
 				break;
 		case FAT32L:
-				xprintf("Found FAT32L Partition, limited support (pre-BETA)\n\r");
+				xprintf("Found FAT32L Partition, limited support\n\r");
 				return 1;
 				break;
 		case FAT16L:
@@ -1043,7 +1043,7 @@ U8 Drive;
 		erc = DeviceOp(Ldrv[Drive].DevNum, 2, i, 1, abDirSectBuf);
 	}
 
-	xprintf("DirEntry Updated %X %X\r\n", i, j);
+/*	xprintf("DirEntry Updated %X %X\r\n", i, j);*/
   return erc;
 }
 
@@ -1194,7 +1194,7 @@ U16 MaxClstr;
 
  if (Clstr < 2)
  {
-	xprintf("Failed in FindFatSect check < 2\r\n");
+/*	xprintf("Failed in FindFatSect check < 2\r\n");*/
  	return (ErcBadFATClstr);
  }
 
@@ -1223,8 +1223,8 @@ U16 MaxClstr;
 
 	if (i >= Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT)
 	{
-		xprintf("Failed in FindFatSect32 check %X >= %X\r\n",
-			Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT);
+	/*	xprintf("Failed in FindFatSect32 check %X >= %X\r\n",
+			Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT);*/
 	 	return (ErcBadFATClstr);
 	}
 	else
@@ -1376,7 +1376,7 @@ U32 MaxClstr;
 
  if (Clstr32 < 2)
  {
-	xprintf("Failed in FindFatSect32 check < 2\r\n");
+/*	xprintf("Failed in FindFatSect32 check < 2\r\n");*/
  	return (ErcBadFATClstr);
  }
 
@@ -1401,8 +1401,8 @@ U32 MaxClstr;
 
 	if (i >= Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT)
 	{
-		xprintf("Failed in FindFatSect32 check %X >= %X\r\n",
-			Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT);
+/*		xprintf("Failed in FindFatSect32 check %X >= %X\r\n",
+			Ldrv[Drive].sFAT + Ldrv[Drive].LBAFAT);*/
 	 	return (ErcBadFATClstr);
 	}
 	else
@@ -1679,7 +1679,7 @@ U32 NextClstr;
 		return(erc);
 	}
 	*pNextClstrRet = NextClstr;
-	xprintf("Assigning next cluster %X\r\n", NextClstr);
+/*	xprintf("Assigning next cluster %X\r\n", NextClstr);*/
 	return(0);
 }
 
@@ -1839,7 +1839,7 @@ U8 fFound;
 		erc = SetClstrValue32(CrntClstr, 0xFFFFFFFF, Drive, &j);
 	}
 	*pNextClstrRet = CrntClstr;
-	xprintf("Extending to Cluster %X\r\n", CrntClstr);
+/*	xprintf("Extending to Cluster %X\r\n", CrntClstr);*/
 	return(erc);
 }
 /*************************************************
@@ -2389,8 +2389,8 @@ U8 fFound, fEnd, *pEnt, *pStart;
  i = Ldrv[Drive].LBARoot;
  j = Ldrv[Drive].nRootDirEnt;
 
-xprintf("Drive %d LBARoot %X nRootDirEnt %x\r\n", Drive,
-		i, j);
+/*xprintf("Drive %d LBARoot %X nRootDirEnt %x\r\n", Drive,
+		i, j);*/
  fFound = 0;
  fEnd = 0;
  while ((j) && (!fFound) && (!fEnd)) 
@@ -3665,7 +3665,7 @@ U8 fFound, *pMem, Drive;
 		else
 			Clstr = pDirEnt->StartClstr;  /* Clstr = beginning of file or dir */
 
-	xprintf("Clstr %X, Clstr32 %X\r\n", Clstr, Clstr32);
+/*	xprintf("Clstr %X, Clstr32 %X\r\n", Clstr, Clstr32);*/
 	while ((level < SpecDepth) && (!erc))
 	{	/* looking for Dir, not file yet */
 
@@ -3701,7 +3701,7 @@ U8 fFound, *pMem, Drive;
 		    		Clstr = pDirEnt->StartClstr;  /* Clstr @start of dir entry */
 	}
 
-	xprintf("Clstr %X, Clstr32 %X\r\n", Clstr, Clstr32);
+/*	xprintf("Clstr %X, Clstr32 %X\r\n", Clstr, Clstr32);*/
 	/* if we got here with no error we've got a file or a DIR.
 	   If it's DIR then it's an error.
 	   pDirEnt points to its directory entry, and Clstr
