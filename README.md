@@ -12,3 +12,10 @@ Major updates/changes:
 
 * Now supports two disk controllers and up to 4 drives each with 4 partitions.
 * FAT32 support (not fully implemented yet, but it works!)
+
+Bootable floppy disk images now available in the images directory.
+
+    mmurtl.img   - Boots to PC-MOS/386 then use mmloader.exe to launch
+                   or use mmlaunch.bat from the root of the drive.
+    mmurtlsa.img - Standalone MMURTL bootable floppy.  Custom boot
+                   loader launches MMURTL natively.
