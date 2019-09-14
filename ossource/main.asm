@@ -114,8 +114,8 @@ PUBLIC _BootDrive  DD 00			;Source drive of the boot
 ; This begins the OS Code Segment
 .CODE
 ;
-.VIRTUAL 10000h				;64K boundry. This lets the assembler know
-							;that this is the address where we execute
+.VIRTUAL 20000h				;128K boundary. This lets the assembler know
+					;that this is the address where we execute
 ;
 ; BEGIN OS INITIALIZATION CODE
 ;

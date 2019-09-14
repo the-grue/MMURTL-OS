@@ -5,7 +5,7 @@
    The first piece is the DATA segment. It is loaded at linear
    addrsss 0.  The default OS stacks are contained in this segment.
    The second piece is the CODE. It is loaded at linear
-   address 10000h (The 64K boundry).  If you know anything about
+   address 20000h (The 128K boundry).  If you know anything about
    MS-DOS, you that is doesn't consume this kind of memory.
    This loader program will load somwhere between the 25K
    and 64K linear boundry depending on whether DOS is loaded
@@ -29,8 +29,8 @@
    size of the segments for the MMURTL run file and adjusts the
    buffers for them.  So modifying MMURTL (adding or taking away code or
    data) shouldn't affect how the loader works (unless you exceed
-   128K for code or data, in which case you'll have to modify this
-   to handle it).
+   128K for code or 96K for data, in which case you'll have to modify this
+   to handle it...again).
 
    What actually happens here:
 	(This basically turns MS-DOS into a $79.00 loader)
@@ -44,7 +44,7 @@
 	5) Set the Interrupt and Global Descriptor table registers
 	   in preparation for protect mode transition
 	6) Set Protected mode bit in CR0 (Control Register 0)
-	7) Jump to OS Code entry point at linear address 10000h
+	7) Jump to OS Code entry point at linear address 20000h
 	in the code segment/selector (which is 8h).
 	All OS segments are ZERO based.
 
@@ -71,6 +71,7 @@
 #include <stdlib.h>
 #include <dos.h>
 #include <dir.h>
+/*#include <conio.h>*/
 #include "\OSSOURCE\runfile.h"
 
 U32 fEOF = 0;
@@ -151,7 +152,7 @@ asm {	.386P
 
 		/* Move first 32K data chunk */
 
-		MOV BX, 06000h
+		MOV BX, 05800h
 		MOV DS, BX
 		XOR SI, SI
 		MOV AX,0000h
@@ -160,13 +161,25 @@ asm {	.386P
 		MOV CX,8000h
 		CLD                    	;
 		REP MOVSB				;
-
+		
 		/* Move second 32K data chunk */
+
+		MOV BX, 06000h
+		MOV DS, BX
+		XOR SI, SI
+		MOV AX,0800h
+		MOV ES,AX
+		XOR DI,DI
+		MOV CX,8000h
+		CLD                    	;
+		REP MOVSB				;
+
+		/* Move third 32K data chunk */
 
 		MOV BX, 06800h
 		MOV DS, BX
 		XOR SI, SI
-		MOV AX,0800h
+		MOV AX,1000h
 		MOV ES,AX
 		XOR DI,DI
 		MOV CX,8000h
@@ -178,7 +191,7 @@ asm {	.386P
 		MOV BX, 07000h
 		MOV DS, BX
 		XOR SI, SI
-		MOV AX,1000h
+		MOV AX,2000h
 		MOV ES,AX
 		XOR DI,DI
 		MOV CX,8000h
@@ -190,7 +203,7 @@ asm {	.386P
 		MOV BX, 07800h
 		MOV DS, BX
 		XOR SI, SI
-		MOV AX,1800h
+		MOV AX,2800h
 		MOV ES,AX
 		XOR DI,DI
 		MOV CX,8000h
@@ -202,13 +215,24 @@ asm {	.386P
 		MOV BX, 08000h
 		MOV DS, BX
 		XOR SI, SI
-		MOV AX,2000h
+		MOV AX,3000h
 		MOV ES,AX
 		XOR DI,DI
 		MOV CX,8000h
 		CLD                    	;
 		REP MOVSB				;
 
+		/* Move fourth 32K code chunk */
+
+		MOV BX, 08800h
+		MOV DS, BX
+		XOR SI, SI
+		MOV AX,3800h
+		MOV ES,AX
+		XOR DI,DI
+		MOV CX,8000h
+		CLD                    	;
+		REP MOVSB				;
 
 		MOV BX, 0B800h
 		MOV ES, BX
@@ -239,7 +263,8 @@ asm {	.386P
 		DB 66h
 		DB 67h
 		DB 0EAh
-		DD 10000h
+;		DD 10000h
+		DD 20000h
 		DW 8h
 		RETN
 } /* end of assembler */
@@ -359,8 +384,8 @@ asm {
 
 /*********************************************************
   This reads and loads the two MMURTL segments into
-  six 32K buffers. Two for the data segment, and 4 for
-  the code segment. (192K Maximum).
+  seven 32K buffers. Three for the data segment, and four  
+  for the code segment. (224K Maximum).
   The MMURTL OS is built as a standard MMURRL run file.
   This is a tag/length/value file as described in the
   DASM documentation (in great detail).
@@ -424,6 +449,7 @@ char filetype, junk, *pin;
 				fprintf(out_fh, "Reading code:  %ld bytes\r\n", tag.len);
                 CSegSize = tag.len;
 
+/*			fprintf(out_fh, "Load code segment 1: %ld tag.len\r\n", tag.len);*/
 				if (tag.len >= 32768)
 					nread = 32768;
 				else
@@ -432,6 +458,7 @@ char filetype, junk, *pin;
 				pin = MK_FP(0x7000,0);
 				nobj = fread (pin, 1, nread, run_fh);
 
+/*			fprintf(out_fh, "Load code segment 2: %ld tag.len\r\n", tag.len);*/
 				if (tag.len >= 32768)
 					nread = 32768;
 				else
@@ -440,6 +467,7 @@ char filetype, junk, *pin;
 				pin = MK_FP(0x7800,0);
 				nobj = fread (pin, 1, nread, run_fh);
 
+/*			fprintf(out_fh, "Load code segment 3: %ld tag.len\r\n", tag.len);*/
 				if (tag.len >= 32768)
 					nread = 32768;
 				else
@@ -447,10 +475,30 @@ char filetype, junk, *pin;
 				tag.len -= nread;
 				pin = MK_FP(0x8000,0);
 				nobj = fread (pin, 1, nread, run_fh);
+
+/*			fprintf(out_fh, "Load code segment 4: %ld tag.len\r\n", tag.len);*/
+				if (tag.len >= 32768)
+					nread = 32768;
+				else
+					nread = tag.len;
+				tag.len -= nread;
+				pin = MK_FP(0x8800,0);
+				nobj = fread (pin, 1, nread, run_fh);
 				break;
 			case DATATAG:
 				fprintf(out_fh, "Reading data:  %ld bytes\r\n", tag.len);
                 DSegSize = tag.len;
+		
+/*			fprintf(out_fh, "Load data segment 1: %ld tag.len\r\n", tag.len);*/
+				if (tag.len >= 32768)
+					nread = 32768;
+				else
+					nread = tag.len;
+				tag.len -= nread;
+				pin = MK_FP(0x5800, 0);
+				nobj = fread (pin, 1, nread, run_fh);
+
+/*			fprintf(out_fh, "Load data segment 2: %ld tag.len\r\n", tag.len);*/
 				if (tag.len >= 32768)
 					nread = 32768;
 				else
@@ -459,6 +507,7 @@ char filetype, junk, *pin;
 				pin = MK_FP(0x6000, 0);
 				nobj = fread (pin, 1, nread, run_fh);
 
+/*			fprintf(out_fh, "Load data segment 3: %ld tag.len\r\n", tag.len);*/
 				if (tag.len >= 32768)
 					nread = 32768;
 				else
@@ -479,6 +528,9 @@ char filetype, junk, *pin;
 			case ENDTAG:
 				nobj = fread (&i, 1, 4, run_fh); 	/* Eat the end tag */
 				fclose(run_fh);
+/*			fprintf(out_fh, "Press a key to continue boot\r\n");
+			getch();*/
+				
                 TurnOnA20();
 				Relocate();			/* Move the loader code & data */
 				SetBootDrive((unsigned int) bootdrive);
@@ -535,7 +587,7 @@ char fName;
 		}
 	}
 
-	printf("MMURTL DOS Loader Ver 1.0 \r\n");
+	printf("MMURTL DOS Loader Ver 1.1 \r\n");
 
 	printf("OS Filename specified: %s \r\n",  osname);
 
