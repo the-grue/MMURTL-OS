@@ -175,6 +175,23 @@ CRTCCurHi   EQU 0Eh     ;Register for lo byte of Cursor address
 CRTCCurLo   EQU 0Fh     ;Register for lo byte of Cursor address
 CRTC0C      DB 0        ;CRT Reg 0C HiByte address value
 CRTC0D      DB 0        ;CRT Reg 0D LoByte address value
+;
+;Additional Video Equates and Types for enhanced video driver
+;
+MISCPort1   EQU 03CCh   ;Read Address for Miscellaneous General Register
+MISCPort2   EQU 03C2h   ;Write Address for Miscellaneous General Register
+GCISPort1   EQU 03C2h   ;Read Only for Input Status Register 0
+GCISPort2   EQU 03DAh   ;Read Only for Input Status Register 1
+SEQPort1    EQU 03C4h   ;Index port for Sequencer Registers
+SEQPort2    EQU 03C5h   ;Data port for Sequencer Registers
+GCPort1     EQU 03CEh   ;Index port for Graphics Controller Registers
+GCPort2     EQU 03CFh   ;Data port for Graphics Controller Registers
+ACPort1     EQU 03C0h   ;Index port for Attribute Controller Registers
+ACPort2     EQU 03C1h   ;Data write port for Attribute Controller Registers
+DACPort1    EQU 03C8h   ;R/W Palette Address
+DACPort2    EQU 03C7h   ;W Palette Address/R DAC State
+DACPort3    EQU 03C9h   ;R/W Palette Data
+DACPort4    EQU 03C6h   ;R Pel Mask
 
 PUBLIC ddVidOwner   DD 1        ;JCB that currently owns video
                                 ;Default to monitor (Job 1)
@@ -242,7 +259,13 @@ ChgVid02:
         PUSH VGATextBase        ;Source
         MOV EBX, [EAX+pVirtVid] ;Destination
         PUSH EBX
+        CMP DWORD PTR [EAX+VidMode] ,0  ;Video Mode 0?
+	JNE BigVid0		;Video Mode 1
         PUSH 4000               ;Size of video
+	JMP VidSet0
+BigVid0:
+	PUSH 8000
+VidSet0:
         CALL FWORD PTR _CopyData    ;Do it!
 
         ;Make pVidMem same as pVirtVid for CURRENT OWNER
@@ -263,7 +286,13 @@ ChgVid02:
         MOV EBX, [EAX+pVirtVid] ;Source
         PUSH EBX
         PUSH VGATextBase        ;Destination
+        CMP DWORD PTR [EAX+VidMode] ,0  ;Video Mode 0?
+	JNE BigVid1		;Video Mode 1
         PUSH 4000               ;Size of video
+	JMP VidSet1
+BigVid1:
+	PUSH 8000
+VidSet1:
         CALL FWORD PTR _CopyData    ;Do it!
 
         ;Make new pVidMem real video screen for new owner
@@ -356,7 +385,13 @@ PUBLIC __ClrScr:
         MOV DX, AX
         SHL EAX, 16
         MOV AX, DX              ;Fill Char & Attr
+	CMP DWORD PTR [EBX+VidMode], 0
+	JNE BigVid2
         MOV ECX,0400h
+	JMP VidSet2
+BigVid2:
+	MOV ECX,0800h
+VidSet2:
         CLD
         REP STOSD
         PUSH 0
@@ -441,7 +476,13 @@ TTYScr:
         PUSH 0
         PUSH 0
         PUSH 80
+	CMP DWORD PTR [EBX+VidMode], 0
+	JNE BigVid3
         PUSH 25
+	JMP VidSet3
+BigVid3:
+	PUSH 50
+VidSet3:
         PUSH 1                  ;fUP (non zero)
         CALL FWORD PTR _ScrollVid   ;Ignore error
         POP EDX                 ;restore registers
@@ -507,7 +548,8 @@ PUBLIC __PutVidAttrs:
         MOV ECX,0A0h            ;Times 160 (char/attrs per line)
         MUL ECX                 ;Times nColumns
         ADD EAX,EBX
-        CMP EAX,0F9Eh           ;Last legal posn on screen
+;        CMP EAX,0F9Eh           ;Last legal posn on screen
+        CMP EAX,1F3Eh           ;Last legal posn on screen
         JBE PutAttrs00
         MOV EAX, ErcVidParam
         JMP PcADone
@@ -564,7 +606,8 @@ PUBLIC __PutVidChars:
         MOV ECX,0A0h            ;Times 160
         MUL ECX                 ;Times nColumns
         ADD EAX,EBX
-        CMP EAX,0F9Eh           ;Last legal posn on screen
+;        CMP EAX,0F9Eh           ;Last legal posn on screen
+        CMP EAX,1F3Eh           ;Last legal posn on screen
         JBE PutChars00
         MOV EAX, ErcVidParam
         JMP PcDone
@@ -617,7 +660,8 @@ PUBLIC __GetVidChar:
         MOV ECX,0A0h            ;Times 160
         MUL ECX                 ;Times nColumns
         ADD EAX,EBX
-        CMP EAX,0F9Eh           ;Last legal posn on screen
+;        CMP EAX,0F9Eh           ;Last legal posn on screen
+        CMP EAX,1F3Eh           ;Last legal posn on screen
         JBE GetChar00
         MOV EAX, ErcVidParam
         JMP PcGDone
@@ -667,12 +711,21 @@ PUBLIC __ScrollVid:
         CMP EAX, 80
         JA svErcExit
         MOV EAX, oULY
+	CMP DWORD PTR [EBX+VidMode], 0
+	JNE BigVid4
         CMP EAX, 24
         JA svErcExit
         ADD EAX, nddLines
         CMP EAX, 25
         JA svErcExit
-
+	JMP VidSet4
+BigVid4:
+        CMP EAX, 49
+        JA svErcExit
+        ADD EAX, nddLines
+        CMP EAX, 50
+        JA svErcExit
+VidSet4:
         CMP ddfUP, 0        ;Scroll UP?
         JNE svUP0           ;Yes... Scroll UP!
 

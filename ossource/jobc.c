@@ -514,14 +514,14 @@ U32 PhyAdd;
 		/* Alloc OS memory pages required for new job */
 
 		if (!erc)
-			erc = AllocOSPage(3, &pPD);		/* Job's PD, PT * pVirtVid */
+			erc = AllocOSPage(4, &pPD);		/* Job's PD, PT * pVirtVid */
 
 		pPT = pPD + 4096;			/* 1 page later */
 		pVid = pPD + 8192;			/* 2 pages later */
 
 		if (!erc) {
 			FillData(pPT, 4096, 0);		/* Zero user PT */
-			FillData(pVid, 4096, 0);	/* Zero user video */
+			FillData(pVid, 8192, 0);	/* Zero user video */
 
 			GetpJCB(1, &pTmpJCB);		/* Get OS pJCB */
 			pOSPD = pTmpJCB->pJcbPD;	/* Pointer to OS PD */
