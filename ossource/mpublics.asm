@@ -121,5 +121,6 @@ PUBLIC _SetJobName		DF 00000000h:388h
 PUBLIC _KillJob			DF 00000000h:390h
 PUBLIC _GetSystemDisk	DF 00000000h:398h
 PUBLIC _UnRegisterSvc	DF 00000000h:3A0h
+PUBLIC _SetVidMode	DF 00000000h:3A8h
 
 ;============== End of Module =======================

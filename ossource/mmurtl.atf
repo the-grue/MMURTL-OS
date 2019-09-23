@@ -42,10 +42,14 @@
 .INCLUDE MemCode.ASM	;  Memory management code
 .INCLUDE SVCCode.ASM	;  System Service management code
 .INCLUDE MiscCode.ASM	;  Misc. code (string,array,I/O support)
+.INCLUDE gmode.ASM	;  Graphics mode code
 .INCLUDE Kernel.ASM		;  Kernel code
 .INCLUDE Except.ASM		;  Exception handlers
 .INCLUDE InitCode.ASM	;  Initialization support code
 .INCLUDE Monitor.ASM	;* The monitor code & data
+;.INCLUDE VGA8x8.ASM	;  8x8 character fonts
+;.INCLUDE VGA8x16.ASM	;  8x16 character fonts
+;.INCLUDE VIDMODES.ASM	;  register settings for video modes
 ;=============================================================================
 ;=============================================================================
 .END

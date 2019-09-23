@@ -32,6 +32,7 @@
 #include "\OSSOURCE\MJob.h"
 #include "\OSSOURCE\MFiles.h"
 #include "\OSSOURCE\MStatus.h"
+#include "\OSSOURCE\gmode.h"
 
 /******************** BEGIN DATA ********************/
 
@@ -785,6 +786,7 @@ unsigned long erc, i, j, fh;
 	sprintf(&aStatLine[37], "%02d", JobNum);
 
 	SetJobName("CLI V2.0", 8);
+	SetVidMode(1);
 
 	/* Get system disk and set up path names for
 	cli, command file, and help file.
@@ -899,6 +901,7 @@ unsigned long erc, i, j, fh;
 					erc = DoDump();
 					break;
 				case EXITCMD:
+					SetVidMode(0);
 					SetExitJob("", 0);
 					ExitJob(0);
 					break;
@@ -956,4 +959,5 @@ unsigned long erc, i, j, fh;
 			SetXY(0,49);
 		}
 	}
+	SetVidMode(0);
 }

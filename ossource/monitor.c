@@ -39,6 +39,7 @@
 #include "MJob.h"
 #include "MFiles.h"
 #include "MDevDrv.h"
+#include "gmode.h"
 
 
 #define ok 0

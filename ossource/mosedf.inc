@@ -102,6 +102,7 @@ ErcVidNum		EQU 300 ;Bad video number passed as param to vid call
 ErcVidparam		EQU 301 ;A param was out of range to a Vid call
 ErcEditParam	EQU 300	;Bad param to EditLine
 ErcBadString	EQU 302	;Invalid sting passed to Math Cnvrt Func
+ErcBadVidMode	EQU 303 ;Invalid video mode selected
 
 ;OS hardware Resource Management
 
