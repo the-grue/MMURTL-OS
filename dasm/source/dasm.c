@@ -271,7 +271,7 @@ U16 nCCFix = 0;
 
 /********* Macro variables *******************/
 
-#define MACSMAX 200
+#define MACSMAX 300
 #define MACBUFMAX  3000
 
 S8   *rgMacPtr[MACSMAX];	/* pointer to simple macros */
