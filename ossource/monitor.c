@@ -136,6 +136,7 @@ extern unsigned long BootDrive;
 /*============ protos (NEAR MMURTL support calls) =================*/
 
 extern long InitKBDService(void);	/* From Keyboard.asm */
+extern long mouse_setup(void);		/* From mouse.c */
 extern long fdisk_setup(void);		/* From Floppy.c */
 extern long hdisk_setup(void);		/* From HardIDE.c */
 extern long coms_setup(void);		/* From RS232.c */
@@ -827,6 +828,10 @@ xprintf("%d\r\n", erc);
 xprintf("Initializing file system...\r\n");
 erc = InitFS();
 xprintf("File System... Error: %d\r\n", erc);
+
+xprintf("Initializing mouse...\r\n");
+erc = mouse_setup();
+xprintf("mouse... Error: %d\r\n", erc);
 
 /* Spawn manager task */
 

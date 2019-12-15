@@ -64,7 +64,7 @@ rgReDIR		DD nDevices DUP (0)		;For redirection of devices
 ;6		RS-232 2				COM2	(OS built-in)
 ;7		RS-232 3				COM3	(OS built-in)
 ;8		RS-232 4				COM4	(OS built-in)
-;9
+;9		Mouse					MOUSE	(OS build-in)
 ;10		Floppy					FD0 	(OS built-in)
 ;11		Floppy					FD1 	(OS built-in)
 ;12		Hard disk				HD0 	(OS built-in)
