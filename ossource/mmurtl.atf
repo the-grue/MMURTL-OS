@@ -46,6 +46,7 @@
 .INCLUDE Except.ASM		;  Exception handlers
 .INCLUDE InitCode.ASM	;  Initialization support code
 .INCLUDE Monitor.ASM	;* The monitor code & data
+.INCLUDE mouse.asm	; mouse driver
 ;=============================================================================
 ;=============================================================================
 .END

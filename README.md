@@ -11,7 +11,8 @@ all of the source code.
 Major updates/changes:
 
 * Now supports two disk controllers and up to 4 drives each with 4 partitions.
-* FAT32 support (not fully implemented yet, but it works!)
+* FAT32 support 
+* Simple mouse driver
 
 Bootable floppy disk images now available in the images directory.
 

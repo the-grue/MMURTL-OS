@@ -6,4 +6,5 @@ CM32 Floppy.c /L
 CM32 FSYS.c /L
 CM32 RS232.c /L
 CM32 Parallel.c /L
+CM32 mouse.c /L
 DASM MMURTL.ATF /E
