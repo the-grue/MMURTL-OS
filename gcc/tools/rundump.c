@@ -1,16 +1,24 @@
+/* Runfile checker - validates your runfile to ensure it is safe to run
+ *
+ * Note - this is made to be run on Linux, not MMURTL
+ *
+ * Usage:
+ * ./rundump runfile.run
+ *
+*/
 #include <stdio.h>
 
 int main(int argc, char** argv)
 {
 	FILE *fp;
 	unsigned char code;
-	unsigned long len;
+	unsigned int len;
 	unsigned char cval;
-	unsigned long val;
-	unsigned long stacksz;
-	unsigned long codesz;
-	unsigned long datasz;
-	unsigned long counter;
+	unsigned int val;
+	unsigned int stacksz;
+	unsigned int codesz;
+	unsigned int datasz;
+	unsigned int counter;
 
 	if(argc < 2)
 	{
@@ -70,6 +78,22 @@ int main(int argc, char** argv)
 			case 0xB2:
 				fread(&len, 4, 1, fp);
 				printf("Data Segment found with length 0x%X\n", len);
+				printf("\tscanning...\n");
+
+				for(counter = 0; counter < len; counter++)
+				{
+					fread(&cval, 1, 1, fp);
+					printf("%X ", cval);
+				}
+				printf("\n");
+				break;
+
+			case 0xC0:
+			case 0xC1:
+			case 0xC2:
+			case 0xC3:
+				fread(&len, 4, 1, fp);
+				printf("Fixup Segment %X found with length 0x%X\n",code , len);
 				printf("\tscanning...\n");
 
 				for(counter = 0; counter < len; counter++)

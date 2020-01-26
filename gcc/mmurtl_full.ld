@@ -26,11 +26,11 @@ SECTIONS
 	__CBEG__ = .;
         *(.text);
 	__CEND__ = .;
-    }
-    .data 0x0000 : AT ( ADDR (.text) + SIZEOF (.text) )
-    {
 	BYTE(0xB2);
 	LONG(__DEND__ - __DBEG__);
+    }
+    .data 0x40002000 : AT ( ADDR (.text) + SIZEOF (.text) )
+    {
 	__DBEG__ = .;
         *(.data);
         *(.bss);
