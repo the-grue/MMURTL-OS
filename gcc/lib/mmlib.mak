@@ -10,7 +10,10 @@ SRC = closefile.s clrscr.s createfile.s deletefile.s exitjob.s getcmdline.s getf
       setpriority.s request.s respond.s checkmsg.s newtask.s allocexch.s deallocexch.s \
       alarm.s allocospage.s allocpage.s registersvc.s dmasetup.s readkbd.s addcallgate.s \
       addidtgate.s endofirq.s maskirq.s unmaskirq.s setirqvector.s getirqvector.s \
-      initdevdr.s deviceinit.s deviceop.s devicestat.s 
+      initdevdr.s deviceinit.s deviceop.s devicestat.s beep.s tone.s killalarm.s \
+	  microdelay.s spawntask.s getcmostime.s gettimertick.s outbyte.s outword.s  \
+	  outdword.s inbyte.s inword.s indword.s readcmos.s copydata.s copydatar.s \
+	  filldata.s comparencs.s compare.s
 
 OBJ = $(SRC:.s=.o)
 
