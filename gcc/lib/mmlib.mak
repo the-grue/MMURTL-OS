@@ -13,7 +13,9 @@ SRC = closefile.s clrscr.s createfile.s deletefile.s exitjob.s getcmdline.s getf
       initdevdr.s deviceinit.s deviceop.s devicestat.s beep.s tone.s killalarm.s \
 	  microdelay.s spawntask.s getcmostime.s gettimertick.s outbyte.s outword.s  \
 	  outdword.s inbyte.s inword.s indword.s readcmos.s copydata.s copydatar.s \
-	  filldata.s comparencs.s compare.s
+	  filldata.s comparencs.s compare.s setnormvid.s getnormvid.s chain.s getcmosdate.s \
+	  createdir.s deletedir.s dealiasmem.s aliasmem.s getdmacount.s allocdmapage.s \
+	  killjob.s getsystemdisk.s unregistersvc.s 
 
 OBJ = $(SRC:.s=.o)
 
