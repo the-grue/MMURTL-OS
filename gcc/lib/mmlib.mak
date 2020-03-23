@@ -15,7 +15,9 @@ SRC = closefile.s clrscr.s createfile.s deletefile.s exitjob.s getcmdline.s getf
 	  outdword.s inbyte.s inword.s indword.s readcmos.s copydata.s copydatar.s \
 	  filldata.s comparencs.s compare.s setnormvid.s getnormvid.s chain.s getcmosdate.s \
 	  createdir.s deletedir.s dealiasmem.s aliasmem.s getdmacount.s allocdmapage.s \
-	  killjob.s getsystemdisk.s unregistersvc.s 
+	  killjob.s getsystemdisk.s unregistersvc.s inwords.s outwords.s moverequest.s \
+	  deallocpage.s loadnewjob.s setvidowner.s getvidowner.s ttyout.s setxy.s getxy.s \
+	  editline.s gettssexch.s 
 
 OBJ = $(SRC:.s=.o)
 
