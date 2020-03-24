@@ -42,14 +42,25 @@ int FillData(char *pDest, int cBytes, char bFill);
 int GetCmdLine(char *pCmdLineRet, int *pdcbCmdLineRet);
 int GetCMOSDate(int *pDateRet);
 int GetCMOSTime(int *pTimeRet);
+int GetDirSector(char *pPathSpec, int cbPathSpec, char *pSectorRet,
+                 int sSectorRet, int SectorNum);
 int GetDMACount(int dChannel, int *pwCountRet);
+int GetExitJob(char *pRunRet, int *pdcbRunRet);
 int GetFileLFA(int dHandle, int *pdLFARet);
 int GetFileSize(int dHandle, int *pdSizeRet);
 int GetIRQVector(int IRQnum, int *pVectorRet);
+int GetJobNum(int *pJobNumRet);
 int GetNormVid(int *pNormVidRet);
+int GetPath(int JobNum, char *pPathRet, int *pdcbPathRet);
+int GetPhyAdd(int JobNum, char *LinAdd, int *pPhyRet);
+int GetpJCB(int dJobNum, char *pJCBRet);
+int GetSysIn(char *pFileRet, int *pdcbFileRet);
+int GetSysOut(char *pFileRet, int *pdcbFileRet);
 int GetSystemDisk(char *pDiskRet);
 int GetTimerTick(int *pTickRet);
 int GetTSSExch(int *pExchRet);
+int GetUserName(char *pUserRet, int *pdcbUserRet);
+int GetVidChar(int ddCol, int ddLine, char *pCharRet, char *pAttrRet);
 int GetVidOwner(int *pdJobNumRet);
 int GetXY(int *pXRet, int *pYRet);
 int InByte(int dPort);
@@ -72,6 +83,10 @@ int OutDWord(int DWord, int wPort);
 int OutWord(int Word, int wPort);
 int OutWords(int dPort, char *pDataOut, int dBytes);
 int PutVidChars(int ddCol, int ddLine, char *pChars, int sChars, int ddAttrib);
+int PutVidAttrs(int ddCol, int ddLine, int sChars, int dAttr);
+int QueryPages(int *pdPagesLeft);
+int ReadBlock(int dHandle, char *pBytesRet, int nBytes,
+              int dLFA, int *pdnBytesRet);
 int ReadBytes(int dHandle, char *pDataRet, int nBytes, int *pdnBytesRet);
 char ReadCMOS(int Address);
 int ReadKBD(int *pdKeyCodeRet, int fWait);
@@ -81,13 +96,21 @@ int Request(char *pSvcName, int wSvcCode, int dRespExch, int *pRqHndlRet, int dn
             char *pData1, int dcbData1, char *pData2, int dcbData2, int dData0,
             int dData1, int dData2);
 int Respond(int dRqHndl, int dStatRet);
+int ScrollVid(int ddULCol, int ddULline, int nddCols,
+              int nddLines, int ddfUp);
 int SendMsg(int dExch, int dMsgHi, int dMsgLo);
+int SetCmdLine(char *pCmd, int dcbCmd);
+int SetExitJob(char *pRunFile, int dcbRunFile);
 int SetFileLFA(int dHandle, int dNewLFA);
 int SetFileSize(int dHandle, int dSize);
 int SetIRQVector(int IRQnum, int *pVectorRet);
 int SetJobName(char *pname, int dcbName);
 int SetNormVid(int dAttr);
+int SetPath(char *pPath, int dcbPath);
 int SetPriority(int bPriority);
+int SetSysIn(char *pFile, int dcbFile);
+int SetSysOut(char *pFile, int dcbFile);
+int SetUserName(char *pUser, int dcbUser);
 int SetVidOwner(int dJobNum);
 int SetXY(int dNewX, int dNewY);
 int Sleep(int dnTicks);
@@ -97,6 +120,8 @@ int TTYOut(char *pTextOut, int ddTextOut, int ddAttrib);
 int UnMaskIRQ(int dIRQnum);
 int UnRegisterSvc(char *pName);
 int WaitMsg(int dExchg, char *pqMsgRet);
+int WriteBlock(int dHandle, char *pData, int nBytes,
+               int dLFA, int *pdnBytesRet);
 int WriteBytes(int dHandle, char *pData, int nBytes, int *pdnBytesRet);
 
 #endif
