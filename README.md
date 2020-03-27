@@ -13,6 +13,12 @@ Major updates/changes:
 * Now supports two disk controllers and up to 4 drives each with 4 partitions.
 * FAT32 support 
 * Simple mouse driver
+* gcc support including
+	- custom linker script to generate run files
+	- runfile dumper and disassembler script to validate runfiles
+	- some simple tests
+	- compliation script to create executables
+	- MMURTL System Call library and makefile
 
 Bootable floppy disk images now available in the images directory.
 

@@ -17,4 +17,3 @@ int main(void)
 	return 0;			/* Never happens! */
 }
 
-asm ("call main\n");			/* Entry point must be last code statement  */

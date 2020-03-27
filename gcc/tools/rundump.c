@@ -25,7 +25,11 @@ int main(int argc, char** argv)
 		printf("Must provide filename as parameter!\n");
 		return 1;
 	}
-	fp = fopen(argv[1], "rb");
+	if((fp = fopen(argv[1], "rb")) == NULL)
+	{
+		printf("Filename %s not found!\n", argv[1]);
+		return 2;
+	}
 
 	while(fread(&code, 1, 1, fp) != 0)
 	{

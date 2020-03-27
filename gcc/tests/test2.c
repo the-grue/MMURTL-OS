@@ -30,4 +30,3 @@ int main(void)
 	exit(third);
 }
 
-asm ("call main\n");
