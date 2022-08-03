@@ -169,7 +169,7 @@ U8 status;
 		buttons = mouse_buf[0];
 		mousex = mouse_buf[1];
 		mousey = mouse_buf[2];
-		xprintf("x=%d, y=%d, buttons=%d\r\n", mousex, mousey, buttons & 0x07);
+/*		xprintf("x=%d, y=%d, buttons=%d\r\n", mousex, mousey, buttons & 0x07);*/
 	}
 	EndOfIRQ(9);
 }
